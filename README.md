@@ -1,0 +1,4 @@
+jQueryGantt
+===========
+
+jQuery Gantt editor
