@@ -2,6 +2,8 @@ jQueryGantt
 ===========
 jQuery Gantt editor has been written by Roberto Bicchierai and Silvia Chelazzi
 
+<img src="http://rbicchierai.files.wordpress.com/2012/08/image1.png" alt="image" width="596" height="358" border="0" />
+
 These are some key features:
 * jquery based
 * MIT licensed: you can reuse everywhere
