@@ -20,5 +20,7 @@ Read the genesi of this component here: http://roberto.open-lab.com/2012/06/14/t
 
 Documentation is here: http://roberto.open-lab.com/2012/08/22/jquery-gantt-editor/ ‎
 
-jQuery Gantt editor is part of <a href="http://www.twproject.com">Teamwork</a> 
+jQuery Gantt editor is part of <a href="http://www.twproject.com">Teamwork 5</a> project
+
+
 
