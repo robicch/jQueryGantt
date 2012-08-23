@@ -214,9 +214,8 @@ function recomputeDuration(start, end) {
 //is distributed under the MIT license.
 //http://www.ibiblio.org/pub/Linux/LICENSES/mit.license
 
-if (!Array.prototype.filter)
-{
-  Array.prototype.filter = function(fun /*, thisp*/)
+if (!Array.prototype.filter){
+  Array.prototype.filter = function(fun )
   {
     var len = this.length;
     if (typeof fun != "function")

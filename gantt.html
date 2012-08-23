@@ -499,7 +499,7 @@ function saveInLocalStorage() {
     if (taskAssig.task.master.canWrite) {
       assigTr.find(".delAssig").click(function() {
         var tr = $(this).closest("[assigId]").fadeOut(200, function() {
-          $(this).remove()
+          $(this).remove();
         });
       });
     }
@@ -508,110 +508,6 @@ function saveInLocalStorage() {
   });
 </script>
 
-
-<script type="text/javascript">
-  var a =
-  {
-    "tasks":[
-      {
-        "id":"tmp_fk1345624806538",
-        "name":"Gantt editor ",
-        "code":"",
-        "level":0,
-        "status":"STATUS_ACTIVE",
-        "start":1346623200000,
-        "duration":5,
-        "end":1347055199999,
-        "startIsMilestone":false,
-        "endIsMilestone":false,
-        "assigs":[
-          {
-            "resourceId":"tmp_3",
-            "id":"tmp_1345625008213",
-            "roleId":"tmp_1",
-            "effort":7200000
-          }
-        ],
-        "depends":"",
-        "description":"",
-        "progress":0
-      },
-      {
-        "id":"tmp_fk1345624806539",
-        "name":"phase 1",
-        "code":"",
-        "level":1,
-        "status":"STATUS_ACTIVE",
-        "start":1346623200000,
-        "duration":2,
-        "end":1346795999999,
-        "startIsMilestone":false,
-        "endIsMilestone":false,
-        "assigs":[
-          {
-            "resourceId":"tmp_1",
-            "id":"tmp_1345624980735",
-            "roleId":"tmp_1",
-            "effort":36000000
-          }
-        ],
-        "depends":"",
-        "description":"",
-        "progress":0
-      },
-      {
-        "id":"tmp_fk1345624789530",
-        "name":"phase 2",
-        "code":"",
-        "level":1,
-        "status":"STATUS_SUSPENDED",
-        "start":1346796000000,
-        "duration":3,
-        "end":1347055199999,
-        "startIsMilestone":false,
-        "endIsMilestone":false,
-        "assigs":[
-          {
-            "resourceId":"tmp_2",
-            "id":"tmp_1345624993405",
-            "roleId":"tmp_2",
-            "effort":36000000
-          }
-        ],
-        "depends":"2",
-        "description":"",
-        "progress":0
-      }
-    ],
-    "resources":[
-      {
-        "id":"tmp_1",
-        "name":"Resource 1"
-      },
-      {
-        "id":"tmp_2",
-        "name":"Resource 2"
-      },
-      {
-        "id":"tmp_3",
-        "name":"Resource 3"
-      }
-    ],"roles":[
-    {
-      "id":"tmp_1",
-      "name":"Project Manager"
-    },
-    {
-      "id":"tmp_2",
-      "name":"Worker"
-    }
-  ],
-    "canWrite":true,
-    "canWriteOnParent":true,
-    "selectedRow":0,
-    "deletedTaskIds":[],
-  }
-</script>
 
 
 </body>
