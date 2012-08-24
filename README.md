@@ -20,7 +20,7 @@ Try the online working demo here: http://gantt.twproject.com
 
 Read the genesi of this component here: http://roberto.open-lab.com/2012/06/14/the-javascript-gantt-odyssey/
 
-Documentation is here: http://roberto.open-lab.com/2012/08/22/jquery-gantt-editor/ ‎
+Documentation is here: http://roberto.open-lab.com/2012/08/24/jquery-gantt-editor/
 
 jQuery Gantt editor is part of <a href="http://www.twproject.com">Teamwork 5</a> project
 
