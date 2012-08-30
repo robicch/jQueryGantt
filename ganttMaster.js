@@ -198,6 +198,7 @@ GanttMaster.messages = {
    "GANNT_ERROR_LOADING_DATA_TASK_REMOVED":"GANNT_ERROR_LOADING_DATA_TASK_REMOVED",
    "CIRCULAR_REFERENCE":"CIRCULAR_REFERENCE",
    "CANNOT_DEPENDS_ON_ANCESTORS":"CANNOT_DEPENDS_ON_ANCESTORS",
+   "CANNOT_DEPENDS_ON_DESCENDANTS":"CANNOT_DEPENDS_ON_DESCENDANTS",
    "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
 
    "GANT_QUARTER_SHORT":"GANT_QUARTER_SHORT",
@@ -517,6 +518,9 @@ GanttMaster.prototype.updateLinks = function(task) {
 
     //cannot depend from an ancestor
     var parents = task.getParents();
+    //cannot depend from descendants
+    var descendants=task.getDescendant();
+
     var deps = task.depends.split(",");
     var newDepsString = "";
 
@@ -533,9 +537,14 @@ GanttMaster.prototype.updateLinks = function(task) {
         if (parents && parents.indexOf(sup) >= 0) {
           this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_ANCESTORS+"\n" + sup.name);
           todoOk = false;
+
+        } else if (descendants && descendants.indexOf(sup) >= 0) {
+          this.setErrorOnTransaction(task.name + "\n"+GanttMaster.messages.CANNOT_DEPENDS_ON_DESCENDANTS+"\n" + sup.name);
+          todoOk = false;
+
         } else if (isLoop(sup, task, visited)) {
           todoOk = false;
-          this.setErrorOnTransaction(GanttMaster.messages.I18n.get("CIRCULAR_REFERENCE")+"\n" + task.name + " -> " + sup.name);
+          this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE+"\n" + task.name + " -> " + sup.name);
         } else {
           this.links.push(new Link(sup, task, lag));
           newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;

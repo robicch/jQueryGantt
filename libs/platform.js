@@ -26,7 +26,7 @@ $.fn.bringToFront=function(selector){
     }
   });
 
-  $(this).css('zIndex',zi+=10);
+  return $(this).css('zIndex',zi+=10);
 };
 
 function nearBestPosition(whereId, theObjId, centerOnEl) {
