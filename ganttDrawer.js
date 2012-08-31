@@ -303,7 +303,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
-  //console.debug("drawTask", task.name);
+  //console.debug("drawTask", task.name,new Date(task.start));
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
   //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
@@ -311,6 +311,8 @@ Ganttalendar.prototype.drawTask = function (task) {
   var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
   var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+
+
 
   //save row element on task
   task.ganttElement = taskBox;
@@ -370,15 +372,17 @@ Ganttalendar.prototype.drawTask = function (task) {
       stop:function(event, ui) {
         //console.debug(ui,$(this))
         var task = self.master.getTask($(this).attr("taskId"));
-        //console.debug(task)
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        var e = Math.round(((ui.position.left + $(this).width()) / self.fx) + self.startMillis);
 
-        //console.debug(new Date(s),new Date(e));
         self.master.beginTransaction();
         self.master.moveTask(task, new Date(s));
         self.master.endTransaction();
-      }
+      }/*,
+      start:function(event, ui) {
+        var task = self.master.getTask($(this).attr("taskId"));
+        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
+        console.debug("start",new Date(s));
+      }*/
     });
   }
 

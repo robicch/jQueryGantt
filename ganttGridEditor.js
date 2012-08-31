@@ -230,10 +230,10 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
         }
 
       } else if (field == "duration") {
-        var oldDur = task.duration;
-        task.duration = parseInt(el.val()) || 1;
-        el.val(task.duration);
-        var newEnd = computeEndByDuration(task.start, task.duration);
+        var dur = task.duration;
+        dur  = parseInt(el.val()) || 1;
+        el.val(dur);
+        var newEnd = computeEndByDuration(task.start, dur);
         self.master.changeTaskDates(task, task.start, newEnd);
 
       } else {

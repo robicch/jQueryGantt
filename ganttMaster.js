@@ -197,6 +197,7 @@ GanttMaster.messages = {
    "TASK_HAS_EXTERNAL_DEPS":"TASK_HAS_EXTERNAL_DEPS",
    "GANNT_ERROR_LOADING_DATA_TASK_REMOVED":"GANNT_ERROR_LOADING_DATA_TASK_REMOVED",
    "CIRCULAR_REFERENCE":"CIRCULAR_REFERENCE",
+   "ERROR_SETTING_DATES":"ERROR_SETTING_DATES",
    "CANNOT_DEPENDS_ON_ANCESTORS":"CANNOT_DEPENDS_ON_ANCESTORS",
    "CANNOT_DEPENDS_ON_DESCENDANTS":"CANNOT_DEPENDS_ON_DESCENDANTS",
    "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
@@ -324,22 +325,23 @@ GanttMaster.prototype.loadTasks = function(tasks, selectedRow) {
     if (!(task instanceof Task)) {
       var t = new Task(task.id, task.name, task.code, task.level, task.start, task.duration);
       for (var key in task) {
-        if (key!="end")
-          t[key] = task[key]; //reset all properties
+        if (key!="end" && key!="start")
+          t[key] = task[key]; //copy all properties
       }
       task = t;
     }
     task.master = this; // in order to access controller from task
 
-    //replace if already exists
+    /*//replace if already exists
     var pos = -1;
     for (var i=0;i<this.tasks.length;i++) {
       if (task.id == this.tasks[i].id) {
         pos = i;
         break;
       }
-    }
-    this.tasks.push(task);
+    }*/
+
+    this.tasks.push(task);  //append task at the end
   }
 
   //var prof=new Profiler("gm_loadTasks_addTaskLoop");
@@ -350,9 +352,10 @@ GanttMaster.prototype.loadTasks = function(tasks, selectedRow) {
     var linkLoops = !this.updateLinks(task);
 
     if (linkLoops || !task.setPeriod(task.start, task.end)) {
-      alert(linkLoops + GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED+"\n" + task.name);
+      alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED+"\n" + task.name+"\n"+
+            (linkLoops?GanttMaster.messages.CIRCULAR_REFERENCE:GanttMaster.messages.ERROR_SETTING_DATES));
+
       //remove task from in-memory collection
-      //console.debug("removing task from memory",task);
       this.tasks.splice(task.getRow(), 1);
     } else {
       //append task to editor
@@ -365,9 +368,12 @@ GanttMaster.prototype.loadTasks = function(tasks, selectedRow) {
   this.editor.fillEmptyLines();
   //prof.stop();
 
-  // re-select old row
-  selectedRow = selectedRow ? selectedRow : 0;
-  this.tasks[selectedRow].rowElement.click();
+  // re-select old row if tasks is not empty
+  if (this.tasks && this.tasks.length>0){
+    selectedRow = selectedRow ? selectedRow : 0;
+    this.tasks[selectedRow].rowElement.click();
+  }
+
 };
 
 
@@ -433,6 +439,11 @@ GanttMaster.prototype.redraw = function() {
 GanttMaster.prototype.reset = function() {
   this.tasks = [];
   this.links = [];
+  this.deletedTaskIds=[];
+  this.__undoStack = [];
+  this.__redoStack = [];
+  delete this.currentTask;
+
   this.editor.reset();
   this.gantt.reset();
 };
