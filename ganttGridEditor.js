@@ -450,8 +450,8 @@ taskRow.find(".edit").click(function() {
 
           if (assId == ass.id) {
             ass.effort = effort;
-            ass.roleId == roleId;
-            ass.resourceId == resId;
+            ass.roleId = roleId;
+            ass.resourceId = resId;
             ass.touched = true;
             found = true;
             break;
