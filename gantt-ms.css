@@ -157,13 +157,13 @@
   border-left:2px dotted #13AFA5;
 }
 
-.ganttHighLight{
+/*.ganttHighLight{
   position:absolute;
   width:100%;
   height:28px;
   background-color:yellow;
   opacity:.4;
-}
+}*/
 
 .ganttButtonBar{
   position:relative;
