@@ -229,8 +229,27 @@
   display:block;
 }
 
-.taskBox.hasChild .layout{
-  border-top:1px solid black;
+.taskBox.hasChild .layout {
+  border: none;
+  background-color: black;
+  height: 9px;
+}
+
+.taskBox.hasChild .layout:before, .taskBox.hasChild .layout:after {
+  background-image: url('down-arrow.png');
+  background-position: 0 4px;
+  background-repeat: no-repeat;
+  content: " ";
+  width: 12px;
+  height: 20px;
+  display: block;  
+}
+.taskBox.hasChild .layout:before { 
+  float: left;
+}
+
+.taskBox.hasChild .layout:after {
+  float: right;
 }
 
 .taskBox .taskProgress{
