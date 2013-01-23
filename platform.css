@@ -178,9 +178,11 @@ h4 {
 
 TH, .tableHeader {
   font-weight: normal;
-  color: #FFFFFF;
+  font-size: 12px !important; 
+  color: black;
   border: none;
-  background-color: #91B4B7;
+  background-color: #ECE9D8;
+
   padding:2px
 }
 
