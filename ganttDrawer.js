@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Open Lab
+  Copyright (c) 2012-2013 Open Lab
   Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.highlightBar;
   this.zoom = zoom;
   this.minGanttSize = minGanttSize;
+  this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
 
   //this.zoomLevels = ["d","w","m","q","s","y"];
   this.zoomLevels = ["w","m","q","s","y"];
@@ -285,6 +286,14 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
     return box;
   }
+
+  //if include today synch extremes
+  if (this.includeToday){
+    var today=new Date().getTime();
+    originalStartmillis=originalStartmillis>today ? today:originalStartmillis;
+    originalEndMillis=originalEndMillis<today ? today:originalEndMillis;
+  }
+
 
   //get best dimension fo gantt
   var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
@@ -570,6 +579,17 @@ Ganttalendar.prototype.refreshGantt = function() {
   if (this.master.currentTask) {
     this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
   }
+};
+
+
+Ganttalendar.prototype.fitGantt = function() {
+  delete this.zoom;
+  this.refreshGantt();
+};
+
+Ganttalendar.prototype.centerOnToday = function() {
+  var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
+  this.element.parent().scrollLeft(x);
 };
 
 

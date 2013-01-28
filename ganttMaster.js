@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Open Lab
+  Copyright (c) 2012-2013 Open Lab
   Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -313,6 +313,7 @@ GanttMaster.prototype.loadProject = function(project) {
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds=[];
   this.endTransaction();
+  this.gantt.centerOnToday();
 };
 
 
