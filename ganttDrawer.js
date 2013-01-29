@@ -35,6 +35,25 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 
 }
 
+Ganttalendar.prototype.log = function(message) {
+  if (window.console) {
+    console.log(message);
+  }
+};
+
+Ganttalendar.prototype.debug = function(message) {
+  if (window.console) {
+    console.debug(message);
+  }
+};
+
+Ganttalendar.prototype.error = function(message) {
+  if (window.console) {
+    console.error(message);
+  }
+};
+
+
 Ganttalendar.prototype.zoomGantt = function(isPlus) {
   var curLevel = this.zoom;
   var pos = this.zoomLevels.indexOf(curLevel + "");
@@ -53,10 +72,11 @@ Ganttalendar.prototype.zoomGantt = function(isPlus) {
 };
 
 
-Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndMillis) {
-  //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
 
+Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndMillis) {
   var self = this;
+
+  self.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));  
 
   function getPeriod(zoomLevel, stMil, endMillis) {
     var start = new Date(stMil);
@@ -249,7 +269,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
       });
 
     } else {
-      console.error("Wrong level " + zoom);
+      self.error("Wrong level " + zoom);
     }
 
     //set a minimal width
@@ -298,7 +318,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
   //get best dimension fo gantt
   var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
 
-  //console.debug(new Date(period.start) + "   " + new Date(period.end));
+  self.debug(new Date(period.start) + "   " + new Date(period.end));
   self.startMillis = period.start; //real dimension of gantt
   self.endMillis = period.end;
   self.originalStartMillis = originalStartmillis; //minimal dimension required by user or by task duration
@@ -312,8 +332,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
-  //console.debug("drawTask", task.name,new Date(task.start));
   var self = this;
+  self.debug("drawTask", task.name,new Date(task.start));
+
   //var prof = new Profiler("ganttDrawTask");
   //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
   editorRow = task.rowElement;
@@ -342,13 +363,13 @@ Ganttalendar.prototype.drawTask = function (task) {
       //grid:[oneDaySize,oneDaySize],
 
       resize:function(event, ui) {
-        //console.debug(ui)
+        self.debug(ui)
         $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
         event.stopImmediatePropagation();
         event.stopPropagation();
       },
       stop:function(event, ui) {
-        //console.debug(ui)
+        self.debug(ui)
         var task = self.master.getTask(ui.element.attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
         var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
@@ -379,7 +400,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
       },
       stop:function(event, ui) {
-        //console.debug(ui,$(this))
+        self.debug(ui,$(this))
         var task = self.master.getTask($(this).attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
 
@@ -390,7 +411,7 @@ Ganttalendar.prototype.drawTask = function (task) {
       start:function(event, ui) {
         var task = self.master.getTask($(this).attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        console.debug("start",new Date(s));
+        self.debug("start",new Date(s));
       }*/
     });
   }
@@ -523,8 +544,9 @@ Ganttalendar.prototype.drawLink = function (from, to) {
 
 
 Ganttalendar.prototype.redrawLinks = function() {
-  //console.debug("redrawLinks ");
-  var self = this;
+  var self = this;  
+  self.debug("redrawLinks ");
+
   this.element.stopTime("ganttlnksredr");
   this.element.oneTime(60, "ganttlnksredr", function() {
     //var prof=new Profiler("gd_drawLink_real");
@@ -553,8 +575,9 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  //console.debug("refreshGantt")
+  var self = this;
   var par = this.element.parent();
+  self.debug("refreshGantt");  
 
   //try to maintain last scroll
   var scrollY=par.scrollTop();
@@ -572,7 +595,7 @@ Ganttalendar.prototype.refreshGantt = function() {
   this.redrawTasks();
 
   //set old scroll  
-  //console.debug("old scroll:",scrollX,scrollY)
+  self.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
 
@@ -589,7 +612,8 @@ Ganttalendar.prototype.fitGantt = function() {
 };
 
 Ganttalendar.prototype.centerOnToday = function() {
-  //console.debug("centerOnToday");
+  var self = this;
+  self.debug("centerOnToday");
   var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
   this.element.parent().scrollLeft(x);
 };
