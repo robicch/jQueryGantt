@@ -354,6 +354,7 @@ function saveInLocalStorage() {
       <th class="gdfColHeader" style="width:35px;"></th>
       <th class="gdfColHeader" style="width:25px;"></th>
       <th class="gdfColHeader gdfResizable" style="width:30px;">code/short name</th>
+      <th class="gdfColHeader gdfResizable" style="width:10px;"></th>
       <th class="gdfColHeader gdfResizable" style="width:200px;">name</th>
       <th class="gdfColHeader gdfResizable" style="width:80px;">start</th>
       <th class="gdfColHeader gdfResizable" style="width:80px;">end</th>
@@ -370,6 +371,7 @@ function saveInLocalStorage() {
     <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
     <td class="gdfCell" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
+    <td class="gdfCell"><span>-</span></td>
 
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'':''#)"></td>
 

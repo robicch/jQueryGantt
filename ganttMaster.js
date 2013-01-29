@@ -61,14 +61,14 @@ GanttMaster.prototype.init = function(place) {
 
   //create editor
   this.editor = new GridEditor(this);
-  this.editor.element.width(place.width() * .4 - 10);
+  this.editor.element.width(place.width() * .9 - 10);
   place.append(this.editor.element);
 
   //create gantt
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
 
   //setup splitter
-  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 40);
+  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 70);
   splitter.secondBox.css("overflow-y", "auto").scroll(function() {
     splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
   });
