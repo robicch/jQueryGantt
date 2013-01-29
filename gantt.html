@@ -7,8 +7,7 @@
 
   <link rel=stylesheet href="platform.css" type="text/css">
   <link rel=stylesheet href="libs/dateField/jquery.dateField.css" type="text/css">
-  <!--<link rel=stylesheet href="gantt.css" type="text/css">-->
-  <link rel=stylesheet href="gantt-ms.css" type="text/css">
+  <link rel=stylesheet href="gantt.css" type="text/css">
 
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -31,7 +30,9 @@
 <body style="background-color: #fff;">
 
 
-
+<div id="ndo" style="position:absolute;right:5px;top:5px;width:378px;padding:5px;background-color: #FFF5E6; border:1px solid #F9A22F; font-size:12px">
+  This Gantt can be used in a complete project management solution - imports your Gantt and more - <a href="http://twproject.com" target="_blank">Teamwork: give it a try</a>.
+</div>
 <div id="workSpace" style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
 
 <div id="taZone" style="display:none;">
@@ -67,7 +68,7 @@
   }
 </style>
 
-
+<form id="gimmeBack" style="display:none;" action="../gimmeBack.jsp" method="post" target="_blank"><input type="hidden" name="prj" id="gimBaPrj"></form>
 
 <script type="text/javascript">
 
@@ -333,7 +334,7 @@ function saveInLocalStorage() {
 <div id="gantEditorTemplates" style="display:none;">
   <div class="__template__" type="GANTBUTTONS"><!--
   <div class="ganttButtonBar">
-    
+    <h1 style="float:left">task tree/gantt</h1>
     <div class="buttons">
     <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="undo"><span class="teamworkIcon">&#39;</span></button>
     <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="redo"><span class="teamworkIcon">&middot;</span></button>
@@ -352,7 +353,7 @@ function saveInLocalStorage() {
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
-      <button onclick="saveGanttOnServer();" class="button big" title="save">save</button>
+      <button onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
     </div></div>
   --></div>
 
@@ -382,7 +383,7 @@ function saveInLocalStorage() {
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
     <td class="gdfCell"><span>-</span></td>
 
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'':''#)"></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
 
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
