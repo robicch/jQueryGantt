@@ -553,6 +553,7 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
+  //console.debug("refreshGantt")
   var par = this.element.parent();
 
   //try to maintain last scroll
@@ -588,6 +589,7 @@ Ganttalendar.prototype.fitGantt = function() {
 };
 
 Ganttalendar.prototype.centerOnToday = function() {
+  //console.debug("centerOnToday");
   var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
   this.element.parent().scrollLeft(x);
 };

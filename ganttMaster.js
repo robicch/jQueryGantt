@@ -313,7 +313,8 @@ GanttMaster.prototype.loadProject = function(project) {
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds=[];
   this.endTransaction();
-  this.gantt.centerOnToday();
+  var self=this;
+  this.gantt.element.oneTime(200,function(){self.gantt.centerOnToday()});
 };
 
 
