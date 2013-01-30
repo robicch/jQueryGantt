@@ -19,7 +19,11 @@
   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/  
+*/
+
+/**
+ * @todo Avoid work in the constructor (computeStart, computeEndByDuration)
+ */
 function Task(id, name, code, level, start, duration) {
   this.id = id;
   this.name = name;
@@ -34,7 +38,7 @@ function Task(id, name, code, level, start, duration) {
   this.startIsMilestone = false;
   this.endIsMilestone = false;
 
-  this.collapsed=false;
+  this.collapsed = false;
   
 
   this.rowElement; //row editor html element
@@ -45,27 +49,29 @@ function Task(id, name, code, level, start, duration) {
   this.assigs = [];
 }
 
-Task.prototype.clone = function() {
+Task.prototype.clone = function () {
   var ret = {};
   for (var key in this) {
-    if (typeof(this[key])!="function")
+    if (typeof(this[key]) != "function") {
       ret[key] = this[key];
+    }
   }
   return ret;
 };
 
-Task.prototype.getAssigsString = function() {
+Task.prototype.getAssigsString = function () {
   var ret = "";
   for (var i=0;i<this.assigs.length;i++) {
     var ass = this.assigs[i];
     var res = this.master.getResource(ass.resourceId);
-    if (res)
+    if (res) {
       ret = ret + (ret == "" ? "" : ", ") + res.name;
+    }
   }
   return ret;
 };
 
-Task.prototype.createAssignment = function(id, resourceId, roleId, effort) {
+Task.prototype.createAssignment = function (id, resourceId, roleId, effort) {
   var assig = new Assignment(id, resourceId, roleId, effort);
   this.assigs.push(assig);
   return assig;
@@ -73,24 +79,31 @@ Task.prototype.createAssignment = function(id, resourceId, roleId, effort) {
 
 
 //<%---------- SET PERIOD ---------------------- --%>
-Task.prototype.setPeriod = function(start, end) {
+Task.prototype.setPeriod = function (start, end) {
   //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
   //var profilerSetPer = new Profiler("gt_setPeriodJS");
 
-  if (start instanceof Date)
+  if (start instanceof Date) {
     start = start.getTime();
-  if (end instanceof Date)
-    end = end.getTime();
+  }
 
-  var originalPeriod = {start:this.start,end:this.end,duration:this.duration};
-  var somethingChanged = false;
+  if (end instanceof Date) {
+    end = end.getTime();
+  }
+
+  var originalPeriod = {
+    start: this.start,
+    end:  this.end,
+    duration: this.duration
+  };
 
   //console.debug("setStart",date,date instanceof Date);
   var wantedStartMillis = start;
 
   //cannot start after end
-  if (start > end)
+  if (start > end) {
     start = end;
+  }
 
   //set a legal start
   start = computeStart(start);
@@ -109,6 +122,8 @@ Task.prototype.setPeriod = function(start, end) {
       return this.moveTo(supEnd + 1, false);
     }
   }
+
+  var somethingChanged = false;
 
   //move date to closest day
   var date = new Date(start);
@@ -209,26 +224,30 @@ Task.prototype.setPeriod = function(start, end) {
 
 
 //<%---------- MOVE TO ---------------------- --%>
-Task.prototype.moveTo = function(start, ignoreMilestones) {
+Task.prototype.moveTo = function (start, ignoreMilestones) {
   //console.debug("moveTo ",this,start,ignoreMilestones);
   //var profiler = new Profiler("gt_task_moveTo");
 
-  if (start instanceof Date)
+  if (start instanceof Date) {
     start = start.getTime();
+  }
 
-  var originalPeriod = {start:this.start,end:this.end};
-  var somethingChanged = false;
+  var originalPeriod = {
+    start:this.start,
+    end:this.end
+  };
+
   var wantedStartMillis = start;
 
   //set a legal start
   start = computeStart(start);
 
   //if start is milestone cannot be move
-  if (!ignoreMilestones && this.startIsMilestone && start!=this.start ) {
+  if (!ignoreMilestones && this.startIsMilestone && start != this.start) {
     //notify error
     this.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"], this);
     return false;
-  } else if (this.hasExternalDep){
+  } else if (this.hasExternalDep) {
     //notify error
     this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"], this);
     return false;
@@ -319,7 +338,6 @@ function updateTree(task) {
   if (!p)
     return true;
 
-  var todoOk = true;
 
   var newStart = p.start;
   var newEnd = p.end;
@@ -327,38 +345,38 @@ function updateTree(task) {
   if (p.start > task.start) {
     if (p.startIsMilestone) {
       task.master.setErrorOnTransaction(GanttMaster.messages["START_IS_MILESTONE"] + "\n" + p.name, task);
-      todoOk = false;
+      return false;
     } else if (p.depends) {
       task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_CONSTRAINTS"] + "\n" + p.name, task);
-      todoOk = false;
-    } else {
-      newStart = task.start;
+      return false;
     }
+
+    newStart = task.start;
   }
+
   if (p.end < task.end) {
-    if (!p.endIsMilestone) {
-      newEnd = task.end;
-    } else {
+    if (p.endIsMilestone) {
       task.master.setErrorOnTransaction(GanttMaster.messages["END_IS_MILESTONE"] + "\n" + p.name, task);
-      todoOk = false;
+      return false;
     }
+
+    newEnd = task.end;
   }
 
-  if (todoOk) {
-    //propagate updates if needed
-    if (newStart != p.start || newEnd != p.end) {
-      //has external deps ?
-      if (p.hasExternalDep) {
-        task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + p.name, task);
-        todoOk = false;
-      } else {
-        todoOk = p.setPeriod(newStart, newEnd);
-      }
+  //propagate updates if needed
+  if (newStart != p.start || newEnd != p.end) {
+    //has external deps ?
+    if (p.hasExternalDep) {
+      task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + p.name, task);
+      return false;
     }
+
+    return p.setPeriod(newStart, newEnd);
   }
-  return todoOk;
+
+
+  return true;
 }
-
 
 //<%---------- CHANGE STATUS ---------------------- --%>
 Task.prototype.changeStatus = function(newStatus) {

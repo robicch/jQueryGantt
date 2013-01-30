@@ -57,7 +57,7 @@ GanttMaster.prototype.init = function(place) {
   var self=this;
 
   //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();  
+  $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
 
   //create editor
   this.editor = new GridEditor(this);
@@ -497,8 +497,10 @@ GanttMaster.prototype.updateLinks = function(task) {
 
   // defines isLoop function
   function isLoop(task, target, visited) {
-    if (target == task)
+    if (target == task) {
       return true;
+    }
+    
     var sups = task.getSuperiors();
     var loop = false;
     for (var i=0;i<sups.length;i++) {
@@ -540,8 +542,11 @@ GanttMaster.prototype.updateLinks = function(task) {
       var dep = deps[j]; // in the form of row(lag) e.g. 2:3,3:4,5
       var par = dep.split(":");
       var lag = 0;
-      if (par.length > 1)
+
+      if (par.length > 1) {
         lag = parseInt(par[1]);
+      }
+
       var sup = this.tasks[parseInt(par[0] - 1)];
 
       if (sup) {
@@ -562,9 +567,9 @@ GanttMaster.prototype.updateLinks = function(task) {
         }
       }
     }
+
     if (todoOk) {
       task.depends = newDepsString;
-
     }
 
   }
@@ -590,11 +595,12 @@ GanttMaster.prototype.beginTransaction = function() {
 
 
 GanttMaster.prototype.endTransaction = function() {
-  var ret = true;
-  if (!this.__currentTransaction)   {
+  if (!this.__currentTransaction) {
     console.error("Transaction never started.");
-    return ret;
+    return true;
   }
+
+  var ret = true;
 
   //no error -> commit
   if (this.__currentTransaction.errors.length <= 0) {
@@ -645,15 +651,16 @@ GanttMaster.prototype.endTransaction = function() {
 
 //this function notify an error to a transaction -> transaction will rollback
 GanttMaster.prototype.setErrorOnTransaction = function(errorMessage, task) {
-  if (this.__currentTransaction)
+  if (this.__currentTransaction) {
     this.__currentTransaction.errors.push({msg:errorMessage,task:task});
-  else
+  } else {
     console.error(errorMessage);
+  }
 };
 
 // inhibit undo-redo
 GanttMaster.prototype.checkpoint= function() {
-  this.__undoStack=[];
+  this.__undoStack = [];
   this.__redoStack = [];
 };
 
@@ -664,6 +671,7 @@ GanttMaster.prototype.undo = function() {
   if (this.__undoStack.length > 0) {
     var his = this.__undoStack.pop();
     this.__redoStack.push(JSON.stringify(this.saveGantt()));
+
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds=oldTasks.deletedTaskIds;
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
@@ -678,6 +686,7 @@ GanttMaster.prototype.redo = function() {
   if (this.__redoStack.length > 0) {
     var his = this.__redoStack.pop();
     this.__undoStack.push(JSON.stringify(this.saveGantt()));
+
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds=oldTasks.deletedTaskIds;
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
