@@ -112,7 +112,7 @@ Task.prototype.setPeriod = function (start, end) {
   var sups = this.getSuperiors();
   if (sups && sups.length > 0) {
 
-    var supEnd = 0;
+    var supEnd = start;
     for (var i=0;i<sups.length;i++) {
       var link = sups[i];
       supEnd = Math.max(supEnd, incrementDateByWorkingDays(link.from.end, link.lag));
