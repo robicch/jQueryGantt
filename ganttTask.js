@@ -276,54 +276,49 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
     }
     this.start = start;
     this.end = end;
-    somethingChanged = true;
-  }
+    //profiler.stop();
 
-  //profiler.stop();
+    //check global boundaries
+    if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
+      this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
+      return false;
+    }
+
+    
+    var panDelta = originalPeriod.start - this.start;
+    //console.debug("panDelta",panDelta);
+    //loops children to shift them
+    var children = this.getChildren();
+    for (var i=0;i<children.length;i++) {
+      ch = children[i];
+      if (!ch.moveTo(ch.start - panDelta, false)) {
+        return false;
+      }
+    }
+  
+
+    //console.debug("set period: somethingChanged",this);
+    if (!updateTree(this)) {
+      return false;
+    }
 
 
-  //nothing changed exit
-  if (!somethingChanged)
-    return true;
-
-  //check global boundaries: error if out-of-scope
-  if (this.start < this.master.minEditableDate || this.end > this.master.maxEditableDate) {
-    this.master.setErrorOnTransaction(GanttMaster.messages["CHANGE_OUT_OF_SCOPE"], this);
-    return false;
-  }
-
-  var todoOk = true;
-
-  var panDelta = originalPeriod.start - this.start;
-  //console.debug("panDelta",panDelta);
-  //loops children to shift them
-  var children = this.getChildren();
-  for (var i=0;i<children.length;i++) {
-    ch = children[i];
-    todoOk = ch.moveTo(ch.start - panDelta, false);
-    if (!todoOk)
-      break;
-  }
-
-  //console.debug("set period: somethingChanged",this);
-  if (todoOk && !updateTree(this)) {
-    todoOk = false;
-  }
-
-  if (todoOk) {
     //and now propagate to inferiors
     var infs = this.getInferiors();
     if (infs && infs.length > 0) {
       for (var i=0;i<infs.length;i++) {
         var link = infs[i];
-        todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
-        if (!todoOk)
-          break;
+
+        //this is not the right date but moveTo checks start
+        if (!link.to.moveTo(end, false)) {
+          return false;
+        }
       }
     }
+
   }
 
-  return todoOk;
+  return true;
 };
 
 
