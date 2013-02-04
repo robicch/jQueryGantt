@@ -419,13 +419,7 @@ Task.prototype.changeStatus = function(newStatus) {
             propagateStatus(chds[i], "STATUS_DONE", false,true,false);
 
           //set inferiors as active if outside the cone
-          var infs = task.getInferiors();
-          //set children as done
-          for (var i=0;i<infs.length;i++) {
-            if (cone.indexOf(infs[i].to) < 0)
-              //infs[i].to.changeStatus("STATUS_ACTIVE");
-              propagateStatus(infs[i].to, "STATUS_ACTIVE", false,false,false);
-          }
+          propagateToInferiors(cone, task.getInferiors(), "STATUS_ACTIVE");
         }
       } else {
         todoOk = false;
@@ -497,11 +491,7 @@ Task.prototype.changeStatus = function(newStatus) {
         }
 
         //set inferiors as STATUS_SUSPENDED or STATUS_UNDEFINED
-        var infs = task.getInferiors();
-        //set children as done
-        for (var i=0;i<infs.length;i++)
-          if (cone.indexOf(infs[i].to) < 0)
-            propagateStatus(infs[i].to, newStatus, false,false,false);
+        propagateToInferiors(cone, task.getInferiors(), newStatus);
       } else {
         todoOk = false;
       }
@@ -514,11 +504,8 @@ Task.prototype.changeStatus = function(newStatus) {
         propagateStatus(chds[i], "STATUS_FAILED", false,true,false);
 
       //set inferiors as active
-      var infs = task.getInferiors();
       //set children as done
-      for (var i=0;i<infs.length;i++)
-        if (cone.indexOf(infs[i].to) < 0)
-          propagateStatus(infs[i].to, "STATUS_FAILED", false,false,false);
+      propagateToInferiors(cone, task.getInferiors(), "STATUS_FAILED");
     }
     if (!todoOk){
       task.status = oldStatus;
@@ -528,6 +515,17 @@ Task.prototype.changeStatus = function(newStatus) {
     return todoOk;
   }
 
+  /**
+   * A helper method to traverse an array of 'inferior' tasks
+   * and signal a status change.
+   */
+  function propagateToInferiors(cone, infs, status) {
+    for (var i=0;i<infs.length;i++) {
+      if (cone.indexOf(infs[i].to) < 0) {
+        propagateStatus(infs[i].to, status, false, false, false);
+      }
+    }
+  }
 
   var todoOk = true;
   var oldStatus = this.status;
