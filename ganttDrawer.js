@@ -330,10 +330,8 @@ Ganttalendar.prototype.drawTask = function (task) {
   if (task.isParent())
     taskBox.addClass("hasChild");
 
-  var taskBoxSeparator=$("<div class='ganttLines'></div>");
 
   taskBox.css({top:top,left:x,width:Math.round((task.end - task.start) * self.fx)});
-  taskBoxSeparator.css({top:top+29});
 
   if (this.master.canWrite) {
     taskBox.resizable({
@@ -394,6 +392,12 @@ Ganttalendar.prototype.drawTask = function (task) {
       }*/
     });
   }
+
+
+  var taskBoxSeparator=$("<div class='ganttLines'></div>");
+  taskBoxSeparator.css({top:top+taskBoxSeparator.height()});
+//  taskBoxSeparator.css({top:top+18});
+
 
   self.element.append(taskBox);
   self.element.append(taskBoxSeparator);

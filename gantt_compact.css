@@ -1,0 +1,323 @@
+.gdfTable {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.gdfTable td, .gdfTable th {
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 10px
+}
+
+.gdfCell {
+  overflow: hidden;
+  padding:1px
+}
+
+.gdfColHeader {
+  min-width: 5px;
+  height: 30px;
+}
+
+.gdfCell, .gdfColHeader {
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
+}
+
+
+.ganttLines{
+  position:absolute;
+  width:100%;
+  height:1px;
+  border-top:1px solid #eee;
+  z-index:1;
+}
+
+.gdfCellInput {
+  border: 0 none;
+  font-size: 12px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: #d4fbe8;
+}
+
+.gdfCellWrap {
+  border: 0 none;
+  font-size: 12px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+
+  background-color: #ffcccc;
+}
+
+.gdfColHeaderOver {
+  opacity: .7;
+}
+
+.gdfHResizing {
+  cursor: w-resize;
+}
+
+.splitterContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.splitBox1, .splitBox2 {
+  overflow-x: scroll;
+  overflow-y: hidden;
+
+  /*background-color: yellow;*/
+}
+
+.splitBox2 {
+  /*background-color: orange;*/
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.splitElement {
+  outline-style: none;
+  position: absolute;
+  height: 100%;
+}
+
+.vSplitBar {
+  width: 5px;
+  background-color: #aaa;
+  cursor: w-resize;
+  text-align: center;
+  color: white;
+}
+
+.end{
+  border-right:1px dotted #666
+}
+
+.holyH{
+    background-color: #9CB7AA;
+}
+.holy{
+  background-color: #FFF5E6;
+}
+
+
+.expcoll{
+  width:6px;
+  height:6px;
+  margin:1px;
+  padding:1px;
+  background-color:yellow;
+  display:inline-block;
+  border:1px solid gray;
+}
+.expcoll.exp{
+  display:none;
+}
+
+
+.ganttTable{
+  table-layout:fixed;
+}
+
+.ganttTable td,.ganttTable th{
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.ganttHead1,.ganttHead2{
+  height:20px;
+}
+
+.ganttHead1 th,.ganttHead2 th{
+  border-left:1px solid white;
+}
+
+.ganttToday{
+  position:absolute;
+  top:0;
+  width:1px;
+  height:100%;
+  border-left:2px dotted #13AFA5;
+}
+
+.ganttHighLight{
+  position:absolute;
+  width:100%;
+  height:18px;
+  background-color:yellow;
+  opacity:.4;
+}
+
+.ganttButtonBar{
+  position:relative;
+  padding:5px;
+}
+
+.ganttButtonBar .buttons {
+    float:left; margin:45px 0 0 40px
+}
+
+
+.ganttButtonBar .button span.teamworkIcon{
+  font-size: 150%
+}
+
+.ganttButtonSeparator{
+  border-left:1px solid gray;
+  padding-right:10px;
+  margin-left:10px;
+  font-size: 130%
+}
+
+.ganttLinks{
+  z-index:10;
+}
+
+.taskBox{
+  position:absolute;
+  height:18px;
+  margin-top:1px;
+  z-index:100;
+}
+
+.taskBox .layout {
+  height:100%;
+  color:red;
+  border-radius:2px;
+  background: #eee; /* Old browsers */
+  border:1px solid #bbb;
+}
+
+.taskBox .taskStatus {
+    left:5px;
+    top:4px;
+    position:absolute;
+    width:10px;
+    height:10px;
+}
+
+.taskBox .layout .milestone{
+  top:0px;
+  position:absolute;
+  width:16px;
+  background: url(milestone.png) no-repeat;
+  height:16px;
+  display:none;
+}
+.taskBox .layout .milestone.end{
+  right:0;
+}
+.taskBox .layout .milestone.active{
+  display:block;
+}
+
+.taskBox.hasChild .layout{
+  border-top:2px solid black;
+}
+
+.taskBox .taskProgress{
+  height:5px;
+  position:absolute;
+}
+
+.taskBox .layout.extDep{
+  background-image:url(hasExternalDeps.png);
+}
+
+
+.taskLabel{
+  position:absolute;
+  height:18px;
+  color:black;
+  text-align:right;
+  padding-right:5px;
+  overflow:hidden;
+  left:-200px;
+  width:195px;
+  white-space:nowrap;
+}
+
+
+.taskDepLine {
+  border: 1px solid #9999ff;
+  overflow: hidden;
+  position: absolute;
+}
+
+
+.taskEditRow,.emptyRow {
+  height:18px;
+}
+
+.taskEditRow input{
+  border: 0 none;
+  font-size: 10px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: Arial, sans-serif
+}
+
+.taskEditRow.rowSelected td,.taskEditRow.rowSelected input{
+  background-color:#FFFF99;  
+}
+
+.taskStatusBox{
+  position:absolute;
+  width:100px;
+  height:18px;
+  border:1px solid #a0a0a0;
+  background-color:#fff;
+  margin-top:2px;
+  margin-left:-1px;
+  padding: 2px
+}
+.taskStatus{
+  width:12px;
+  height:12px;
+  display:inline-block;
+}
+.taskStatus[status=STATUS_ACTIVE]{
+ background-color: #66FF99;
+}
+.taskStatus[status=STATUS_DONE]{
+ background-color: #0099FF;
+}
+.taskStatus[status=STATUS_FAILED]{
+ background-color: #660066;
+}
+.taskStatus[status=STATUS_SUSPENDED]{
+ background-color: #fbb11e;
+}
+.taskStatus[status=STATUS_UNDEFINED]{
+ background-color: #ffffff;
+}
+.taskStatus.selected{
+  border:#666 2px solid;
+}
+
+
+.ui-resizable-helper { border: 1px dotted #00F;  }
+.ui-resizable-e, .ui-resizable-w {width: 5px;}
+.ui-draggable{
+  cursor:move;
+}
+
+
