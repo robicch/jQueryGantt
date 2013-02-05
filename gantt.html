@@ -125,22 +125,27 @@ function loadGanttFromServer(taskId, callback) {
   loadFromLocalStorage();
 
   //this is the real implementation
-  /*//var taskId = $("#taskSelector").val();
-   var prof = new Profiler("loadServerSide");
-   prof.reset();
+  /*
+  //var taskId = $("#taskSelector").val();
+  var prof = new Profiler("loadServerSide");
+  prof.reset();
 
-   $.getJSON("ganttAjaxController.jsp", {CM:"LOADPROJECT",taskId:taskId}, function(response) {
-   //console.debug(response);
-   if (response.ok) {
-   prof.stop();
-   ge.loadProject(response.project);
-   ge.checkpoint(); //empty the undo stack
-   if (typeof(callback)=="function")
-   callback(response);
-   }else {
-   jsonErrorHandling(response);
-   }
-   });*/
+  $.getJSON("ganttAjaxController.jsp", {CM:"LOADPROJECT",taskId:taskId}, function(response) {
+    //console.debug(response);
+    if (response.ok) {
+      prof.stop();
+
+      ge.loadProject(response.project);
+      ge.checkpoint(); //empty the undo stack
+
+      if (typeof(callback)=="function") {
+        callback(response);
+      }
+    } else {
+      jsonErrorHandling(response);
+    }
+  });
+  */
 }
 
 
@@ -150,43 +155,50 @@ function saveGanttOnServer() {
   saveInLocalStorage();
 
 
-  /*var prj = ge.saveProject();
-   delete prj.resources;
-   delete prj.roles;
-   var prof = new Profiler("saveServerSide");
-   prof.reset();
+  /*
+  var prj = ge.saveProject();
 
-   if (ge.deletedTaskIds.length>0){
-   if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length))
-   return;
-   }
+  delete prj.resources;
+  delete prj.roles;
 
-   $.ajax("ganttAjaxController.jsp", {
-   dataType:"json",
-   data: {CM:"SVPROJECT",prj:JSON.stringify(prj)},
-   type:"POST",
+  var prof = new Profiler("saveServerSide");
+  prof.reset();
 
-   success: function(response) {
-   if (response.ok) {
-   prof.stop();
-   if (response.project){
-   ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
-   } else {
-   ge.reset();
-   }
-   } else {
-   var errMsg="Errors saving project\n";
-   if (response.message)
-   errMsg=errMsg+response.message+"\n";
+  if (ge.deletedTaskIds.length>0) {
+    if (!confirm("TASK_THAT_WILL_BE_REMOVED\n"+ge.deletedTaskIds.length)) {
+      return;
+    }
+  }
 
-   for (var i=0;i<response.errorMessages.length;i++){
-   errMsg=errMsg+response.errorMessages[i]+"\n";
-   }
-   alert(errMsg);
-   }
-   }
+  $.ajax("ganttAjaxController.jsp", {
+    dataType:"json",
+    data: {CM:"SVPROJECT",prj:JSON.stringify(prj)},
+    type:"POST",
 
-   });*/
+    success: function(response) {
+      if (response.ok) {
+        prof.stop();
+        if (response.project) {
+          ge.loadProject(response.project); //must reload as "tmp_" ids are now the good ones
+        } else {
+          ge.reset();
+        }
+      } else {
+        var errMsg="Errors saving project\n";
+        if (response.message) {
+          errMsg=errMsg+response.message+"\n";
+        }
+
+        if (response.errorMessages.length) {
+          errMsg += response.errorMessages.join("\n");
+        }
+
+        alert(errMsg);
+      }
+    }
+
+  });
+  */
 }
 
 
