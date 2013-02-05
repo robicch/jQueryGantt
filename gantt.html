@@ -125,22 +125,27 @@ function loadGanttFromServer(taskId, callback) {
   loadFromLocalStorage();
 
   //this is the real implementation
-  /*//var taskId = $("#taskSelector").val();
-   var prof = new Profiler("loadServerSide");
-   prof.reset();
+  /*
+  //var taskId = $("#taskSelector").val();
+  var prof = new Profiler("loadServerSide");
+  prof.reset();
 
-   $.getJSON("ganttAjaxController.jsp", {CM:"LOADPROJECT",taskId:taskId}, function(response) {
-   //console.debug(response);
-   if (response.ok) {
-   prof.stop();
-   ge.loadProject(response.project);
-   ge.checkpoint(); //empty the undo stack
-   if (typeof(callback)=="function")
-   callback(response);
-   }else {
-   jsonErrorHandling(response);
-   }
-   });*/
+  $.getJSON("ganttAjaxController.jsp", {CM:"LOADPROJECT",taskId:taskId}, function(response) {
+    //console.debug(response);
+    if (response.ok) {
+      prof.stop();
+
+      ge.loadProject(response.project);
+      ge.checkpoint(); //empty the undo stack
+
+      if (typeof(callback)=="function") {
+        callback(response);
+      }
+    } else {
+      jsonErrorHandling(response);
+    }
+  });
+  */
 }
 
 
