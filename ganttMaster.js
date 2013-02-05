@@ -110,6 +110,8 @@ GanttMaster.prototype.init = function(place) {
 
 
   }).bind("addAboveCurrentTask.gantt", function() {
+    var factory = new TaskFactory();
+
     var ch;
     var row = 0;
     if (self.currentTask) {
@@ -117,10 +119,10 @@ GanttMaster.prototype.init = function(place) {
       if (self.currentTask.level<=0)
         return;
 
-      ch = new Task("tmp_" + new Date().getTime(), "", "", self.currentTask.level, self.currentTask.start, 1);
+      ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level, self.currentTask.start, 1);
       row = self.currentTask.getRow();
     } else {
-      ch = new Task("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
+      ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
     }
     self.beginTransaction();
     var task = self.addTask(ch, row);
@@ -131,14 +133,15 @@ GanttMaster.prototype.init = function(place) {
     self.endTransaction();
 
   }).bind("addBelowCurrentTask.gantt", function() {
+    var factory = new TaskFactory();
     self.beginTransaction();
     var ch;
     var row = 0;
     if (self.currentTask) {
-      ch = new Task("tmp_" + new Date().getTime(), "", "", self.currentTask.level + 1, self.currentTask.start, 1);
+      ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level + 1, self.currentTask.start, 1);
       row = self.currentTask.getRow() + 1;
     } else {
-      ch = new Task("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
+      ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
     }
     var task = self.addTask(ch, row);
     if (task) {
@@ -207,8 +210,9 @@ GanttMaster.messages = {
 
 
 GanttMaster.prototype.createTask = function (id, name, code, level, start, duration) {
-  var task2 = new Task(id, name, code, level, start, duration);
-  return task2;
+  var factory = new TaskFactory();
+
+  return factory.build(id, name, code, level, start, duration);
 };
 
 
@@ -318,13 +322,14 @@ GanttMaster.prototype.loadProject = function(project) {
 
 
 GanttMaster.prototype.loadTasks = function(tasks, selectedRow) {
+  var factory = new TaskFactory();
   //reset
   this.reset();
 
   for (var i=0;i<tasks.length;i++){
     var task = tasks[i];
     if (!(task instanceof Task)) {
-      var t = new Task(task.id, task.name, task.code, task.level, task.start, task.duration);
+      var t = factory.build(task.id, task.name, task.code, task.level, task.start, task.duration);
       for (var key in task) {
         if (key!="end" && key!="start")
           t[key] = task[key]; //copy all properties
