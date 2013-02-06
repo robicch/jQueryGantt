@@ -23,7 +23,7 @@
 
 $.fn.gridify = function(options) {
   this.options = {
-    colResizeZoneWidht:10
+    colResizeZoneWidth:10
   };
 
   $.extend(this.options, options);
@@ -51,7 +51,7 @@ $.gridify = {
           var colHeader = $(this);
           var mousePos = e.pageX - colHeader.offset().left;
 
-          if (colHeader.width() - mousePos < opt.colResizeZoneWidht) {
+          if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
             $("body").addClass("gdfHResizing");
           } else {
             $("body").removeClass("gdfHResizing");
@@ -61,7 +61,7 @@ $.gridify = {
       }).bind("mousedown.gdf", function(e) {
         var colHeader = $(this);
         var mousePos = e.pageX - colHeader.offset().left;
-        if (colHeader.width() - mousePos < opt.colResizeZoneWidht) {
+        if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
           $.gridify.columInResize = $(this);
           //bind event for start resizing
           //console.debug("start resizing");
