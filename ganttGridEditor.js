@@ -182,9 +182,10 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
           if (inp.attr("name") == "start") {
             lstart = date.getTime();
-            if (lstart >= lend)
-            //   lstart = lend - (3600000 * 24);
-              lend = lstart + (3600000 * 24) * task.duration;
+            if (lstart >= lend) {
+              var end_as_date = new Date(lstart);
+              lend = end_as_date.add('d', task.duration).getTime();
+            }
 
             //update task from editor
             self.master.beginTransaction();
@@ -192,10 +193,12 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
             self.master.endTransaction();
 
           } else {
-            lend = date.getTime() + (3600000 * 24);
-            if (lstart >= lend)
-            //lend = lstart + (3600000 * 24);
-              lstart = lend - (3600000 * 24) * (task.duration);
+            var end_as_date = new Date(date.getTime());
+            lend = end_as_date.getTime();
+            if (lstart >= lend) {
+              end_as_date.add('d', -1 * task.duration);
+              lstart = end_as_date.getTime();
+            }
 
             //update task from editor
             self.master.beginTransaction();
