@@ -22,29 +22,43 @@
 */
 
 /**
- * @todo Avoid work in the constructor (computeStart, computeEndByDuration)
+ * A method to instantiate valid task models from
+ * raw data.
  */
-function Task(id, name, code, level, start, duration) {
+function TaskFactory() {
+
+  /**
+   * Build a new Task
+   */
+  this.build = function(id, name, code, level, start, duration) {
+    // Set at beginning of day
+    var adjusted_start = computeStart(start);
+    var calculated_end = computeEndByDuration(adjusted_start, duration);
+
+    return new Task(id, name, code, level, adjusted_start, calculated_end, duration);
+  };
+
+}
+
+function Task(id, name, code, level, start, end, duration) {
   this.id = id;
   this.name = name;
   this.code = code;
   this.level = level;
   this.status = "STATUS_UNDEFINED";
 
-  this.start = computeStart(start);  //set at the beginning of the day
+  this.start = start
   this.duration = duration;
-  this.end = computeEndByDuration(this.start, this.duration); // to be computed
+  this.end = end;
 
   this.startIsMilestone = false;
   this.endIsMilestone = false;
 
   this.collapsed = false;
   
-
   this.rowElement; //row editor html element
   this.ganttElement; //gantt html element
   this.master;
-
 
   this.assigs = [];
 }
