@@ -418,111 +418,261 @@ Ganttalendar.prototype.addTask = function (task) {
 
 //<%-------------------------------------- GANT DRAW LINK ELEMENT --------------------------------------%>
 //'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLink = function (from, to) {
-  var rectFrom = from.ganttElement.position();
-  rectFrom.width = from.ganttElement.width();
-  rectFrom.height = from.ganttElement.height();
-  var rectTo = to.ganttElement.position();
-  rectTo.width = to.ganttElement.width();
-  rectTo.height = to.ganttElement.height();
+Ganttalendar.prototype.drawLink = function (from, to, type) {
   var peduncolusSize = 10;
   var lineSize = 2;
 
-  var left,top;
-
-  //    var ndo=this.element.find(".ganttLinks");
-  var ndo = $("<div>").attr({from:from.id,to:to.id});
-
+  /**
+   * A representation of a Horizontal line
+   */
   HLine = function(width, top, left) {
     var hl = $("<div>").addClass("taskDepLine");
-    hl.css({height:lineSize,left:left,width:width,top:top - lineSize / 2});
+    hl.css({
+      height: lineSize,
+      left: left,
+      width: width,
+      top: top - lineSize / 2
+    });
     return hl;
   };
+
+  /**
+   * A representation of a Vertical line
+   */
   VLine = function(height, top, left) {
     var vl = $("<div>").addClass("taskDepLine");
-    vl.css({height:height,left:left - lineSize / 2,width:lineSize,top:top});
+    vl.css({
+      height: height,
+      left:left - lineSize / 2,
+      width: lineSize,
+      top: top
+    });
     return vl;
   };
 
-  var currentX = rectFrom.left + rectFrom.width;
-  var currentY = rectFrom.height / 2 + rectFrom.top;
+  /**
+   * Given an item, extract its rendered position
+   * width and height into a structure.
+   */
+  function buildRect(item) {
+    var rect = item.ganttElement.position();
+    rect.width = item.ganttElement.width();
+    rect.height = item.ganttElement.height();
 
-  var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
-
-  if (!useThreeLine) {
-    // L1
-    if (peduncolusSize > 0) {
-      var l1 = new HLine(peduncolusSize, currentY, currentX);
-      currentX = currentX + peduncolusSize;
-      ndo.append(l1);
-    }
-
-    // L2
-    var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
-    var l2;
-    if (l2_4size < 0) {
-      l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-    } else {
-      l2 = new VLine(l2_4size, currentY, currentX);
-    }
-    currentY = currentY + l2_4size;
-
-    ndo.append(l2);
-
-    // L3
-    var l3size = rectFrom.left + rectFrom.width + peduncolusSize - (rectTo.left - peduncolusSize);
-    currentX = currentX - l3size;
-    var l3 = new HLine(l3size, currentY, currentX);
-    ndo.append(l3);
-
-    // L4
-    var l4;
-    if (l2_4size < 0) {
-      l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-    } else {
-      l4 = new VLine(l2_4size, currentY, currentX);
-    }
-    ndo.append(l4);
-
-    currentY = currentY + l2_4size;
-
-    // L5
-    if (peduncolusSize > 0) {
-      var l5 = new HLine(peduncolusSize, currentY, currentX);
-      currentX = currentX + peduncolusSize;
-      ndo.append(l5);
-
-    }
-  } else {
-    //L1
-    var l1_3Size = (rectTo.left - currentX) / 2;
-    var l1 = new HLine(l1_3Size, currentY, currentX);
-    currentX = currentX + l1_3Size;
-    ndo.append(l1);
-
-    //L2
-    var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
-    var l2;
-    if (l2Size < 0) {
-      l2 = new VLine(-l2Size, currentY + l2Size, currentX);
-    } else {
-      l2 = new VLine(l2Size, currentY, currentX);
-    }
-    ndo.append(l2);
-
-    currentY = currentY + l2Size;
-
-    //L3
-    var l3 = new HLine(l1_3Size, currentY, currentX);
-    currentX = currentX + l1_3Size;
-    ndo.append(l3);
+    return rect;
   }
 
-  //arrow
-  var arr = $("<img src='linkArrow.png'>").css({position:'absolute',top:rectTo.top + rectTo.height / 2 - 5,left:rectTo.left - 5});
-  ndo.append(arr);
+  /**
+   * The default rendering method, which paints a start to end dependency.
+   *
+   * @see buildRect
+   */
+  function drawStartToEnd(rectFrom, rectTo, peduncolusSize) {
+    var left, top;
 
-  this.element.find(".ganttLinks").append(ndo);
+    var ndo = $("<div>").attr({
+      from: from.id,
+      to: to.id
+    });
+
+    var currentX = rectFrom.left + rectFrom.width;
+    var currentY = rectFrom.height / 2 + rectFrom.top;
+
+    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
+
+    if (!useThreeLine) {
+      // L1
+      if (peduncolusSize > 0) {
+        var l1 = new HLine(peduncolusSize, currentY, currentX);
+        currentX = currentX + peduncolusSize;
+        ndo.append(l1);
+      }
+
+      // L2
+      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
+      var l2;
+      if (l2_4size < 0) {
+        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
+      } else {
+        l2 = new VLine(l2_4size, currentY, currentX);
+      }
+      currentY = currentY + l2_4size;
+
+      ndo.append(l2);
+
+      // L3
+      var l3size = rectFrom.left + rectFrom.width + peduncolusSize - (rectTo.left - peduncolusSize);
+      currentX = currentX - l3size;
+      var l3 = new HLine(l3size, currentY, currentX);
+      ndo.append(l3);
+
+      // L4
+      var l4;
+      if (l2_4size < 0) {
+        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
+      } else {
+        l4 = new VLine(l2_4size, currentY, currentX);
+      }
+      ndo.append(l4);
+
+      currentY = currentY + l2_4size;
+
+      // L5
+      if (peduncolusSize > 0) {
+        var l5 = new HLine(peduncolusSize, currentY, currentX);
+        currentX = currentX + peduncolusSize;
+        ndo.append(l5);
+
+      }
+    } else {
+      //L1
+      var l1_3Size = (rectTo.left - currentX) / 2;
+      var l1 = new HLine(l1_3Size, currentY, currentX);
+      currentX = currentX + l1_3Size;
+      ndo.append(l1);
+
+      //L2
+      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
+      var l2;
+      if (l2Size < 0) {
+        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
+      } else {
+        l2 = new VLine(l2Size, currentY, currentX);
+      }
+      ndo.append(l2);
+
+      currentY = currentY + l2Size;
+
+      //L3
+      var l3 = new HLine(l1_3Size, currentY, currentX);
+      currentX = currentX + l1_3Size;
+      ndo.append(l3);
+    }
+
+    //arrow
+    var arr = $("<img src='linkArrow.png'>").css({
+      position: 'absolute',
+      top: rectTo.top + rectTo.height / 2 - 5,
+      left: rectTo.left - 5
+    });
+
+    ndo.append(arr);
+
+    return ndo;
+  }
+
+  /**
+   * A rendering method which paints a start to start dependency.
+   *
+   * @see buildRect
+   */
+  function drawStartToStart(rectFrom, rectTo, peduncolusSize) {
+    var left, top;
+
+    var ndo = $("<div>").attr({
+      from: from.id,
+      to: to.id
+    });
+
+    var currentX = rectFrom.left;
+    var currentY = rectFrom.height / 2 + rectFrom.top;
+
+    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
+
+    if (!useThreeLine) {
+      // L1
+      if (peduncolusSize > 0) {
+        var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
+        currentX = currentX - peduncolusSize;
+        ndo.append(l1);
+      }
+
+      // L2
+      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
+      var l2;
+      if (l2_4size < 0) {
+        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
+      } else {
+        l2 = new VLine(l2_4size, currentY, currentX);
+      }
+      currentY = currentY + l2_4size;
+
+      ndo.append(l2);
+
+      // L3
+      var l3size = (rectFrom.left - peduncolusSize) - (rectTo.left - peduncolusSize);
+      currentX = currentX - l3size;
+      var l3 = new HLine(l3size, currentY, currentX);
+      ndo.append(l3);
+
+      // L4
+      var l4;
+      if (l2_4size < 0) {
+        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
+      } else {
+        l4 = new VLine(l2_4size, currentY, currentX);
+      }
+      ndo.append(l4);
+
+      currentY = currentY + l2_4size;
+
+      // L5
+      if (peduncolusSize > 0) {
+        var l5 = new HLine(peduncolusSize, currentY, currentX);
+        currentX = currentX + peduncolusSize;
+        ndo.append(l5);
+      }
+    } else {
+      //L1
+      
+      var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
+      currentX = currentX - peduncolusSize;
+      ndo.append(l1);
+
+      //L2
+      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
+      var l2;
+      if (l2Size < 0) {
+        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
+      } else {
+        l2 = new VLine(l2Size, currentY, currentX);
+      }
+      ndo.append(l2);
+
+      currentY = currentY + l2Size;
+
+      //L3
+
+      var l3 = new HLine(currentX + peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
+      currentX = currentX + peduncolusSize + (rectTo.left - rectFrom.left);
+      ndo.append(l3);
+    }
+
+    //arrow
+    var arr = $("<img src='linkArrow.png'>").css({
+      position: 'absolute',
+      top: rectTo.top + rectTo.height / 2 - 5,
+      left: rectTo.left - 5
+    });
+
+    ndo.append(arr);
+
+    return ndo;
+  }
+
+  var rectFrom = buildRect(from);
+  var rectTo = buildRect(to);
+
+  // Dispatch to the correct renderer
+  if (type == 'start-to-start') {
+    this.element.find(".ganttLinks").append(
+      drawStartToStart(rectFrom, rectTo, peduncolusSize)
+    );
+  } else {
+    this.element.find(".ganttLinks").append(
+      drawStartToEnd(rectFrom, rectTo, peduncolusSize)
+    );
+  }
 };
 
 
