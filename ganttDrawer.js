@@ -643,7 +643,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 
       //L3
 
-      var l3 = new HLine(currentX + peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
+      var l3 = new HLine(peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
       currentX = currentX + peduncolusSize + (rectTo.left - rectFrom.left);
       ndo.append(l3);
     }
