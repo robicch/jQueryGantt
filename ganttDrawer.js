@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Open Lab
+  Copyright (c) 2012 Open Lab
   Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -20,733 +20,703 @@
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
-  this.master = master; // is the a GantEditor instance
-  this.element; // is the jquery element containing gantt
-  this.highlightBar;
-  this.zoom = zoom;
-  this.minGanttSize = minGanttSize;
-  this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
 
-  //this.zoomLevels = ["d","w","m","q","s","y"];
-  this.zoomLevels = ["w","m","q","s","y"];
-
-  this.element = this.create(zoom, startmillis, endMillis);
-
+function Ganttalendar(master, minGanttSize, renderInfo) {
+    this.master = master; // is the a GantEditor instance
+    this.highlightBar = 0;
+    this.minGanttSize = minGanttSize;
+    this.renderInfo = renderInfo;
+    this.AxisColor =[];
+    this.AxisColor[0]=1;
+    this.AxisWeekend();
+    this.element = this.createGantt();
 }
+Ganttalendar.prototype.createGantt =function () {
 
-Ganttalendar.prototype.zoomGantt = function(isPlus) {
-  var curLevel = this.zoom;
-  var pos = this.zoomLevels.indexOf(curLevel + "");
-
-  var newPos = pos;
-  if (isPlus) {
-    newPos = pos <= 0 ? 0 : pos - 1;
-  } else {
-    newPos = pos >= this.zoomLevels.length - 1 ? this.zoomLevels.length - 1 : pos + 1;
-  }
-  if (newPos != pos) {
-    curLevel = this.zoomLevels[newPos];
-    this.zoom = curLevel;
-    this.refreshGantt();
-  }
-};
-
-
-Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndMillis) {
-  //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
-
-  var self = this;
-
-  function getPeriod(zoomLevel, stMil, endMillis) {
-    var start = new Date(stMil);
-    var end = new Date(endMillis);
-
-
-    //reset hours
-    if (zoomLevel == "d") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      //reset day of week
-    } else if (zoomLevel == "w") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      start.setFirstDayOfThisWeek();
-      end.setFirstDayOfThisWeek();
-      end.setDate(end.getDate() + 6);
-
-      //reset day of month
-    } else if (zoomLevel == "m") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      start.setDate(1);
-      end.setDate(1);
-      end.setMonth(end.getMonth() + 1);
-      end.setDate(end.getDate() - 1);
-
-      //reset to quarter
-    } else if (zoomLevel == "q") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      start.setDate(1);
-      start.setMonth(Math.floor(start.getMonth() / 3) * 3);
-      end.setDate(1);
-      end.setMonth(Math.floor(end.getMonth() / 3) * 3 + 3);
-      end.setDate(end.getDate() - 1);
-
-      //reset to semester
-    } else if (zoomLevel == "s") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-      start.setDate(1);
-
-      start.setMonth(Math.floor(start.getMonth() / 6) * 6);
-      end.setDate(1);
-      end.setMonth(Math.floor(end.getMonth() / 6) * 6 + 6);
-      end.setDate(end.getDate() - 1);
-
-      //reset to year - > gen
-    } else if (zoomLevel == "y") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
-      start.setDate(1);
-      start.setMonth(0);
-
-      end.setDate(1);
-      end.setMonth(12);
-      end.setDate(end.getDate() - 1);
+    var start;
+    var MjrAxisWidth;
+    var daysInMonth;
+    var mnrAxisWidth;
+    var sm;
+    var epd;
+    var colspan;
+    var end;
+    var noOfDays;
+    var count=0;
+    var dispFormat;
+    var tbl;
+    var trow1;
+    var trow2;
+    var noOfDP;
+    var hrWidth;
+    var hrsInDp;
+    var i =0;
+    var cellwidth;
+    var hoursInDay;
+    var tdmnrAxis;
+    var trmnrAxis;
+    var mnrAxisEnd;
+    var mnrAxisstart;
+    var hour;
+    var minutes;
+    var stTime;
+    var endDate;
+    var wdth;
+    var k;
+    var duration;
+    var sd;
+    var tr1                   = $("<tr>").addClass("siebui-ganttHead1");
+    var tr2                   = $("<tr>").addClass("siebui-ganttHead2");
+    var tr3;
+    var trBody                = $("<tr>").addClass("ganttBody");
+    var self =this;
+    var noOfHrs;
+    var HOURMILLIS          = 3600000;
+    var BOTAXISINFO         = this.renderInfo["BA"];
+    var RENDERTHIRDAXIS     = BOTAXISINFO?1:0;
+    var dayInfo             = this.renderInfo["DI"];
+    self.startMillis         = this.renderInfo["startMillis"];
+    var endMillis           = this.renderInfo["endMillis"];
+    var yearth              = self.master.editor.element.find("[id=Yearheader]");
+    var splDayInfo          = this.renderInfo["SPL_DT"];
+    var daysplinfo;
+    var WEEK_DAY =1,
+        DAY_DAYPART =2,
+        DAY_HOUR=4,
+        MONTH_DOW   =32,
+        MONTH_DAY   =64,
+        WEEK_DAY_DAYPART =128,
+        MONTH_DOW_DAYPART=256,
+        DAY_TWOHOUR =512,
+        DAY_FOURHOUR =1024,
+        MINUTES_INHOUR=60;
+    
+    if(yearth)
+    {
+        var startYear       = new Date(self.startMillis).getFullYear();
+        var endYear         = new Date(endMillis).getFullYear();
+        yearth.text((startYear === endYear)? startYear:startYear +" - "+endYear);
     }
-    return {start:start.getTime(),end:end.getTime()};
-  }
-
-  function createHeadCell(lbl, span, additionalClass) {
-    var th = $("<th>").html(lbl).attr("colSpan", span);
-    if (additionalClass)
-      th.addClass(additionalClass);
-    return th;
-  }
-
-  function createBodyCell(span, isEnd, additionalClass) {
-    var ret = $("<td>").html("&nbsp;").attr("colSpan", span).addClass("ganttBodyCell");
-    if (isEnd)
-      ret.addClass("end");
-    if (additionalClass)
-      ret.addClass(additionalClass);
-    return ret;
-  }
-
-  function createGantt(zoom, startPeriod, endPeriod) {
-    var tr1 = $("<tr>").addClass("ganttHead1");
-    var tr2 = $("<tr>").addClass("ganttHead2");
-    var trBody = $("<tr>").addClass("ganttBody");
-
-    function iterate(renderFunction1, renderFunction2) {
-      var start = new Date(startPeriod);
-      //loop for header1
-      while (start.getTime() <= endPeriod) {
-        renderFunction1(start);
-      }
-
-      //loop for header2
-      start = new Date(startPeriod);
-      while (start.getTime() <= endPeriod) {
-        renderFunction2(start);
-      }
+    
+    if(RENDERTHIRDAXIS)
+    {
+        tr3 = $("<tr>").addClass("siebui-ganttHead2");
     }
+    var timescalecls = "siebui-ganttdrilldown";
+    var timeScaleLIC = this.renderInfo["TST"];
+    var weekend;
+    switch(Number(timeScaleLIC)){
+        //Rendering month timescales
+        case(MONTH_DOW_DAYPART):
+            start = new Date(self.startMillis);
+            if(!dayInfo)
+            {
+                break;
+            }
+            noOfDP = dayInfo.length;
+            while (start.getTime()<endMillis && count<5)//Rendering Major Axis
+            {
+                sm = start.getTime();
+                sd = start.format('MM/dd/yyyy');
+                daysplinfo = splDayInfo[sd];
+                weekend = self.IsWeekend(start);
+                tr1.append(self.createHeadCell(new Date(sm).format("EEE, MMM d"), 1,0,timescalecls,daysplinfo,weekend,1));
+                $(tr1).attr("DateVal", sd);
+                if(RENDERTHIRDAXIS)
+                {
+                    tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
+                }
+                i=0;
+                //tdmnrAxis=$("<td width='100%'>");
+                tdmnrAxis=$("<td '>").attr("colSpan",1);
+                tbl =$("<table width='100%' height='100%'>").addClass("siebui-ganttInnerTbl");
+                trmnrAxis =$("<tr width='100%'>");
+                while (i<noOfDP) //Rendering Minor Axis
+                {
+                    noOfHrs = (dayInfo[i].DUR)/3600;
+                    mnrAxisWidth =(noOfHrs/24)*100;
+                    trmnrAxis.append(self.createHeadCell(dayInfo[i].NM.substr(0,1),0,mnrAxisWidth+"%",0,0,weekend,2));
+                    i = i+1;
+                }
+                tbl.append(trmnrAxis);
+                tdmnrAxis.append(tbl );
+                tr2.append(tdmnrAxis);
+                count++;
+                start.setDate(start.getDate() + 7);
+            }
+            break;
+        case(MONTH_DOW):
+        case(MONTH_DAY):
+            start = new Date(self.startMillis);
+            var noOfCells;
+            if(timeScaleLIC=== "32")
+            {
+                sm =  start.getTime();
+                noOfCells =5;
+                while (start.getTime() < endMillis && count < noOfCells)
+                {
+                    start.setDate(1);
+                    start.setMonth(start.getMonth() + 1);
+                    if (start.getTime() < endMillis)
+                    {
+                        daysInMonth = Math.ceil((start.getTime() - sm) / (HOURMILLIS * 24*this.renderInfo["noOfHrs"]));
+                        count += daysInMonth;
+                    }
+                    else
+                    {
+                        daysInMonth = noOfCells-count;
+                    }
+                    tr1.append(self.createHeadCell(new Date(sm).format("MMMM"), daysInMonth)); //spans mumber of dayn in the month
+                    sm += (daysInMonth * HOURMILLIS * 24*7);
+                }
+                dispFormat="EEE dd";
+            }
+            else
+            {
+                noOfCells=31;
+                while (start.getTime() < endMillis)
+                {
+                    sm = start.getTime();
+                    start.setDate(1);
+                    start.setMonth(start.getMonth() + 1);
+                    if (start.getTime() < endMillis)
+                    {
+                        daysInMonth = Math.floor((start.getTime() - sm) / (HOURMILLIS * 24*this.renderInfo["noOfHrs"]));
+                        if (daysInMonth === 0)
+                        {
+                            daysInMonth = 1;
+                        }
+                        count += daysInMonth;
+                    }
+                    else
+                    {
+                        daysInMonth = noOfCells-count;
+                    }
+                    tr1.append(self.createHeadCell(new Date(sm).format("MMM"),daysInMonth)); //spans mumber of dayn in the month
+                    
+                }
+                dispFormat="d";
+            }
+            start = new Date(self.startMillis);
+            count =0;
+            while (++count <= noOfCells)
+            {
+                weekend = self.IsWeekend(start);
+                sd = start.format('MM/dd/yyyy');
+                if(timeScaleLIC=== "MONTH_DOW")
+                {
+                    daysplinfo = splDayInfo[sd];
+                    tr2.append(self.createHeadCell(start.format(dispFormat), 1, 0,timescalecls,daysplinfo,weekend,2));
+                }
+                else
+                {
+                    tr2.append(self.createHeadCell(start.format(dispFormat), 1, 0,timescalecls,0,weekend,2));
+                }
+                $(tr2).attr("DateVal", start.format("MM/dd/yyyy"));
+                if(RENDERTHIRDAXIS)
+                {
+                    if(Number(timeScaleLIC)=== MONTH_DAY)
+                    {
+                        tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 :""),1));
+                    }
+                    else
+                    {
+                        tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
+                    }
+                }
+                start.setDate(start.getDate() + this.renderInfo["noOfHrs"]);
+            }
+            break;
 
-    //this is computed by hand in order to optimize cell size
-    var computedTableWidth;
+        //Rendering Day timescales
+        case (DAY_HOUR):
+        case (DAY_TWOHOUR):
+        case (DAY_FOURHOUR):
+            start = new Date(self.startMillis);
+                while (start.getTime() < endMillis) //Rendering Major Axis
+                {
+                    sm = start.getTime();
+                    sd = start.format('MM/dd/yyyy');
+                    weekend = self.IsWeekend(start);
+                    start.setDate(start.getDate() + 1);
+                    mnrAxisstart = new Date(sm);
+                    if (start.getTime() < endMillis)
+                    {
+                        MjrAxisWidth = (start.getTime() - sm)/(endMillis-self.startMillis)*100;
+                        mnrAxisEnd =start.getTime() ;
+                    }
+                    else
+                    {
+                        MjrAxisWidth = (endMillis - sm)/(endMillis-self.startMillis)*100;
+                        mnrAxisEnd =endMillis;
+                    }
+                    daysplinfo = splDayInfo[sd];
+                    tr1.append(self.createHeadCell(new Date(sm).format("EEEE, MMMM d"), 0,MjrAxisWidth+"%",timescalecls,daysplinfo,weekend,1)); //spans mumber of dayn in the month
+                    $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
+                    if(RENDERTHIRDAXIS)
+                    {
+                        tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
+                    }
+                    mnrAxisWidth = this.renderInfo["noOfHrs"]*HOURMILLIS*100/(endMillis-self.startMillis);
+                    mnrAxisWidth = mnrAxisWidth/MjrAxisWidth*100;
+                    tdmnrAxis=$("<td width='100%'>");
+                    tbl =$("<table width='100%' height='100%' cellspacing='0' cellpadding='0'>").addClass("siebui-ganttInnerTbl");
+                    trmnrAxis =$("<tr width='100%'>");
+                    while (mnrAxisstart.getTime() < mnrAxisEnd) //Rendering Minor Axis
+                    {
+                        hour =mnrAxisstart.getHours();
+                        minutes=mnrAxisstart.getMinutes();
+                        stTime =hour*MINUTES_INHOUR+minutes;
+                        endDate=mnrAxisEnd-mnrAxisstart.getTime();
+                        if(stTime%(this.renderInfo["noOfHrs"]*MINUTES_INHOUR)!==0 || endDate< (this.renderInfo["noOfHrs"]*HOURMILLIS))
+                        {
+                            if(stTime%(this.renderInfo["noOfHrs"]*MINUTES_INHOUR)!==0)
+                            {
+                                duration=(this.renderInfo["noOfHrs"]*MINUTES_INHOUR)-(stTime%(this.renderInfo["noOfHrs"]*MINUTES_INHOUR));
+                            }
+                            else
+                            {
+                                duration=endDate/60000;
+                            }
+                            wdth=(duration/(this.renderInfo["noOfHrs"]*MINUTES_INHOUR)*mnrAxisWidth);
+                            trmnrAxis.append(self.createHeadCell(mnrAxisstart.format("h a"), 0, wdth+"%",0,0,weekend,2));
+                            mnrAxisstart.setTime(mnrAxisstart.getTime() +(duration*MINUTES_INHOUR*1000));
+                        }
+                        else
+                        {
+                            trmnrAxis.append((self.createHeadCell(mnrAxisstart.format("h a"), 0, mnrAxisWidth+"%",0,0,weekend,2)));
+                            mnrAxisstart.setHours(mnrAxisstart.getHours() +this.renderInfo["noOfHrs"]);
+                        }
+                    }
+                    tbl.append(trmnrAxis);
+                    tdmnrAxis.append(tbl );
+                    tr2.append(tdmnrAxis);
+                }
+                break;
+           case (DAY_DAYPART):
+                start = new Date(self.startMillis);
+                if(!dayInfo)
+                {
+                    break;
+                }
+                noOfDP = dayInfo.length;
+                while (start.getTime() < endMillis) //Rendering Major Axis
+                {
+                    sm = start.getTime();
+                    sd = start.format('MM/dd/yyyy');
+                    mnrAxisstart = new Date(sm);
+                    weekend = self.IsWeekend(start);
+                    start.setDate(start.getDate() + 1);
+                    mnrAxisEnd =start.getTime();
+                    MjrAxisWidth = (start.getTime() - sm)/(endMillis-self.startMillis)*100;
+                    daysplinfo = splDayInfo[sd];
+                    tr1.append(self.createHeadCell(new Date(sm).format("EEEE, MMMM d"), 0,MjrAxisWidth+"%",timescalecls,daysplinfo,weekend,1));
+                    $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
+                    if(RENDERTHIRDAXIS)
+                    {
+                       tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""),0,MjrAxisWidth+"%"));
+                    }
+                    k=0;
+                    tdmnrAxis=$("<td width='100%'>");
+                    tbl =$("<table width='100%' height='100%' cellspacing='0' cellpadding='0'>").addClass("siebui-ganttInnerTbl");
+                    trmnrAxis =$("<tr width='100%'>");
+                    while (mnrAxisstart.getTime() < mnrAxisEnd) //Rendering Minor Axis
+                    {
+                        noOfHrs = (dayInfo[k].DUR)/3600;
+                        mnrAxisWidth = dayInfo[k].DUR/(endMillis-self.startMillis)*100*1000;
+                        trmnrAxis.append(self.createHeadCell(dayInfo[k].NM, 0, mnrAxisWidth+"%",0,0,weekend,2));
+                        k = (k+1)%noOfDP;
+                        mnrAxisstart.setHours(mnrAxisstart.getHours() +noOfHrs);
+                    }
+                    tbl.append(trmnrAxis);
+                    tdmnrAxis.append(tbl );
+                    tr2.append(tdmnrAxis);
+                }
+            break;
 
-    // year
-    if (zoom == "y") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 180)) * 100); //180gg = 1 sem = 100px
-      iterate(function(date) {
-        tr1.append(createHeadCell(date.format("yyyy"), 2));
-        date.setFullYear(date.getFullYear() + 1);
-      }, function(date) {
-        var sem = (Math.floor(date.getMonth() / 6) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_SEMESTER_SHORT"] + sem, 1));
-        trBody.append(createBodyCell(1, sem == 2));
-        date.setMonth(date.getMonth() + 6);
-      });
+        //Rendering Week/Day/Day Part timescale
+        case(WEEK_DAY_DAYPART):
+            start = new Date(self.startMillis);
+            if(!dayInfo)
+            {
+                break;
+            }
+            noOfDP = dayInfo.length;
+            
+            while (start.getTime()<endMillis) //Rendering Major Axis
+            {
+                sm = start.getTime();
+                sd = start.format('MM/dd/yyyy');
+                weekend = self.IsWeekend(start);
+                start.setDate(start.getDate() + 1);
+                MjrAxisWidth = (start.getTime()-sm)/(endMillis-self.startMillis)*100;
+                daysplinfo = splDayInfo[sd];
+                tr1.append(self.createHeadCell(new Date(sm).format("EEE, MMM d"), 1,0,timescalecls,daysplinfo,weekend,1));
+                $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
+                if(RENDERTHIRDAXIS)
+                {
+                    tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""),1,0));
+                }
+                i=0;
+                //tdmnrAxis=$("<td width='100%'>");
+                tdmnrAxis=$("<td '>").attr("colSpan",1);
+                tbl =$("<table width='100%' height='100%' cellspacing='0' cellpadding='0'>").addClass("siebui-ganttInnerTbl");
+                trmnrAxis =$("<tr width='100%'>");
+                while (i<noOfDP) //Rendering Minor Axis
+                {
+                    noOfHrs = (dayInfo[i].DUR)/3600;
+                    mnrAxisWidth =noOfHrs/24*100;
+                    trmnrAxis.append(self.createHeadCell(dayInfo[i].NM.substr(0,1),0,mnrAxisWidth+"%",0,0,weekend,2));
+                    i = (i+1);
+                }
+                tbl.append(trmnrAxis);
+                tdmnrAxis.append(tbl );
+                tr2.append(tdmnrAxis);
+            }
+            break;
 
-      //semester
-    } else if (zoom == "s") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 90)) * 100); //90gg = 1 quarter = 100px
-      iterate(function(date) {
-        var end = new Date(date.getTime());
-        end.setMonth(end.getMonth() + 6);
-        end.setDate(end.getDate() - 1);
-        tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 2));
-        date.setMonth(date.getMonth() + 6);
-      }, function(date) {
-        var quarter = ( Math.floor(date.getMonth() / 3) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_QUARTER_SHORT"] + quarter, 1));
-        trBody.append(createBodyCell(1, quarter % 2 == 0));
-        date.setMonth(date.getMonth() + 3);
-      });
-
-      //quarter
-    } else if (zoom == "q") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 30)) * 300); //1 month= 300px
-      iterate(function(date) {
-        var end = new Date(date.getTime());
-        end.setMonth(end.getMonth() + 3);
-        end.setDate(end.getDate() - 1);
-        tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 3));
-        date.setMonth(date.getMonth() + 3);
-      }, function(date) {
-        var lbl = date.format("MMM");
-        tr2.append(createHeadCell(lbl, 1));
-        trBody.append(createBodyCell(1, date.getMonth() % 3 == 2));
-        date.setMonth(date.getMonth() + 1);
-      });
-
-      //month
-    } else if (zoom == "m") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 1)) * 20); //1 day= 20px
-      iterate(function(date) {
-        var sm = date.getTime();
-        date.setMonth(date.getMonth() + 1);
-        var daysInMonth = parseInt((date.getTime() - sm) / (3600000 * 24));
-        tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
-      }, function(date) {
-        tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null));
-        var nd = new Date(date.getTime());
-        nd.setDate(date.getDate() + 1);
-        trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
-        date.setDate(date.getDate() + 1);
-      });
-
-      //week
-    } else if (zoom == "w") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 30); //1 day= 30px
-      iterate(function(date) {
-        var end = new Date(date.getTime());
-        end.setDate(end.getDate() + 6);
-        tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
-        date.setDate(date.getDate() + 7);
-      }, function(date) {
-        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null));
-        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
-        date.setDate(date.getDate() + 1);
-      });
-
-      //days
-    } else if (zoom == "d") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
-      iterate(function(date) {
-        tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
-        date.setDate(date.getDate() + 1);
-      }, function(date) {
-        tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null));
-        trBody.append(createBodyCell(1, date.getHours() > 17, isHoliday(date) ? "holy" : null));
-        date.setHours(date.getHours() + 6);
-      });
-
-    } else {
-      console.error("Wrong level " + zoom);
+        case(WEEK_DAY):
+            start = new Date(self.startMillis);
+            epd   = new Date(endMillis);
+            
+            while (start.getTime() <= endMillis)
+            {
+                end = new Date(start.getTime());
+                end.setDate(end.getDate() + 7);
+                end.setDate(end.getDate() -1);
+                tr1.append(self.createHeadCell(start.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
+                start.setDate(start.getDate() + 7);
+            }
+            start = new Date(self.startMillis);
+            noOfDays = (endMillis -start.getTime())/(24*HOURMILLIS);
+            mnrAxisWidth = 1/noOfDays*100;
+            while (start.getTime() < endMillis)
+            {
+                weekend = self.IsWeekend(start);
+                sd = start.format('MM/dd/yyyy');
+                daysplinfo = splDayInfo[sd];
+                tr2.append(self.createHeadCell(start.format("d EEEE"), 1,0,timescalecls,daysplinfo,weekend,2));
+                $(tr2).attr("DateVal", start.format("MM/dd/yyyy"));
+                if(RENDERTHIRDAXIS)
+                {
+                    tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
+                }
+                start.setDate(start.getDate() + 1);
+            }
+            break;
+       
     }
-
-    //set a minimal width
-    computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
-
-    var table = $("<table cellspacing=0 cellpadding=0>");
-    table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width:computedTableWidth});
-    table.height(self.master.editor.element.height());
+    var table =$("<table width='100%' height='100%' cellspacing='0' cellpadding='0'>");
+    if(RENDERTHIRDAXIS)
+    {
+        tr1.attr('height','33%');
+        tr2.attr('height','33%');
+        tr3.attr('height','33%');
+        table.append(tr1).append(tr2).append(tr3).addClass("siebui-ganttTable").css({width:self.minGanttSize});
+    }
+    else
+    {
+        tr1.attr('height','50%');
+        tr2.attr('height','50%');
+        table.append(tr1).append(tr2).addClass("siebui-ganttTable").css({width:self.minGanttSize});
+    }
 
     var box = $("<div>");
-    box.addClass("gantt unselectable").attr("unselectable","true").css({position:"relative",width:computedTableWidth});
+    box.css({width:self.minGanttSize});
+    box.css({height:'100%'});
     box.append(table);
 
     //highlightBar
-    var hlb = $("<div>").addClass("ganttHighLight");
+    /*var hlb = $("<div>").addClass("ganttHighLight");
     box.append(hlb);
     self.highlightBar = hlb;
 
     //create link container
     var links = $("<div>");
-    links.addClass("ganttLinks").css({position:"absolute",top:0,width:computedTableWidth,height:"100%"});
-    box.append(links);
+    //links.addClass("ganttLinks").css({position:"absolute",top:0,width:computedTableWidth,height:"100%"});
+    box.append(links);*/
 
 
     //compute scalefactor fx
-    self.fx = computedTableWidth / (endPeriod - startPeriod);
+    self.fx = self.minGanttSize/(endMillis- self.startMillis);
+    if(this.renderInfo["DDrag"])
+    {
+       self.DDrag = this.renderInfo["DDrag"];
+    }
+    else
+    {
+      self.DDrag ="N";
+    }
+    if(this.renderInfo["DRSZ"])
+    {
+       self.DRSZ = this.renderInfo["DRSZ"];
+    }
+    else
+    {
+       self.DRSZ = self.DDrag;
+    }
+    return box;
+};
+Ganttalendar.prototype.AxisWeekend =function () {
+   var timeScaleLIC  = ';'+this.renderInfo["TST"]+':';
+   var weekendAxisColors = ';'+this.renderInfo["Weekend Axis Color TS"]+';';
+   var Axis;
+   var index;
+   if((index = weekendAxisColors.indexOf(timeScaleLIC)) != -1)
+   {
+      Axis =weekendAxisColors.substring(index+timeScaleLIC.length,weekendAxisColors.indexOf(';',index+timeScaleLIC.length));
+      if(Axis.indexOf("1")!== -1)
+      {
+         this.AxisColor[1] =1;
+      }
+      if(Axis.indexOf("2")!== -1)
+      {
+         this.AxisColor[2] =1;
+      }
+   }
+   else
+   {
+      this.AxisColor[0]=0;
+   }
 
-    // drawTodayLine
-    if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
-      var x = Math.round(((new Date().getTime()) - self.startMillis) * self.fx);
-      var today = $("<div>").addClass("ganttToday").css("left", x);
-      box.append(today);
+};
+//TimeScale Implementation
+Ganttalendar.prototype.createHeadCell =function (lbl, span, width, additionalClass,daysplinfo,weekend,AxisNo) {
+    //modified for timescale drilldown
+    var th = $("<th>");
+    var div1 = $("<div>");
+    var colorInfo       = this.renderInfo["TS COLOR"];
+    var iconInfo        = this.renderInfo["ICON_INFO"];
+    var color;
+    if (additionalClass)
+    {
+        div1.append(jQuery('<a class=' + additionalClass + '>').text(lbl));
+    }
+    else
+    {
+        div1.html(lbl);
+    }
+    //To Display Icons
+    if (daysplinfo)
+    {
+        var imgfolder = "../images/";
+        for ( var key in daysplinfo)
+        {
+            if(daysplinfo.hasOwnProperty(key))
+            {
+                if (iconInfo && iconInfo[key])
+                {
+                    var cssclass = iconInfo[key];
+                    var image = $("<img>");
+                        image.attr('src', imgfolder+'spacer.gif');
+                        image.addClass(cssclass);
+                    div1.append(image);
+                }
+                if (colorInfo && colorInfo[key])
+                {
+                color = colorInfo[key];
+                if(color)
+                {
+                    th.css({'background-color':color});
+                }
+                }
+            }
+        }
+    }
+    th.append(div1);
+    if(weekend && (!this.AxisColor[0] ||this.AxisColor[AxisNo]))
+    {
+        color = colorInfo["Weekends"];
+        if(color)
+        {
+            th.addClass('siebui-Weekends').css("background-color",color);
+        }
+    }
+    if (span !==0)
+    {
+        th.attr("colSpan", span);
+    }
+    else if(width && width !==0)
+    {
+        th.attr("width", width);
     }
 
-    return box;
-  }
-
-  //if include today synch extremes
-  if (this.includeToday){
-    var today=new Date().getTime();
-    originalStartmillis=originalStartmillis>today ? today:originalStartmillis;
-    originalEndMillis=originalEndMillis<today ? today:originalEndMillis;
-  }
-
-
-  //get best dimension fo gantt
-  var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
-
-  //console.debug(new Date(period.start) + "   " + new Date(period.end));
-  self.startMillis = period.start; //real dimension of gantt
-  self.endMillis = period.end;
-  self.originalStartMillis = originalStartmillis; //minimal dimension required by user or by task duration
-  self.originalEndMillis = originalEndMillis;
-
-  var table = createGantt(zoom, period.start, period.end);
-
-  return table;
+    return th;
+};
+Ganttalendar.prototype.IsWeekend = function (start) {
+    if(start instanceof Date)
+    {
+        var day = start.getDay();
+        if(day=== 0)
+        {
+            day=7;
+        }
+        day =','+day+',';
+        return ((this.renderInfo["Weekends"]).indexOf(day) !== -1);
+    }
 };
 
+Ganttalendar.prototype.createBodyCell = function (span, isEnd, additionalClass) {
+    var ret = $("<td>").html("&nbsp;").attr("colSpan", span).addClass("ganttBodyCell");
+    if (isEnd)
+    {
+        ret.addClass("end");
+    }
+    if (additionalClass)
+    {
+        ret.addClass(additionalClass);
+    }
+    return ret;
+};
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
-Ganttalendar.prototype.drawTask = function (task) {
-  //console.debug("drawTask", task.name,new Date(task.start));
-  var self = this;
-  //var prof = new Profiler("ganttDrawTask");
-  //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
-  editorRow = task.rowElement;
-  var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
-  var x = Math.round((task.start - self.startMillis) * self.fx);
-  var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+Ganttalendar.prototype.drawTask = function (Events,row) {
+    var self = this;
+    var eventcls =  "siebui-ganttdrilldown";
+    var editorRow = self.master.utility.find("[id=" + row + "]");
+    var rowindex = ($(editorRow).closest('tr')).index();
+    var top = rowindex * $(editorRow).closest('tr').height();
+    var imgfolder = "../images/";
+    var iconInfo = this.renderInfo["ICON_INFO"];
 
+    if(Events)
+    {
+        var task;
+        var taskId;
+        var pTask = "";
+        var counter = 0;
+        var height = $(".siebui-taskEditRow").height();
 
+        for(var nC= 0 ;nC < Events.length; nC++ )
+        {
+            var calculatedtop;
+            var y;
+            var eheight;
+            var borderwidth = parseInt($(".siebui-layout").css("border-width"),10);
+            task = self.master.getEvent(row,Events[nC]);
+            task["CLS"] = eventcls;
+            var start = new Date(task.ST);
+            var end = new Date(task.ET);
+            //resetting the counter for the next set of overlapping record of the same resource.
+            if (task.OLPCNT && pTask !== "" && pTask.loco)
+            {
+                counter = 0;
+            }
+            //resetting the counter for the next set of overlapping record of the same resource.
+            
+            if(task.OLPCNT)
+            {
+                counter++;
+                y = (height/task.OLPCNT);
 
-  //save row element on task
-  task.ganttElement = taskBox;
+                if (counter == 1)
+                {
+                    calculatedtop = top;
+                }
+                else if (task.OTE)
+                {
+                }
+                else
+                {
+                    calculatedtop = calculatedtop + y;
+                }
+                if (borderwidth > 0)
+                {
+                    eheight = y - task.OLPCNT/(2 * borderwidth);
+                }
+            }
+            else
+            {
+                counter = 0;
+                calculatedtop = top;
+                eheight = height;
+            }
 
-  //if I'm parent
-  if (task.isParent())
-    taskBox.addClass("hasChild");
+            var x = Math.round((start - self.startMillis) * self.fx);
+            var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
+            var drg = ((self.DDrag != "Y") && (task["DRG"]==='Y'));
+            var rsz = ((self.DRSZ != "Y") && (task["RSZ"] ? task["RSZ"] === "Y"  : task["DRG"]==="Y"));
+            if(drg)
+            {
+               taskBox.addClass("siebui-taskBox Dragpble");
+            }
+            if(rsz)
+            {
+               taskBox.addClass("siebui-taskBox Rsizable");
+            }
+            if(!drg && !rsz)
+            {
+               taskBox.addClass("siebui-taskBox");
+            }
+            if (task["Icon"])
+            {
+                var iarray = task["Icon"].split(',');
+                for (var nicon= 0 ;nicon < iarray.length; nicon++)
+                {
+                    var span = $("<span>");
+                    if (iconInfo && iconInfo[iarray[nicon]])
+                    {
+                        var cssclass = iconInfo[iarray[nicon]];
+                        var image = $("<img>");
+                            image.attr('src', imgfolder+'spacer.gif');
+                            image.addClass(cssclass);
+                            span.append(image);
+                            taskBox.children(0).append(span);
+                    }
+                }
+            }
+            //save row element on task
 
-
-  taskBox.css({top:top,left:x,width:Math.round((task.end - task.start) * self.fx)});
-
-  if (this.master.canWrite) {
-    taskBox.resizable({
-      handles: 'e' + ( task.depends ? "" : ",w"), //if depends cannot move start
-      //helper: "ui-resizable-helper",
-      //grid:[oneDaySize,oneDaySize],
-
-      resize:function(event, ui) {
-        //console.debug(ui)
-        $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-      },
-      stop:function(event, ui) {
-        //console.debug(ui)
-        var task = self.master.getTask(ui.element.attr("taskId"));
-        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
-
-        self.master.beginTransaction();
-        self.master.changeTaskDates(task, new Date(s), new Date(e));
-        self.master.endTransaction();
-      }
-
-    });
-
-  }
-
-  taskBox.dblclick(function() {
-    self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
-
-  }).mousedown(function() {
-    var task = self.master.getTask($(this).attr("taskId"));
-    task.rowElement.click();
-  });
-
-  //panning only in no depends
-  if (!task.depends && this.master.canWrite) {
-
-    taskBox.css("position", "absolute").draggable({
-      axis:'x',
-      drag:function (event, ui) {
-        $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
-      },
-      stop:function(event, ui) {
-        //console.debug(ui,$(this))
-        var task = self.master.getTask($(this).attr("taskId"));
-        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-
-        self.master.beginTransaction();
-        self.master.moveTask(task, new Date(s));
-        self.master.endTransaction();
-      }/*,
-      start:function(event, ui) {
-        var task = self.master.getTask($(this).attr("taskId"));
-        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        console.debug("start",new Date(s));
-      }*/
-    });
-  }
-
-
-  var taskBoxSeparator=$("<div class='ganttLines'></div>");
-  taskBoxSeparator.css({top:top+taskBoxSeparator.height()});
-//  taskBoxSeparator.css({top:top+18});
-
-
-  self.element.append(taskBox);
-  self.element.append(taskBoxSeparator);
-
-  //ask for redraw link
-  self.redrawLinks();
-
-  //prof.stop();
+            taskBox.css({top:calculatedtop, height:eheight,left:x,width:Math.round((end - start) * self.fx)});
+            var Val = self.master.utility.find("[id=" + row + "]").find("td");
+            Val.append(taskBox);
+            pTask = task;
+        }
+    }
 };
 
 
 Ganttalendar.prototype.addTask = function (task) {
-  //set new boundaries for gantt
-  this.originalEndMillis = this.originalEndMillis > task.end ? this.originalEndMillis : task.end;
-  this.originalStartMillis = this.originalStartMillis < task.start ? this.originalStartMillis : task.start;
 };
 
 
 //<%-------------------------------------- GANT DRAW LINK ELEMENT --------------------------------------%>
 //'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLink = function (from, to, type) {
-  var peduncolusSize = 10;
-  var lineSize = 2;
-
-  /**
-   * A representation of a Horizontal line
-   */
-  HLine = function(width, top, left) {
-    var hl = $("<div>").addClass("taskDepLine");
-    hl.css({
-      height: lineSize,
-      left: left,
-      width: width,
-      top: top - lineSize / 2
-    });
-    return hl;
-  };
-
-  /**
-   * A representation of a Vertical line
-   */
-  VLine = function(height, top, left) {
-    var vl = $("<div>").addClass("taskDepLine");
-    vl.css({
-      height: height,
-      left:left - lineSize / 2,
-      width: lineSize,
-      top: top
-    });
-    return vl;
-  };
-
-  /**
-   * Given an item, extract its rendered position
-   * width and height into a structure.
-   */
-  function buildRect(item) {
-    var rect = item.ganttElement.position();
-    rect.width = item.ganttElement.width();
-    rect.height = item.ganttElement.height();
-
-    return rect;
-  }
-
-  /**
-   * The default rendering method, which paints a start to end dependency.
-   *
-   * @see buildRect
-   */
-  function drawStartToEnd(rectFrom, rectTo, peduncolusSize) {
-    var left, top;
-
-    var ndo = $("<div>").attr({
-      from: from.id,
-      to: to.id
-    });
-
-    var currentX = rectFrom.left + rectFrom.width;
-    var currentY = rectFrom.height / 2 + rectFrom.top;
-
-    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
-
-    if (!useThreeLine) {
-      // L1
-      if (peduncolusSize > 0) {
-        var l1 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l1);
-      }
-
-      // L2
-      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
-      var l2;
-      if (l2_4size < 0) {
-        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l2 = new VLine(l2_4size, currentY, currentX);
-      }
-      currentY = currentY + l2_4size;
-
-      ndo.append(l2);
-
-      // L3
-      var l3size = rectFrom.left + rectFrom.width + peduncolusSize - (rectTo.left - peduncolusSize);
-      currentX = currentX - l3size;
-      var l3 = new HLine(l3size, currentY, currentX);
-      ndo.append(l3);
-
-      // L4
-      var l4;
-      if (l2_4size < 0) {
-        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l4 = new VLine(l2_4size, currentY, currentX);
-      }
-      ndo.append(l4);
-
-      currentY = currentY + l2_4size;
-
-      // L5
-      if (peduncolusSize > 0) {
-        var l5 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l5);
-
-      }
-    } else {
-      //L1
-      var l1_3Size = (rectTo.left - currentX) / 2;
-      var l1 = new HLine(l1_3Size, currentY, currentX);
-      currentX = currentX + l1_3Size;
-      ndo.append(l1);
-
-      //L2
-      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
-      var l2;
-      if (l2Size < 0) {
-        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
-      } else {
-        l2 = new VLine(l2Size, currentY, currentX);
-      }
-      ndo.append(l2);
-
-      currentY = currentY + l2Size;
-
-      //L3
-      var l3 = new HLine(l1_3Size, currentY, currentX);
-      currentX = currentX + l1_3Size;
-      ndo.append(l3);
-    }
-
-    //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
-      top: rectTo.top + rectTo.height / 2 - 5,
-      left: rectTo.left - 5
-    });
-
-    ndo.append(arr);
-
-    return ndo;
-  }
-
-  /**
-   * A rendering method which paints a start to start dependency.
-   *
-   * @see buildRect
-   */
-  function drawStartToStart(rectFrom, rectTo, peduncolusSize) {
-    var left, top;
-
-    var ndo = $("<div>").attr({
-      from: from.id,
-      to: to.id
-    });
-
-    var currentX = rectFrom.left;
-    var currentY = rectFrom.height / 2 + rectFrom.top;
-
-    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
-
-    if (!useThreeLine) {
-      // L1
-      if (peduncolusSize > 0) {
-        var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
-        currentX = currentX - peduncolusSize;
-        ndo.append(l1);
-      }
-
-      // L2
-      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
-      var l2;
-      if (l2_4size < 0) {
-        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l2 = new VLine(l2_4size, currentY, currentX);
-      }
-      currentY = currentY + l2_4size;
-
-      ndo.append(l2);
-
-      // L3
-      var l3size = (rectFrom.left - peduncolusSize) - (rectTo.left - peduncolusSize);
-      currentX = currentX - l3size;
-      var l3 = new HLine(l3size, currentY, currentX);
-      ndo.append(l3);
-
-      // L4
-      var l4;
-      if (l2_4size < 0) {
-        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l4 = new VLine(l2_4size, currentY, currentX);
-      }
-      ndo.append(l4);
-
-      currentY = currentY + l2_4size;
-
-      // L5
-      if (peduncolusSize > 0) {
-        var l5 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l5);
-      }
-    } else {
-      //L1
-      
-      var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
-      currentX = currentX - peduncolusSize;
-      ndo.append(l1);
-
-      //L2
-      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
-      var l2;
-      if (l2Size < 0) {
-        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
-      } else {
-        l2 = new VLine(l2Size, currentY, currentX);
-      }
-      ndo.append(l2);
-
-      currentY = currentY + l2Size;
-
-      //L3
-
-      var l3 = new HLine(peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
-      currentX = currentX + peduncolusSize + (rectTo.left - rectFrom.left);
-      ndo.append(l3);
-    }
-
-    //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
-      top: rectTo.top + rectTo.height / 2 - 5,
-      left: rectTo.left - 5
-    });
-
-    ndo.append(arr);
-
-    return ndo;
-  }
-
-  var rectFrom = buildRect(from);
-  var rectTo = buildRect(to);
-
-  // Dispatch to the correct renderer
-  if (type == 'start-to-start') {
-    this.element.find(".ganttLinks").append(
-      drawStartToStart(rectFrom, rectTo, peduncolusSize)
-    );
-  } else {
-    this.element.find(".ganttLinks").append(
-      drawStartToEnd(rectFrom, rectTo, peduncolusSize)
-    );
-  }
-};
-
-
-Ganttalendar.prototype.redrawLinks = function() {
-  //console.debug("redrawLinks ");
-  var self = this;
-  this.element.stopTime("ganttlnksredr");
-  this.element.oneTime(60, "ganttlnksredr", function() {
-    //var prof=new Profiler("gd_drawLink_real");
-    self.element.find(".ganttLinks").empty();
-    for (var i=0;i<self.master.links.length;i++) {
-      var link = self.master.links[i];
-      self.drawLink(link.from, link.to);
-    }
-    //prof.stop();
-  });
-};
-
 
 Ganttalendar.prototype.reset = function() {
-  this.element.find(".ganttLinks").empty();
-  this.element.find("[taskId]").remove();
+    this.element.find("[taskId]").remove();
 };
 
-
 Ganttalendar.prototype.redrawTasks = function() {
-  for (var i=0;i<this.master.tasks.length;i++) {
-    var task = this.master.tasks[i];
-    this.drawTask(task);
-  }
+    for (var i=0;i<this.master.tasks.length;i++)
+    {
+        var taskrow  = this.master.tasks[i];
+        // Sorting Event based on Display order.
+
+        var taskEvents = this.master.gettaskSeqEvents(taskrow);
+        // Sorting Event based on Display order.
+        this.drawTask(taskEvents,taskrow);
+    }
 };
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  //console.debug("refreshGantt")
-  var par = this.element.parent();
+    var par = this.element.parent();
 
-  //try to maintain last scroll
-  var scrollY=par.scrollTop();
-  var scrollX=par.scrollLeft();
+    //try to maintain last scroll
+    var scrollY=par.scrollTop();
+    var scrollX=par.scrollLeft();
 
-  this.element.remove();
-  //guess the zoom level in base of period
-  if (!this.zoom ){
-    var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
-    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : (days < 400 ? 4 : 5 ) ) ) )];
-  }
-  var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
-  this.element = domEl;
-  par.append(domEl);
-  this.redrawTasks();
+    this.element.remove();
+    var domEl = this.createGantt();
+    this.element = domEl;
+    par.append(domEl);
 
-  //set old scroll  
-  //console.debug("old scroll:",scrollX,scrollY)
-  par.scrollTop(scrollY);
-  par.scrollLeft(scrollX);
+    this.redrawTasks();
 
-  //set current task
-  if (this.master.currentTask) {
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
-  }
+    //set current task
+    if (this.master.currentTask)
+    {
+        this.highlightBar.css("top", this.master.currentTask.rowElement.position().top);
+    }
 };
-
-
-Ganttalendar.prototype.fitGantt = function() {
-  delete this.zoom;
-  this.refreshGantt();
-};
-
-Ganttalendar.prototype.centerOnToday = function() {
-  //console.debug("centerOnToday");
-  var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
-  this.element.parent().scrollLeft(x);
-};
-
-
-
