@@ -31,6 +31,8 @@ function GanttMaster(){
     this.element = "";
     this.resInfo="";
     this.utility = "";
+    this.pageClass = "";
+    this.rgrid = "";
 
 
     this.resources = ""; //list of resources
@@ -66,18 +68,22 @@ GanttMaster.prototype.init = function(place, resInfo, renderInfo) {
     this.editor.element.width(place.width() * 0.4 - 10);
     place.append(this.editor.element);
 
-    var table = $("<table cellspacing=0 cellpadding=0>");
+    var table = $("<div id='UGrid'>");
     var calcwidth = (place.width()* 0.6)+(2*$("#siebui-gdfColHeader").width());
-    table.addClass("siebui-ganttTable").css({width:calcwidth});
+    table.addClass("siebui-ganttTable").css({ width: calcwidth });
+
+    this.rgrid = $("<div id='RGrid'>");
+    this.rgrid.width(place.width() * 0.4);
+    this.rgrid.addClass("siebui-gdfTable");
 
     this.gantt = new Ganttalendar(this, calcwidth, renderInfo);
     this.utility = table;
     //setup splitter
-    var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, this.utility,40);
+    var splitter = $.splittify.init(place, this.editor.element, this.rgrid, this.gantt.element, this.utility, 40);
     //splitter.secondBox.css("overflow-y", "auto").scroll(function() {//SAMPREDD
-    splitter.thirdBox.scroll(function() {
-        splitter.firstBox.scrollTop(splitter.thirdBox.scrollTop());
-    });
+//    splitter.thirdBox.scroll(function() {
+//        splitter.firstBox.scrollTop(splitter.thirdBox.scrollTop());
+//    });
 
 
     //prepend buttons
@@ -330,50 +336,14 @@ GanttMaster.prototype.addTask = function(task, row) {
  */
 GanttMaster.prototype.loadProject = function (project) {
     //this.beginTransaction(); Ravi Commented
-    this.resources = project.resources;
-    this.roles = project.roles;
-    this.canWrite = project.canWrite;
-    this.canWriteOnParent = project.canWriteOnParent;
-
-    if (project.minEditableDate)
-    {
-        this.minEditableDate = computeStart(project.minEditableDate);
-    }
-    else
-    {
-        this.minEditableDate =-Infinity;
-    }
-
-    if (project.maxEditableDate)
-    {
-        this.maxEditableDate =computeEnd(project.maxEditableDate);
-    }
-    else
-    {
-        this.maxEditableDate =Infinity;
-    }
-
-    this.loadTasks(project.tasks, project.selectedRow);
-    this.deletedTaskIds=[];
-    this.gantt.redrawTasks();
-    this.editor.fillEmptyLines();
+    this.pageClass = project.pageclass;
+    this.loadTasks(project.tasks, project.events, project.selectedRow);
     //this.endTransaction(); Ravi Commented
 };
 
-GanttMaster.prototype.loadTasks = function(ganttTasks, selectedRow) {
-    //reset
-    this.reset();
-    this.tasks = ganttTasks;
-
-    for (var i=0;i<ganttTasks.length;i++)
-    {
-        var task = ganttTasks[i];
-        this.editor.addTask(task);
-        var taskRow = $.JST.createFromTemplate(this.getResInfo(task), "TASKUTILITYROW");
-        this.utility.append(taskRow);
-    }
-
-    this.editor.fillEmptyLines();
+GanttMaster.prototype.loadTasks = function (ganttTasks, events, selectedRow) {
+    this.editor.addTask(ganttTasks);
+    this.utility.append($(events));
 };
 
 
