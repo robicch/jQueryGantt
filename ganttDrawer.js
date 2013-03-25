@@ -121,12 +121,14 @@ Ganttalendar.prototype.createGantt =function () {
                 daysplinfo = splDayInfo[sd];
                 weekend = self.IsWeekend(start);
                 tr1.append(self.createHeadCell(new Date(sm).format("EEE, MMM d"), 1,0,timescalecls,daysplinfo,weekend,1));
+                $(tr1).attr("DateVal", sd);
                 if(RENDERTHIRDAXIS)
                 {
                     tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
                 }
                 i=0;
-                tdmnrAxis=$("<td width='100%'>");
+                //tdmnrAxis=$("<td width='100%'>");
+                tdmnrAxis=$("<td '>").attr("colSpan",1);
                 tbl =$("<table width='100%' height='100%'>").addClass("siebui-ganttInnerTbl");
                 trmnrAxis =$("<tr width='100%'>");
                 while (i<noOfDP) //Rendering Minor Axis
@@ -191,6 +193,7 @@ Ganttalendar.prototype.createGantt =function () {
                         daysInMonth = noOfCells-count;
                     }
                     tr1.append(self.createHeadCell(new Date(sm).format("MMM"),daysInMonth)); //spans mumber of dayn in the month
+                    
                 }
                 dispFormat="d";
             }
@@ -209,6 +212,7 @@ Ganttalendar.prototype.createGantt =function () {
                 {
                     tr2.append(self.createHeadCell(start.format(dispFormat), 1, 0,timescalecls,0,weekend,2));
                 }
+                $(tr2).attr("DateVal", start.format("MM/dd/yyyy"));
                 if(RENDERTHIRDAXIS)
                 {
                     if(Number(timeScaleLIC)=== MONTH_DAY)
@@ -248,6 +252,7 @@ Ganttalendar.prototype.createGantt =function () {
                     }
                     daysplinfo = splDayInfo[sd];
                     tr1.append(self.createHeadCell(new Date(sm).format("EEEE, MMMM d"), 0,MjrAxisWidth+"%",timescalecls,daysplinfo,weekend,1)); //spans mumber of dayn in the month
+                    $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
                     if(RENDERTHIRDAXIS)
                     {
                         tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
@@ -306,6 +311,7 @@ Ganttalendar.prototype.createGantt =function () {
                     MjrAxisWidth = (start.getTime() - sm)/(endMillis-self.startMillis)*100;
                     daysplinfo = splDayInfo[sd];
                     tr1.append(self.createHeadCell(new Date(sm).format("EEEE, MMMM d"), 0,MjrAxisWidth+"%",timescalecls,daysplinfo,weekend,1));
+                    $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
                     if(RENDERTHIRDAXIS)
                     {
                        tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""),0,MjrAxisWidth+"%"));
@@ -346,12 +352,14 @@ Ganttalendar.prototype.createGantt =function () {
                 MjrAxisWidth = (start.getTime()-sm)/(endMillis-self.startMillis)*100;
                 daysplinfo = splDayInfo[sd];
                 tr1.append(self.createHeadCell(new Date(sm).format("EEE, MMM d"), 1,0,timescalecls,daysplinfo,weekend,1));
+                $(tr1).attr("DateVal", new Date(sm).format("MM/dd/yyyy"));
                 if(RENDERTHIRDAXIS)
                 {
                     tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""),1,0));
                 }
                 i=0;
-                tdmnrAxis=$("<td width='100%'>");
+                //tdmnrAxis=$("<td width='100%'>");
+                tdmnrAxis=$("<td '>").attr("colSpan",1);
                 tbl =$("<table width='100%' height='100%' cellspacing='0' cellpadding='0'>").addClass("siebui-ganttInnerTbl");
                 trmnrAxis =$("<tr width='100%'>");
                 while (i<noOfDP) //Rendering Minor Axis
@@ -388,6 +396,7 @@ Ganttalendar.prototype.createGantt =function () {
                 sd = start.format('MM/dd/yyyy');
                 daysplinfo = splDayInfo[sd];
                 tr2.append(self.createHeadCell(start.format("d EEEE"), 1,0,timescalecls,daysplinfo,weekend,2));
+                $(tr2).attr("DateVal", start.format("MM/dd/yyyy"));
                 if(RENDERTHIRDAXIS)
                 {
                     tr3.append(self.createHeadCell((BOTAXISINFO[sd] ? BOTAXISINFO[sd].FLD1 +"/"+ BOTAXISINFO[sd].FLD2:""), 1,0));
@@ -457,9 +466,13 @@ Ganttalendar.prototype.AxisWeekend =function () {
    {
       Axis =weekendAxisColors.substring(index+timeScaleLIC.length,weekendAxisColors.indexOf(';',index+timeScaleLIC.length));
       if(Axis.indexOf("1")!== -1)
+      {
          this.AxisColor[1] =1;
+      }
       if(Axis.indexOf("2")!== -1)
+      {
          this.AxisColor[2] =1;
+      }
    }
    else
    {
@@ -489,21 +502,24 @@ Ganttalendar.prototype.createHeadCell =function (lbl, span, width, additionalCla
         var imgfolder = "../images/";
         for ( var key in daysplinfo)
         {
-            if (iconInfo && iconInfo[key])
+            if(daysplinfo.hasOwnProperty(key))
             {
-                var cssclass = iconInfo[key];
-                var image = $("<img>");
-                    image.attr('src', imgfolder+'spacer.gif');
-                    image.addClass(cssclass);
-                div1.append(image);
-            }
-            if (colorInfo && colorInfo[key])
-            {
-               color = colorInfo[key];
-               if(color)
-               {
-                  th.css({'background-color':color});
-               }
+                if (iconInfo && iconInfo[key])
+                {
+                    var cssclass = iconInfo[key];
+                    var image = $("<img>");
+                        image.attr('src', imgfolder+'spacer.gif');
+                        image.addClass(cssclass);
+                    div1.append(image);
+                }
+                if (colorInfo && colorInfo[key])
+                {
+                color = colorInfo[key];
+                if(color)
+                {
+                    th.css({'background-color':color});
+                }
+                }
             }
         }
     }
