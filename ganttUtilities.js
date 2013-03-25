@@ -110,24 +110,31 @@ $.gridify = {
 };
 
 $.splittify = {
-    init: function(where, first, second,third,perc) {
+    init: function (where, first, rgrid, second, third, perc) {
 
-        perc=perc || 50;
+        perc = perc || 50;
 
         var splitter = $("<div>").addClass("siebui-splitterContainer");
         var diaryHeight = $(".siebui-ganttControl").height();
-        var diaryWidth = $(".siebui-ganttControl").width();
+        var diaryWidth = $(".siebui-ganttControl").width(),
+            utilityWidth = diaryWidth - headerColumnWidth - 60,
+            headerColumnWidth = $(".siebui-gdfColHeader").width();
 
-        var firstBox = $("<div>").addClass("siebui-splitElement siebui-splitBox1").css({height:diaryHeight});
-        var splitterBar = $("<div>").addClass("siebui-splitElement siebui-vSplitBar");
-        var secondBox = $("<div>").addClass("siebui-splitElement siebui-splitBox2").css({height:diaryHeight});
-        var thirdBox = $("<div>").addClass("siebui-splitElement siebui-splitBox3").css({height:diaryHeight});
+        //var firstBox = $("<div>").addClass("siebui-splitElement siebui-splitBox1").css({ height: diaryHeight - first.height() });
+        var firstBox = $("<div>").addClass("siebui-splitElement siebui-splitBox1 siebui-unselectable").css({ height: diaryHeight });
+        var rgridBox = $("<div>").addClass("siebui-splitElement rgrid siebui-unselectable").css({ height: diaryHeight - first.height() });
+        var splitterBar = $("<div>").addClass("siebui-splitElement siebui-vSplitBar siebui-unselectable");
+        var secondBox = $("<div>").addClass("siebui-splitElement siebui-splitBox2 siebui-unselectable").css({ height: diaryHeight });
+        var thirdBox = $("<div>").addClass("siebui-splitElement siebui-splitBox3 siebui-unselectable").css({ height: diaryHeight });
 
         firstBox.append(first);
+        rgridBox.append(rgrid);
+        firstBox.append(rgridBox);
         secondBox.append(second);
         thirdBox.append(third);
 
         splitter.append(firstBox);
+        // splitter.append(rgridBox);
         splitter.append(splitterBar);
         splitter.append(secondBox);
 
@@ -136,35 +143,35 @@ $.splittify = {
         where.append(splitter);
 
         var w = where.innerWidth();
-        firstBox.width(w *perc/ 100 - splitterBar.width());
+        firstBox.width(w * 0.4 - splitterBar.width());
+
         var headerColumnWidth = $("#siebui-gdfColHeader").width();
         splitterBar.css({ left: headerColumnWidth + 17, height: diaryHeight }); //SAMPREDD :left:headerColumnWidth+14
         //secondBox.width(w -firstBox.width()-splitterBar.width() ).css({left:firstBox.width() + splitterBar.width()});//SAMPREDD
-        secondBox.width(diaryWidth-headerColumnWidth).css({left:headerColumnWidth+ splitterBar.width()+17});
-        thirdBox.width(diaryWidth-headerColumnWidth).css({left:headerColumnWidth+ splitterBar.width()-2, top: "63px",position:"relative"});
-        secondBox.height(63);
-        thirdBox.height(diaryHeight - 63);
+        secondBox.width(diaryWidth - headerColumnWidth - 50).css({ left: headerColumnWidth + splitterBar.width() + 17, height: 63 });
+        thirdBox.width(diaryWidth - headerColumnWidth - 20).css({ left: headerColumnWidth + splitterBar.width() + 17, top: secondBox.height(), height: diaryHeight - secondBox.height(), position: "relative" });
 
-        splitterBar.bind("mousedown.gdf", function(e) {
+        splitterBar.bind("mousedown.gdf", function (e) {
+            $("s_S_A1_div").addClass("siebui-unselectable");
             $.splittify.splitterBar = $(this);
             //bind event for start resizing
             //console.debug("start splitting");
-            $("body").unselectable().bind("mousemove.gdf", function(e) {
-            //manage resizing
-            //console.debug(e.pageX - $.gridify.columInResize.offset().left)
-            var sb = $.splittify.splitterBar;
-            var pos = e.pageX - sb.parent().offset().left;
-            var w = sb.parent().width();
-            if (pos > 10 && pos < w - 20)
-            {
-                sb.css({left:pos});
-                firstBox.width(pos);
-                secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
-                thirdBox.css({left:pos + sb.width()-20,width:w - pos - sb.width()});
-            }
+            $("body").unselectable().bind("mousemove.gdf", function (e) {
+                //manage resizing
+                //console.debug(e.pageX - $.gridify.columInResize.offset().left)
+                $("s_S_A1_div").addClass("siebui-unselectable");
+                var sb = $.splittify.splitterBar;
+                var pos = e.pageX - sb.parent().offset().left;
+                var w = sb.parent().width();
+                if (pos > 10 && pos < w - 20) {
+                    sb.css({ left: pos });
+                    firstBox.width(pos);
+                    secondBox.css({ left: pos + sb.width(), width: w - pos - sb.width() - 4 });
+                    thirdBox.css({ left: pos + sb.width(), width: w - pos - sb.width() - 4 });
+                }
 
-            //bind mouse up on body to stop resizing
-            }).bind("mouseup.gdf", function() {
+                //bind mouse up on body to stop resizing
+            }).bind("mouseup.gdf", function () {
                 //console.debug("stop splitting");
                 $(this).unbind("mousemove.gdf").unbind("mouseup.gdf").clearUnselectable();
                 delete $.splittify.splitterBar;
@@ -172,7 +179,7 @@ $.splittify = {
             });
         });
 
-        return {firstBox:firstBox,secondBox:secondBox,thirdBox:thirdBox,splitterBar:splitterBar};
+        return { firstBox: firstBox, secondBox: secondBox, thirdBox: thirdBox, splitterBar: splitterBar };
     }
 };
 
