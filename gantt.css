@@ -313,6 +313,10 @@
   border:#666 2px solid;
 }
 
+.ganttTaskEditor {
+    padding: 10px
+}
+
 
 .ui-resizable-helper { border: 1px dotted #00F;  }
 .ui-resizable-e, .ui-resizable-w {width: 5px;}

@@ -169,7 +169,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         date.setFullYear(date.getFullYear() + 1);
       }, function(date) {
         var sem = (Math.floor(date.getMonth() / 6) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_SEMESTER_SHORT"] + sem, 1));
+        tr2.append(createHeadCell(GanttMaster.messages["GANTT_SEMESTER_SHORT"] + sem, 1));
         trBody.append(createBodyCell(1, sem == 2));
         date.setMonth(date.getMonth() + 6);
       });
@@ -185,7 +185,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
         date.setMonth(date.getMonth() + 6);
       }, function(date) {
         var quarter = ( Math.floor(date.getMonth() / 3) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANT_QUARTER_SHORT"] + quarter, 1));
+        tr2.append(createHeadCell(GanttMaster.messages["GANTT_QUARTER_SHORT"] + quarter, 1));
         trBody.append(createBodyCell(1, quarter % 2 == 0));
         date.setMonth(date.getMonth() + 3);
       });
@@ -643,7 +643,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 
       //L3
 
-      var l3 = new HLine(peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
+      var l3 = new HLine(currentX + peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
       currentX = currentX + peduncolusSize + (rectTo.left - rectFrom.left);
       ndo.append(l3);
     }
@@ -718,7 +718,7 @@ Ganttalendar.prototype.refreshGantt = function() {
   //guess the zoom level in base of period
   if (!this.zoom ){
     var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
-    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : (days < 400 ? 4 : 5 ) ) ) )];
+    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : 4  ) ) )];
   }
   var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
   this.element = domEl;
@@ -743,8 +743,8 @@ Ganttalendar.prototype.fitGantt = function() {
 };
 
 Ganttalendar.prototype.centerOnToday = function() {
-  //console.debug("centerOnToday");
-  var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx);
+  var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx)-30;
+  //console.debug("centerOnToday "+x);
   this.element.parent().scrollLeft(x);
 };
 

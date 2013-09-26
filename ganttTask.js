@@ -795,6 +795,9 @@ Task.prototype.outdent = function() {
     chds[i].setPeriod(chds[i].start + 1, chds[i].end + 1);
   }
 
+  //recompute depends string
+  this.master.updateDependsStrings();
+
   //enlarge parent using a fake set period
   this.setPeriod(this.start + 1, this.end + 1);
 
