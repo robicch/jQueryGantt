@@ -388,7 +388,6 @@ Ganttalendar.prototype.drawTask = function (task) {
       start:function(event, ui) {
         var task = self.master.getTask($(this).attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        console.debug("start",new Date(s));
       }*/
     });
   }
