@@ -876,7 +876,7 @@ Task.prototype.moveDown = function() {
   }
 
   //is brother
-  if (this.master.tasks[newRow].level == this.level) {
+  if (this.master.tasks[newRow] && this.master.tasks[newRow].level == this.level) {
     ret = true;
     //find last desc
     for (newRow = newRow + 1; newRow < this.master.tasks.length; newRow++) {
