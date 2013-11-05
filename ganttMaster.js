@@ -506,24 +506,66 @@ GanttMaster.prototype.updateLinks = function(task) {
       return true;
     }
     
-    var sups = task.getSuperiors();
-    var loop = false;
-    for (var i=0;i<sups.length;i++) {
-      var supLink = sups[i];
-      if (supLink.from == target) {
-        loop = true;
-        break;
-      } else {
-        if (visited.indexOf(supLink.from) <= 0) {
-          visited.push(supLink.from);
-          if (isLoop(supLink.from, target, visited)) {
-            loop = true;
-            break;
-          }
-        }
-      }
+    var start_graph = {};
+    var end_graph = {};
+    
+    // separately define dependencies for task start and task end dates
+    // parent tasks depend on child tasks end date
+    // child tasks depend on parent task start date
+    for(var i=0;i<ge.tasks.length;i++) {
+    	var thisTask = ge.tasks[i];
+    	if (!start_graph[thisTask.id]){
+    		start_graph[thisTask.id] = [];
+	}
+    	if (!end_graph[thisTask.id]){
+    		end_graph[thisTask.id] = [];
+	}
+    	
+    	var parent = thisTask.getParent();
+    	if (parent && parent.id) {
+    		start_graph[thisTask.id].push(parent.id);
+    	}
+    	
+    	var children = thisTask.getChildren();
+    	for(var j=0;j<children.length;j++){
+    		end_graph[thisTask.id].push(children[j].id);
+    	}
     }
-    return loop;
+    
+    // dependent tasks rely on their links for both start and end dates
+    for(var i=0;i<ge.links.length;i++){
+    	var thisLink = ge.links[i];
+    	start_graph[thisLink.to.id].push(thisLink.from.id);
+    	end_graph[thisLink.to.id].push(thisLink.from.id);
+    }
+    
+    // make sure the current_task and the target_task do not create a loop in the graph provided
+    function check_for_loop(current_task, target_task, graph, checked_tasks) {
+    	if (checked_tasks[current_task]){
+    		return false;
+    	}
+    	if (current_task == target_task){
+    		return true;
+    	}
+    	checked_tasks[current_task] = true;
+    	var children = graph[current_task] || [];
+    	for(var i=0;i<children.length;i++){
+    		if (check_for_loop(children[i], target_task, graph, checked_tasks)){
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    // check the start date graph for a loop
+    if(check_for_loop(task.id, target.id, start_graph, [])){
+    	return true;
+    };
+    // check the end date graph of a loop
+    if(check_for_loop(task.id, target.id, end_graph, [])){
+    	return true;
+    }
+    return false;
   }
 
   //remove my depends
