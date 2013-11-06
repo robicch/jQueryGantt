@@ -502,20 +502,31 @@ GanttMaster.prototype.updateLinks = function(task) {
 
   // defines isLoop function
   function isLoop(task, target, visited) {
+    //var prof= new Profiler("gm_isLoop");
+    //console.debug("isLoop :"+task.name+" - "+target.name);
     if (target == task) {
       return true;
     }
-    
+
     var sups = task.getSuperiors();
+
+    //my parent' superiors are my superiors too
+    var p= task.getParent();
+    while (p){
+      sups=sups.concat(p.getSuperiors());
+      p= p.getParent();
+    }
+
     var loop = false;
+    //check superiors
     for (var i=0;i<sups.length;i++) {
       var supLink = sups[i];
       if (supLink.from == target) {
         loop = true;
         break;
       } else {
-        if (visited.indexOf(supLink.from) <= 0) {
-          visited.push(supLink.from);
+        if (visited.indexOf(supLink.from.id+"x"+target.id) <= 0) {
+          visited.push(supLink.from.id+"x"+target.id);
           if (isLoop(supLink.from, target, visited)) {
             loop = true;
             break;
@@ -523,6 +534,19 @@ GanttMaster.prototype.updateLinks = function(task) {
         }
       }
     }
+
+    //check target parent
+    var tpar=target.getParent();
+    if (tpar ){
+      if (visited.indexOf(task.id+"x"+tpar.id) <= 0) {
+        visited.push(task.id+"x"+tpar.id);
+        if (isLoop(task,tpar, visited)) {
+          loop = true;
+        }
+      }
+    }
+
+    //prof.stop();
     return loop;
   }
 
@@ -540,6 +564,7 @@ GanttMaster.prototype.updateLinks = function(task) {
     var descendants=task.getDescendant();
 
     var deps = task.depends.split(",");
+
     var newDepsString = "";
 
     var visited = [];
