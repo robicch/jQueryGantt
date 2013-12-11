@@ -697,7 +697,7 @@ GanttMaster.prototype.checkpoint= function() {
 //----------------------------- UNDO/REDO MANAGEMENT ---------------------------------%>
 
 GanttMaster.prototype.undo = function() {
-  //console.debug("undo before:",undoStack,redoStack);
+  //console.debug("undo before:",this.__undoStack,this.__redoStack);
   if (this.__undoStack.length > 0) {
     var his = this.__undoStack.pop();
     this.__redoStack.push(JSON.stringify(this.saveGantt()));
@@ -707,7 +707,7 @@ GanttMaster.prototype.undo = function() {
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
     //console.debug(oldTasks,oldTasks.deletedTaskIds)
     this.redraw();
-    //console.debug("undo after:",undoStack,redoStack);
+    //console.debug("undo after:",this.__undoStack,this.__redoStack);
   }
 };
 

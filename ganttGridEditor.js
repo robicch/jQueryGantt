@@ -28,7 +28,7 @@ function GridEditor(master) {
 }
 
 
-GridEditor.prototype.fillEmptyLines = function() {
+GridEditor.prototype.fillEmptyLines = function () {
   var factory = new TaskFactory();
 
   //console.debug("GridEditor.fillEmptyLines");
@@ -39,7 +39,7 @@ GridEditor.prototype.fillEmptyLines = function() {
     var emptyRow = $.JST.createFromTemplate({}, "TASKEMPTYROW");
     //click on empty row create a task and fill above
     var master = this.master;
-    emptyRow.click(function(ev) {
+    emptyRow.click(function (ev) {
       master.beginTransaction();
       var emptyRow = $(this);
       var lastTask;
@@ -51,7 +51,7 @@ GridEditor.prototype.fillEmptyLines = function() {
       }
 
       //fill all empty previouses
-      emptyRow.prevAll(".emptyRow").andSelf().each(function() {
+      emptyRow.prevAll(".emptyRow").andSelf().each(function () {
         var ch = factory.build("tmp_fk" + new Date().getTime(), "", "", level, start, 1);
         var task = master.addTask(ch);
         lastTask = ch;
@@ -59,11 +59,12 @@ GridEditor.prototype.fillEmptyLines = function() {
       master.endTransaction();
       lastTask.rowElement.click();
       lastTask.rowElement.find("[name=name]").focus()//focus to "name" input
-              .blur(function() { //if name not inserted -> undo -> remove just added lines
-        var imp = $(this);
-        if (!imp.isValueChanged())
-          master.undo();
-      });
+        .blur(function () { //if name not inserted -> undo -> remove just added lines
+          var imp = $(this);
+          if (imp.val() == "") {
+            master.undo();
+          }
+        });
     });
     this.element.append(emptyRow);
   }
@@ -234,7 +235,6 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       self.master.beginTransaction();
 
       if (field == "depends") {
-
         var oldDeps = task.depends;
         task.depends = el.val();
         // update links
