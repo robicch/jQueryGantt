@@ -748,6 +748,12 @@ Task.prototype.indent = function() {
       } else
         break;
     }
+
+    var parent = this.getParent();
+    if(parent && this.start < parent.start && parent.depends && !this.depends){
+    	var new_end = computeEndByDuration(parent.start, this.duration);
+    	this.master.changeTaskDates(this, parent.start, new_end);
+    }
     //recompute depends string
     this.master.updateDependsStrings();
     //enlarge parent using a fake set period
