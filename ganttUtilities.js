@@ -95,7 +95,6 @@ $.gridify = {
           cell.empty().append(wrp);
         }
       }).addClass("gdfied");
-      ;
 
     });
   }
