@@ -256,12 +256,20 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
 
     var table = $("<table cellspacing=0 cellpadding=0>");
-    table.append(tr1).append(tr2).append(trBody).addClass("ganttTable").css({width:computedTableWidth});
+    table.append(tr1).append(tr2).css({width:computedTableWidth});
+
+    var head=table.clone().addClass("fixHead");
+
+    table.append(trBody).addClass("ganttTable");
+
+
     table.height(self.master.editor.element.height());
 
     var box = $("<div>");
     box.addClass("gantt unselectable").attr("unselectable","true").css({position:"relative",width:computedTableWidth});
     box.append(table);
+
+    box.append(head);
 
     //highlightBar
     var hlb = $("<div>").addClass("ganttHighLight");

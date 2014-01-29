@@ -51,3 +51,7 @@ BODY, TBODY {
 .ganttLinks,.ganttTable{
   height:auto !important;
 }
+
+.fixHead{
+  display: none !important;
+}

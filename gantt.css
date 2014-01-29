@@ -1,3 +1,4 @@
+/* -------------------------------------- GRIDIFY -----------------------------------*/
 .gdfTable {
   table-layout: fixed;
   border-collapse: separate;
@@ -27,14 +28,6 @@
   border-right: 1px solid #eee;
 }
 
-
-.ganttLines{
-  position:absolute;
-  width:100%;
-  height:1px;
-  border-top:1px solid #eee;
-  z-index:1;
-}
 
 .gdfCellInput {
   border: 0 none;
@@ -66,29 +59,23 @@
   cursor: w-resize;
 }
 
+
+/* -------------------------------------- SPLITTER -----------------------------------*/
 .splitterContainer {
   width: 100%;
   height: 100%;
 }
 
-.splitBox1, .splitBox2 {
+.splitBox1{
   overflow-x: scroll;
   overflow-y: hidden;
-
-  /*background-color: yellow;*/
 }
 
-.splitBox2 {
-  /*background-color: orange;*/
+.splitBox2{
+  overflow-x: scroll;
+  overflow-y: auto;
 }
 
-.unselectable {
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
 
 .splitElement {
   outline-style: none;
@@ -104,31 +91,13 @@
   color: white;
 }
 
-.end{
-  border-right:1px dotted #666
+.fixHead{
+  position: absolute;
+  z-index: 2000;
+  top:0;
 }
 
-.holyH{
-    background-color: #9CB7AA;
-}
-.holy{
-  background-color: #FFF5E6;
-}
-
-
-.expcoll{
-  width:6px;
-  height:6px;
-  margin:1px;
-  padding:1px;
-  background-color:yellow;
-  display:inline-block;
-  border:1px solid gray;
-}
-.expcoll.exp{
-  display:none;
-}
-
+/* -------------------------------------- GANTT -----------------------------------*/
 
 .ganttTable{
   table-layout:fixed;
@@ -185,9 +154,33 @@
   font-size: 130%
 }
 
+
+.ganttLines{
+  position:absolute;
+  width:100%;
+  height:1px;
+  border-top:1px solid #eee;
+  z-index:1;
+}
+
 .ganttLinks{
   z-index:10;
 }
+
+
+.end{
+  border-right:1px dotted #666
+}
+
+.holyH{
+  background-color: #9CB7AA;
+}
+.holy{
+  background-color: #FFF5E6;
+}
+
+
+/* -------------------------------------- TASK -----------------------------------*/
 
 .taskBox{
   position:absolute;
@@ -317,6 +310,28 @@
     padding: 10px
 }
 
+
+
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.expcoll{
+  width:6px;
+  height:6px;
+  margin:1px;
+  padding:1px;
+  background-color:yellow;
+  display:inline-block;
+  border:1px solid gray;
+}
+.expcoll.exp{
+  display:none;
+}
 
 .ui-resizable-helper { border: 1px dotted #00F;  }
 .ui-resizable-e, .ui-resizable-w {width: 5px;}

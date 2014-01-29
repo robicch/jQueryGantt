@@ -61,16 +61,18 @@ GanttMaster.prototype.init = function(place) {
 
   //create editor
   this.editor = new GridEditor(this);
-  this.editor.element.width(place.width() * .9 - 10);
-  place.append(this.editor.element);
+  place.append(this.editor.gridified);
 
   //create gantt
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
 
   //setup splitter
-  var splitter = $.splittify.init(place, this.editor.element, this.gantt.element, 70);
-  splitter.secondBox.css("overflow-y", "auto").scroll(function() {
-    splitter.firstBox.scrollTop(splitter.secondBox.scrollTop());
+  var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
+  splitter.secondBox.scroll(function() {
+    var top = $(this).scrollTop();
+    splitter.firstBox.scrollTop(top);
+    splitter.firstBox.find(".fixHead").css('top',top);
+    splitter.secondBox.find(".fixHead").css('top',top);
   });
 
 
@@ -205,7 +207,8 @@ GanttMaster.messages = {
   "CANNOT_DEPENDS_ON_DESCENDANTS":        "CANNOT_DEPENDS_ON_DESCENDANTS",
   "INVALID_DATE_FORMAT":                  "INVALID_DATE_FORMAT",
   "GANTT_QUARTER_SHORT": "GANTT_QUARTER_SHORT",
-  "GANTT_SEMESTER_SHORT":"GANTT_SEMESTER_SHORT"
+  "GANTT_SEMESTER_SHORT":"GANTT_SEMESTER_SHORT",
+  "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE":"CANNOT_CLOSE_TASK_IF_OPEN_ISSUE"
 };
 
 
@@ -302,6 +305,7 @@ GanttMaster.prototype.loadProject = function(project) {
   this.roles = project.roles;
   this.canWrite = project.canWrite;
   this.canWriteOnParent = project.canWriteOnParent;
+  this.cannotCloseTaskIfIssueOpen = project.cannotCloseTaskIfIssueOpen;
 
   if (project.minEditableDate)
     this.minEditableDate = computeStart(project.minEditableDate);

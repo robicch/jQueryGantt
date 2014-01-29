@@ -21,83 +21,96 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-$.fn.gridify = function(options) {
-  this.options = {
+$.gridify = function (table, opt) {
+  var options = {
     colResizeZoneWidth:10
   };
 
-  $.extend(this.options, options);
-  $.gridify.init($(this), this.options);
-  return this;
-};
+  $.extend(options, opt);
 
-$.gridify = {
-  init: function(elems, opt) {
-    elems.each(function() {
-      var table = $(this);
+  var box = $("<div>").addClass("gdfWrapper");
+  box.append(table);
 
-      //----------------------  header management start
-      table.find("th.gdfColHeader.gdfResizable:not(.gdfied)").mouseover(function() {
-        $(this).addClass("gdfColHeaderOver");
+  var head = table.clone();
+  head.addClass("fixHead");
+  //remove non head
+  head.find("tbody").remove();
+  box.append(head);
 
-      }).bind("mouseout.gdf", function() {
-        $(this).removeClass("gdfColHeaderOver");
-        if (!$.gridify.columInResize) {
-          $("body").removeClass("gdfHResizing");
-        }
+  box.append(table);
 
-      }).bind("mousemove.gdf", function(e) {
-        if (!$.gridify.columInResize) {
-          var colHeader = $(this);
-          var mousePos = e.pageX - colHeader.offset().left;
+  var hTh=head.find(".gdfColHeader");
+  var cTh=table.find(".gdfColHeader");
+  for (var i=0; i<hTh.length;i++){
+    hTh.eq(i).data("fTh",cTh.eq(i));
+  }
 
-          if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
-            $("body").addClass("gdfHResizing");
-          } else {
-            $("body").removeClass("gdfHResizing");
-          }
-        }
+  //--------- set table to 0 to prevent a strange 100%
+  table.width(0);
+  head.width(0);
 
-      }).bind("mousedown.gdf", function(e) {
+
+  //----------------------  header management start
+  head.find("th.gdfColHeader.gdfResizable:not(.gdfied)").mouseover(function () {
+    $(this).addClass("gdfColHeaderOver");
+
+  }).bind("mouseout.gdf",function () {
+      $(this).removeClass("gdfColHeaderOver");
+      if (!$.gridify.columInResize) {
+        $("body").removeClass("gdfHResizing");
+      }
+
+    }).bind("mousemove.gdf",function (e) {
+      if (!$.gridify.columInResize) {
         var colHeader = $(this);
         var mousePos = e.pageX - colHeader.offset().left;
-        if (colHeader.width() - mousePos < opt.colResizeZoneWidth) {
-          $.gridify.columInResize = $(this);
-          //bind event for start resizing
-          //console.debug("start resizing");
-          $(document).bind("mousemove.gdf", function(e) {
-            //manage resizing
-            //console.debug(e.pageX - $.gridify.columInResize.offset().left)
-            $.gridify.columInResize.width(e.pageX - $.gridify.columInResize.offset().left);
+
+        if (colHeader.width() - mousePos < options.colResizeZoneWidth) {
+          $("body").addClass("gdfHResizing");
+        } else {
+          $("body").removeClass("gdfHResizing");
+        }
+      }
+
+    }).bind("mousedown.gdf",function (e) {
+      var colHeader = $(this);
+      var mousePos = e.pageX - colHeader.offset().left;
+      if (colHeader.width() - mousePos < options.colResizeZoneWidth) {
+        $.gridify.columInResize = $(this);
+        //bind event for start resizing
+        //console.debug("start resizing");
+        $(document).bind("mousemove.gdf",function (e) {
+          //manage resizing
+          $.gridify.columInResize.width(e.pageX - $.gridify.columInResize.offset().left);
+          $.gridify.columInResize.data("fTh").width($.gridify.columInResize.width());
 
 
-            //bind mouse up on body to stop resizing
-          }).bind("mouseup.gdf", function() {
+          //bind mouse up on body to stop resizing
+        }).bind("mouseup.gdf", function () {
             //console.debug("stop resizing");
             $(this).unbind("mousemove.gdf").unbind("mouseup.gdf");
             $("body").removeClass("gdfHResizing");
             delete $.gridify.columInResize;
           });
-        }
-      }).addClass("gdfied unselectable").attr("unselectable","true");
+      }
+    }).addClass("gdfied unselectable").attr("unselectable", "true");
 
 
-      //----------------------  cell management start wrapping
-      table.find("td.gdfCell:not(.gdfied)").each(function() {
-        var cell = $(this);
-        if (cell.is(".gdfEditable")) {
-          var inp = $("<input type='text'>").addClass("gdfCellInput");
-          inp.val(cell.text());
-          cell.empty().append(inp);
-        } else {
-          var wrp = $("<div>").addClass("gdfCellWrap");
-          wrp.html(cell.html());
-          cell.empty().append(wrp);
-        }
-      }).addClass("gdfied");
+  //----------------------  cell management start wrapping
+  table.find("td.gdfCell:not(.gdfied)").each(function () {
+    var cell = $(this);
+    if (cell.is(".gdfEditable")) {
+      var inp = $("<input type='text'>").addClass("gdfCellInput");
+      inp.val(cell.text());
+      cell.empty().append(inp);
+    } else {
+      var wrp = $("<div>").addClass("gdfCellWrap");
+      wrp.html(cell.html());
+      cell.empty().append(wrp);
+    }
+  }).addClass("gdfied");
 
-    });
-  }
+  return box;
 };
 
 $.splittify = {
@@ -111,34 +124,35 @@ $.splittify = {
     var splitterBar = $("<div>").addClass("splitElement vSplitBar").attr("unselectable", "on").html("|").css("padding-top",where.height()/2+"px");
     var secondBox = $("<div>").addClass("splitElement splitBox2");
 
+
     firstBox.append(first);
     secondBox.append(second);
 
-    splitter.append(firstBox);
-    splitter.append(secondBox);
-    splitter.append(splitterBar);
-
+    splitter.append(firstBox).append(secondBox).append(splitterBar);
 
     where.append(splitter);
 
     var w = where.innerWidth();
-    firstBox.width(w *perc/ 100 - splitterBar.width()).css({left:0});
+    var fbw = w *perc/ 100 - splitterBar.width();
+    var realW=firstBox.get(0).scrollWidth;
+    fbw=fbw>realW?realW:fbw;
+    firstBox.width(fbw).css({left:0});
     splitterBar.css({left:firstBox.width()});
-    secondBox.width(w -firstBox.width()-splitterBar.width() ).css({left:firstBox.width() + splitterBar.width()});
-
-
+    secondBox.width(w -fbw-splitterBar.width() ).css({left:firstBox.width() + splitterBar.width()});
 
     splitterBar.bind("mousedown.gdf", function(e) {
       $.splittify.splitterBar = $(this);
       //bind event for start resizing
       //console.debug("start splitting");
+      var realW=firstBox.get(0).scrollWidth;
       $("body").unselectable().bind("mousemove.gdf", function(e) {
         //manage resizing
         //console.debug(e.pageX - $.gridify.columInResize.offset().left)
         var sb = $.splittify.splitterBar;
         var pos = e.pageX - sb.parent().offset().left;
         var w = sb.parent().width();
-        if (pos > 10 && pos < w - 20) {
+        var fbw=firstBox
+        if (pos > 10 && pos < realW) {
           sb.css({left:pos});
           firstBox.width(pos);
           secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
@@ -154,6 +168,7 @@ $.splittify = {
     });
 
     return {firstBox:firstBox,secondBox:secondBox,splitterBar:splitterBar};
+
   }
 };
 
