@@ -160,6 +160,13 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   taskRow.find(".date").each(function () {
     var el = $(this);
 
+    //start is readonly in case of deps
+    if(task.depends && el.attr("name")=="start"){
+      el.attr("readonly","true");
+    } else {
+      el.removeAttr("readonly");
+    }
+
     el.click(function () {
       var inp = $(this);
       inp.dateField({
@@ -236,10 +243,19 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       if (field == "depends") {
         var oldDeps = task.depends;
         task.depends = el.val();
+
+        //start is readonly in case of deps
+        if(task.depends){
+          row.find("[name=start]").attr("readonly","true");
+        } else {
+          row.find("[name=start]").removeAttr("readonly");
+        }
+
+
         // update links
         var linkOK = self.master.updateLinks(task);
         if (linkOK) {
-          //synchronize status fro superiors states
+          //synchronize status from superiors states
           var sups = task.getSuperiors();
           for (var i = 0; i < sups.length; i++) {
             if (!sups[i].from.synchronizeStatus())
@@ -356,7 +372,15 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
     taskEditor.find("#endIsMilestone").attr("checked", true);
 
   taskEditor.find("#duration").val(task.duration);
-  taskEditor.find("#start").val(new Date(task.start).format());
+  var startDate = taskEditor.find("#start");
+  startDate.val(new Date(task.start).format());
+  //start is readonly in case of deps
+  if(task.depends){
+    startDate.attr("readonly","true");
+  } else {
+    startDate.removeAttr("readonly");
+  }
+
   taskEditor.find("#end").val(new Date(task.end).format());
 
   //taskEditor.find("[name=depends]").val(task.depends);

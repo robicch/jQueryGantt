@@ -51,10 +51,6 @@
   background-color: #ffcccc;
 }
 
-.gdfColHeaderOver {
-  opacity: .7;
-}
-
 .gdfHResizing {
   cursor: w-resize;
 }
@@ -270,6 +266,10 @@
 
 .taskEditRow.rowSelected td,.taskEditRow.rowSelected input{
   background-color:#FFFF99;  
+}
+
+input[readonly]{
+  color: #c0c0c0;
 }
 
 .taskStatusBox{
