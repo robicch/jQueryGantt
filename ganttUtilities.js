@@ -76,19 +76,20 @@ $.gridify = function (table, opt) {
       var colHeader = $(this);
       var mousePos = e.pageX - colHeader.offset().left;
       if (colHeader.width() - mousePos < options.colResizeZoneWidth) {
+        $("body").unselectable();
         $.gridify.columInResize = $(this);
         //bind event for start resizing
         //console.debug("start resizing");
         $(document).bind("mousemove.gdf",function (e) {
           //manage resizing
           $.gridify.columInResize.width(e.pageX - $.gridify.columInResize.offset().left);
-          $.gridify.columInResize.data("fTh").width($.gridify.columInResize.width());
+          $.gridify.columInResize.data("fTh").width($.gridify.columInResize.outerWidth());
 
 
           //bind mouse up on body to stop resizing
         }).bind("mouseup.gdf", function () {
             //console.debug("stop resizing");
-            $(this).unbind("mousemove.gdf").unbind("mouseup.gdf");
+            $(this).unbind("mousemove.gdf").unbind("mouseup.gdf").clearUnselectable();
             $("body").removeClass("gdfHResizing");
             delete $.gridify.columInResize;
           });
@@ -229,18 +230,15 @@ function recomputeDuration(start, end) {
 //http://www.ibiblio.org/pub/Linux/LICENSES/mit.license
 
 if (!Array.prototype.filter){
-  Array.prototype.filter = function(fun )
-  {
+  Array.prototype.filter = function (fun) {
     var len = this.length;
     if (typeof fun != "function")
       throw new TypeError();
 
     var res = new Array();
     var thisp = arguments[1];
-    for (var i = 0; i < len; i++)
-    {
-      if (i in this)
-      {
+    for (var i = 0; i < len; i++) {
+      if (i in this) {
         var val = this[i]; // in case fun mutates this
         if (fun.call(thisp, val, i, this))
           res.push(val);

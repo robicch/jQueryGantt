@@ -405,6 +405,11 @@ Task.prototype.changeStatus = function(newStatus) {
     var todoOk = true;
     task.status = newStatus;
 
+    if( task.master.cannotCloseTaskIfIssueOpen && newStatus=="STATUS_DONE" && task.openIssues>0){
+      task.master.setErrorOnTransaction(GanttMaster.messages["CANNOT_CLOSE_TASK_IF_OPEN_ISSUE"] +" " +task.name);
+      return false;
+    }
+
     //xxxx -> STATUS_DONE            may activate dependent tasks, both suspended and undefined. Will set to done all descendants.
     //STATUS_FAILED -> STATUS_DONE          do nothing if not forced by hand
     if (newStatus == "STATUS_DONE") {
