@@ -47,6 +47,7 @@ function GanttMaster() {
   this.__currentTransaction;  // a transaction object holds previous state during changes
   this.__undoStack = [];
   this.__redoStack = [];
+  this.__inUndoRedo = false; // a control flag to avoid Undo/Redo stacks reset when needed
 
   var self = this;
 }
@@ -450,8 +451,12 @@ GanttMaster.prototype.reset = function() {
   this.tasks = [];
   this.links = [];
   this.deletedTaskIds=[];
-  this.__undoStack = [];
-  this.__redoStack = [];
+  if (!this.__inUndoRedo) {
+    this.__undoStack = [];
+    this.__redoStack = [];
+  } else { // don't reset the stacks if we're in an Undo/Redo, but restart the inUndoRedo control
+    this.__inUndoRedo = false;
+  }
   delete this.currentTask;
 
   this.editor.reset();
@@ -708,6 +713,7 @@ GanttMaster.prototype.undo = function() {
 
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds=oldTasks.deletedTaskIds;
+    this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
     //console.debug(oldTasks,oldTasks.deletedTaskIds)
     this.redraw();
@@ -723,6 +729,7 @@ GanttMaster.prototype.redo = function() {
 
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds=oldTasks.deletedTaskIds;
+    this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
     this.redraw();
     //console.debug("redo after:",undoStack,redoStack);
