@@ -111,6 +111,8 @@
 
 .ganttHead1 th,.ganttHead2 th{
   border-left:1px solid white;
+  padding: 0;
+  margin: 0;
 }
 
 .ganttToday{
