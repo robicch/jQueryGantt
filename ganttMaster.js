@@ -506,7 +506,7 @@ GanttMaster.prototype.saveGantt = function(forTransaction) {
 
 
 GanttMaster.prototype.updateLinks = function(task) {
-  //console.debug("updateLinks");
+  //console.debug("updateLinks",task);
   //var prof= new Profiler("gm_updateLinks");
 
   // defines isLoop function
@@ -525,6 +525,13 @@ GanttMaster.prototype.updateLinks = function(task) {
       sups=sups.concat(p.getSuperiors());
       p= p.getParent();
     }
+
+    //my children superiors are my superiors too
+    var chs=task.getChildren();
+    for (var i=0;i<chs.length;i++){
+      sups=sups.concat(chs[i].getSuperiors());
+    }
+
 
     var loop = false;
     //check superiors

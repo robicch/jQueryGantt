@@ -24,7 +24,7 @@
 /**
  * A method to instantiate valid task models from
  * raw data.
- */
+*/
 function TaskFactory() {
 
   /**
