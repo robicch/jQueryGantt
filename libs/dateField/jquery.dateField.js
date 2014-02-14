@@ -61,13 +61,14 @@ jQuery.fn.dateField = function(options) {
   divDays.addClass("calFullMonth");
   theDiv.append(divNavBar).append(divDays);
 
+
   if (options.isSearchField){
     var divShortcuts=$("<div>").addClass("shortCuts").html("<span title='last quarter'>LQ</span> <span title='last month'>LM</span> <span title='this month'>M</span> <span title='last week'>LW</span> <span title='this week'>W</span> <span title='yesterday'>Y</span> <span title='today'>T</span><span title='tomorrow'>TO</span> <span title='next week'>NW</span> <span title='next month'>NM</span> <span title='this quarter'>Q</span> <span title='next quarter'>NQ</span>");
     divShortcuts.click(function(ev){
       var el=$(ev.target);
       if(el.is("span")){
         if (!options.isSearchField)
-          options.inputField.val(Date.parseString(el.text().trim(),options.dateFormat).format(options.dateFormat));
+          options.inputField.val(Date.parseString(el.text().trim(),options.dateFormat).format(options.dateFormat),true);
         else
           options.inputField.val(el.text().trim());
         theDiv.remove();
@@ -197,10 +198,10 @@ jQuery.fn.dateField = function(options) {
   var dateStr=options.inputField.val();
 
 
-  if (!dateStr || !Date.isValid(dateStr,options.dateFormat)){
+  if (!dateStr || !Date.isValid(dateStr,options.dateFormat,true)){
     calendar.drawCalendar(new Date());
   } else {
-    var date = Date.parseString(dateStr,options.dateFormat);
+    var date = Date.parseString(dateStr,options.dateFormat,true);
     //set date string formatted
     if (!options.isSearchField)
       options.inputField.val(date.format(options.dateFormat)).attr("millis",date.getTime());

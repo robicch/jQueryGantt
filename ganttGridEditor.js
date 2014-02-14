@@ -1,29 +1,29 @@
 /*
-  Copyright (c) 2012-2013 Open Lab
-  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
-  Permission is hereby granted, free of charge, to any person obtaining
-  a copy of this software and associated documentation files (the
-  "Software"), to deal in the Software without restriction, including
-  without limitation the rights to use, copy, modify, merge, publish,
-  distribute, sublicense, and/or sell copies of the Software, and to
-  permit persons to whom the Software is furnished to do so, subject to
-  the following conditions:
+ Copyright (c) 2012-2013 Open Lab
+ Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
 
-  The above copyright notice and this permission notice shall be
-  included in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 function GridEditor(master) {
   this.master = master; // is the a GantEditor instance
   this.gridified = $.gridify($.JST.createFromTemplate({}, "TASKSEDITHEAD"));
-  this.element  = this.gridified.find(".gdfTable").eq(1);
+  this.element = this.gridified.find(".gdfTable").eq(1);
 }
 
 
@@ -39,8 +39,12 @@ GridEditor.prototype.fillEmptyLines = function () {
     //click on empty row create a task and fill above
     var master = this.master;
     emptyRow.click(function (ev) {
-      master.beginTransaction();
       var emptyRow = $(this);
+      //add on the first empty row only
+      if (!master.canWrite || emptyRow.prevAll(".emptyRow").size() > 0)
+        return
+
+      master.beginTransaction();
       var lastTask;
       var start = new Date().getTime();
       var level = 0;
@@ -61,7 +65,8 @@ GridEditor.prototype.fillEmptyLines = function () {
         .blur(function () { //if name not inserted -> undo -> remove just added lines
           var imp = $(this);
           if (imp.val() == "") {
-            master.undo();
+            lastTask.name="Task "+(lastTask.getRow()+1);
+            imp.val(lastTask.name);
           }
         });
     });
@@ -70,7 +75,7 @@ GridEditor.prototype.fillEmptyLines = function () {
 };
 
 
-GridEditor.prototype.addTask = function(task, row) {
+GridEditor.prototype.addTask = function (task, row) {
   //console.debug("GridEditor.addTask",task,row);
   //var prof = new Profiler("editorAddTaskHtml");
 
@@ -98,7 +103,7 @@ GridEditor.prototype.addTask = function(task, row) {
     }
 
   }
-  this.element.find(".taskRowIndex").each(function(i, el) {
+  this.element.find(".taskRowIndex").each(function (i, el) {
     $(el).html(i + 1);
   });
   //prof.stop();
@@ -107,7 +112,7 @@ GridEditor.prototype.addTask = function(task, row) {
 };
 
 
-GridEditor.prototype.refreshTaskRow = function(task) {
+GridEditor.prototype.refreshTaskRow = function (task) {
   //console.debug("refreshTaskRow")
   //var profiler = new Profiler("editorRefreshTaskRow");
   var row = task.rowElement;
@@ -127,13 +132,13 @@ GridEditor.prototype.refreshTaskRow = function(task) {
   //profiler.stop();
 };
 
-GridEditor.prototype.redraw = function() {
+GridEditor.prototype.redraw = function () {
   for (var i = 0; i < this.master.tasks.length; i++) {
     this.refreshTaskRow(this.master.tasks[i]);
   }
 };
 
-GridEditor.prototype.reset = function() {
+GridEditor.prototype.reset = function () {
   this.element.find("[taskId]").remove();
 };
 
@@ -142,13 +147,13 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   var self = this;
   //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
   if (this.master.canWrite) {
-    self.bindRowInputEvents(task,taskRow);
+    self.bindRowInputEvents(task, taskRow);
 
   } else { //cannot write: disable input
     taskRow.find("input").attr("readonly", true);
   }
 
-  taskRow.find(".edit").click(function() {self.openFullEditor(task,taskRow)});
+  taskRow.find(".edit").click(function () {self.openFullEditor(task, taskRow)});
 
 };
 
@@ -161,8 +166,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     var el = $(this);
 
     //start is readonly in case of deps
-    if(task.depends && el.attr("name")=="start"){
-      el.attr("readonly","true");
+    if (task.depends && el.attr("name") == "start") {
+      el.attr("readonly", "true");
     } else {
       el.removeAttr("readonly");
     }
@@ -228,55 +233,102 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     $(this).updateOldValue();
 
   }).blur(function () {
-    var el = $(this);
-    if (el.isValueChanged()) {
-      var row = el.closest("tr");
-      var taskId = row.attr("taskId");
+      var el = $(this);
+      if (el.isValueChanged()) {
+        var row = el.closest("tr");
+        var taskId = row.attr("taskId");
 
-      var task = self.master.getTask(taskId);
+        var task = self.master.getTask(taskId);
 
-      //update task from editor
-      var field = el.attr("name");
+        //update task from editor
+        var field = el.attr("name");
 
-      self.master.beginTransaction();
+        self.master.beginTransaction();
 
-      if (field == "depends") {
-        var oldDeps = task.depends;
-        task.depends = el.val();
+        if (field == "depends") {
+          var oldDeps = task.depends;
+          task.depends = el.val();
 
-        //start is readonly in case of deps
-        if(task.depends){
-          row.find("[name=start]").attr("readonly","true");
-        } else {
-          row.find("[name=start]").removeAttr("readonly");
-        }
-
-
-        // update links
-        var linkOK = self.master.updateLinks(task);
-        if (linkOK) {
-          //synchronize status from superiors states
-          var sups = task.getSuperiors();
-          for (var i = 0; i < sups.length; i++) {
-            if (!sups[i].from.synchronizeStatus())
-              break;
+          //start is readonly in case of deps
+          if (task.depends) {
+            row.find("[name=start]").attr("readonly", "true");
+          } else {
+            row.find("[name=start]").removeAttr("readonly");
           }
 
-          self.master.changeTaskDates(task, task.start, task.end);
+
+          // update links
+          var linkOK = self.master.updateLinks(task);
+          if (linkOK) {
+            //synchronize status from superiors states
+            var sups = task.getSuperiors();
+            for (var i = 0; i < sups.length; i++) {
+              if (!sups[i].from.synchronizeStatus())
+                break;
+            }
+
+            self.master.changeTaskDates(task, task.start, task.end);
+          }
+
+        } else if (field == "duration") {
+          var dur = task.duration;
+          dur = parseInt(el.val()) || 1;
+          el.val(dur);
+          var newEnd = computeEndByDuration(task.start, dur);
+          self.master.changeTaskDates(task, task.start, newEnd);
+
+        } else {
+          task[field] = el.val();
         }
-
-      } else if (field == "duration") {
-        var dur = task.duration;
-        dur = parseInt(el.val()) || 1;
-        el.val(dur);
-        var newEnd = computeEndByDuration(task.start, dur);
-        self.master.changeTaskDates(task, task.start, newEnd);
-
-      } else {
-        task[field] = el.val();
+        self.master.endTransaction();
       }
-      self.master.endTransaction();
+    });
+
+  //cursor key movement
+  taskRow.find("input").keyup(function (event) {
+    console.debug(event);
+    var theCell = $(this);
+    var theTd = theCell.parent();
+    var theRow = theTd.parent();
+    var col = theTd.prevAll("td").size();
+
+    var ret = true;
+    switch (event.keyCode) {
+
+      case 37: //left arrow
+       break;
+
+      case 38: //up arrow
+        var prevRow = theRow.prev();
+        var td = prevRow.find("td").eq(col);
+        var inp = td.find("input");
+
+        if (inp.size()>0)
+          inp.focus();
+        break;
+      case 40: //down arrow
+        var nextRow = theRow.next();
+        var td = nextRow.find("td").eq(col);
+        var inp = td.find("input");
+        if (inp.size()>0)
+          inp.focus();
+        else
+          nextRow.click(); //create a new row
+        break;
+      case 36: //home
+        break;
+      case 35: //end
+        break;
+
+      case 9: //tab
+       case 13: //enter
+       case 39: //right arrow
+       break;
     }
+    return ret;
+
+  }).focus(function () {
+    $(this).closest("tr").click();
   });
 
 
@@ -348,10 +400,9 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 };
 
 
-
 GridEditor.prototype.openFullEditor = function (task, taskRow) {
 
-  var self=this;
+  var self = this;
 
   //task editor in popup
   var taskId = taskRow.attr("taskId");
@@ -375,8 +426,8 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
   var startDate = taskEditor.find("#start");
   startDate.val(new Date(task.start).format());
   //start is readonly in case of deps
-  if(task.depends){
-    startDate.attr("readonly","true");
+  if (task.depends) {
+    startDate.attr("readonly", "true");
   } else {
     startDate.removeAttr("readonly");
   }
@@ -395,6 +446,27 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
     assigsTable.append(assigRow);
   }
 
+  //define start end callbacks
+  function startChangeCallback(date) {
+    var dur = parseInt(taskEditor.find("#duration").val());
+    date.clearTime();
+    taskEditor.find("#end").val(new Date(computeEndByDuration(date.getTime(), dur)).format());
+  }
+
+  function endChangeCallback(end) {
+    var start = Date.parseString(taskEditor.find("#start").val());
+    end.setHours(23, 59, 59, 999);
+
+    if (end.getTime() < start.getTime()) {
+      var dur = parseInt(taskEditor.find("#duration").val());
+      start = incrementDateByWorkingDays(end.getTime(), -dur);
+      taskEditor.find("#start").val(new Date(computeStart(start)).format());
+    } else {
+      taskEditor.find("#duration").val(recomputeDuration(start.getTime(), end.getTime()));
+    }
+  }
+
+
   if (!self.master.canWrite) {
     taskEditor.find("input,textarea").attr("readOnly", true);
     taskEditor.find("input:checkbox,select").attr("disabled", true);
@@ -404,32 +476,33 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
     taskEditor.find("#start").click(function () {
       $(this).dateField({
         inputField:$(this),
-        callback:  function (date) {
-          var dur = parseInt(taskEditor.find("#duration").val());
-          date.clearTime();
-          taskEditor.find("#end").val(new Date(computeEndByDuration(date.getTime(), dur)).format());
+        callback:  startChangeCallback
+      });
+    }).blur(function () {
+        var inp = $(this);
+        if (!Date.isValid(inp.val())) {
+          alert(GanttMaster.messages["INVALID_DATE_FORMAT"]);
+          inp.val(inp.getOldValue());
+        } else {
+          startChangeCallback(Date.parseString(inp.val()))
         }
       });
-    });
 
     //bind dateField on dates
     taskEditor.find("#end").click(function () {
       $(this).dateField({
         inputField:$(this),
-        callback:  function (end) {
-          var start = Date.parseString(taskEditor.find("#start").val());
-          end.setHours(23, 59, 59, 999);
-
-          if (end.getTime() < start.getTime()) {
-            var dur = parseInt(taskEditor.find("#duration").val());
-            start = incrementDateByWorkingDays(end.getTime(), -dur);
-            taskEditor.find("#start").val(new Date(computeStart(start)).format());
-          } else {
-            taskEditor.find("#duration").val(recomputeDuration(start.getTime(), end.getTime()));
-          }
+        callback:  endChangeCallback
+      });
+    }).blur(function () {
+        var inp = $(this);
+        if (!Date.isValid(inp.val())) {
+          alert(GanttMaster.messages["INVALID_DATE_FORMAT"]);
+          inp.val(inp.getOldValue());
+        } else {
+          endChangeCallback(Date.parseString(inp.val()))
         }
       });
-    });
 
     //bind blur on duration
     taskEditor.find("#duration").change(function () {
@@ -440,6 +513,7 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
       el.val(dur);
       taskEditor.find("#end").val(new Date(computeEndByDuration(start.getTime(), dur)).format());
     });
+
 
     //bind add assignment
     taskEditor.find("#addAssig").click(function () {

@@ -366,6 +366,8 @@ Ganttalendar.prototype.drawTask = function (task) {
         self.master.endTransaction();
       }
 
+    }).on("mouseup",function(){
+      $(":focus").blur(); // in order to save grid field when moving task
     });
 
   }
