@@ -214,7 +214,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
       iterate(function(date) {
         var sm = date.getTime();
         date.setMonth(date.getMonth() + 1);
-        var daysInMonth = parseInt((date.getTime() - sm) / (3600000 * 24));
+        var daysInMonth = Math.round((date.getTime() - sm) / (3600000 * 24));
         tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
       }, function(date) {
         tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null,25));
@@ -728,7 +728,7 @@ Ganttalendar.prototype.refreshGantt = function() {
   this.element.remove();
   //guess the zoom level in base of period
   if (!this.zoom ){
-    var days = (this.originalEndMillis - this.originalStartMillis) / (3600000 * 24);
+    var days = Math.round((this.originalEndMillis - this.originalStartMillis) / (3600000 * 24));
     this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : 4  ) ) )];
   }
   var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);

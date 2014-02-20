@@ -286,7 +286,6 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
   //cursor key movement
   taskRow.find("input").keyup(function (event) {
-    console.debug(event);
     var theCell = $(this);
     var theTd = theCell.parent();
     var theRow = theTd.parent();
