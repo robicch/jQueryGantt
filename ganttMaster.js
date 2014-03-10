@@ -82,12 +82,7 @@ GanttMaster.prototype.init = function (place) {
 
 
   //bindings
-  place.bind("refreshTasks.gantt",function () {
-    self.redrawTasks();
-  }).bind("refreshTask.gantt",function (e, task) {
-      self.drawTask(task);
-
-    }).bind("deleteCurrentTask.gantt",function (e) {
+  place.bind("deleteCurrentTask.gantt",function (e) {
       if (!self.canWrite)
         return;
       var row = self.currentTask.getRow();

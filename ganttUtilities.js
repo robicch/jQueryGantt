@@ -23,7 +23,7 @@
 
 $.gridify = function (table, opt) {
   var options = {
-    colResizeZoneWidth:10
+    resizeZoneWidth:10
   };
 
   $.extend(options, opt);
@@ -65,7 +65,7 @@ $.gridify = function (table, opt) {
         var colHeader = $(this);
         var mousePos = e.pageX - colHeader.offset().left;
 
-        if (colHeader.width() - mousePos < options.colResizeZoneWidth) {
+        if (colHeader.width() - mousePos < options.resizeZoneWidth) {
           $("body").addClass("gdfHResizing");
         } else {
           $("body").removeClass("gdfHResizing");
@@ -75,7 +75,7 @@ $.gridify = function (table, opt) {
     }).bind("mousedown.gdf",function (e) {
       var colHeader = $(this);
       var mousePos = e.pageX - colHeader.offset().left;
-      if (colHeader.width() - mousePos < options.colResizeZoneWidth) {
+      if (colHeader.width() - mousePos < options.resizeZoneWidth) {
         $("body").unselectable();
         $.gridify.columInResize = $(this);
         //bind event for start resizing
@@ -246,4 +246,135 @@ if (!Array.prototype.filter){
     }
     return res;
   };
+}
+
+
+/**
+ * Allows drag and drop and extesion of task boxes. Only works on x axis
+ * @param opt
+ * @return {*}
+ */
+$.fn.dragExtedSVG = function (opt) {
+
+  //doing this can work with one svg at once only
+  var target;
+  var svgX;
+  var rectMouseDx;
+
+  var options = {
+    canDrag:        true,
+    canResize:      true,
+    resizeZoneWidth:10,
+    minSize:10,
+    drag:           function (e) {},
+    drop:           function (e) {},
+    resize:         function (e) {},
+    stopResize:     function (e) {}
+  };
+
+  $.extend(options, opt);
+
+  this.each(function () {
+    var el = $(this);
+
+    var svg = el.parents("svg:first");
+    svgX=svg.parent().offset().left; //parent is used instead of svg for a Firefox oddity
+
+    if (options.canDrag)
+      el.addClass("deSVGdrag");
+
+    if (options.canResize || options.canDrag) {
+      el.bind("mousedown.deSVG",
+        function (e) {
+          target = $(this);
+          var x1 = parseFloat(el.offset().left);
+
+          //var x1 = parseFloat(el.attr("x"));
+          var x2 = x1 + parseFloat(el.attr("width"));
+          var posx =  e.pageX;
+
+          $("body").unselectable();
+
+
+          //start resize
+          if (options.canResize && x2 - posx < options.resizeZoneWidth ){
+            //store offset mouse x1
+            rectMouseDx=x2-e.pageX;
+            target.attr("oldw",target.attr("width"));
+
+            //bind event for start resizing
+            el.parents("svg:first").bind("mousemove.deSVG",function (e) {
+              //manage resizing
+              var posx =  e.pageX;
+              var nW = posx - x1 +rectMouseDx;
+
+              target.attr("width",nW<options.minSize?options.minSize:nW);
+              //callback
+              options.resize.call(target.get(0),e);
+
+            }).bind("mouseleave.deSVG",stopResize);
+
+            //bind mouse up on body to stop resizing
+            $("body").one("mouseup.deSVG", stopResize );
+
+            // start drag
+          }else if (options.canDrag ) {
+            //store offset mouse x1
+            rectMouseDx=parseFloat(target.attr("x"))-e.pageX;
+            target.attr("oldx",target.attr("x"));
+
+            //bind event for start resizing
+            el.parents("svg:first").bind("mousemove.deSVG",function (e) {
+              //manage resizing
+              target.attr("x",rectMouseDx+ e.pageX);
+              //callback
+              options.drag.call(target.get(0),e);
+
+            }).bind("mouseleave.deSVG",drop);
+
+            //bind mouse up on body to stop resizing
+            $("body").one("mouseup.deSVG", drop );
+
+          }
+        }
+
+      ).bind("mousemove.deSVG",
+        function (e) {
+          var el = $(this);
+          var x1 = el.offset().left;
+          var x2 = x1 + parseFloat(el.attr("width"));
+          var posx =  e.pageX;
+
+
+          //console.debug("mousemove", x1,x2,svgX,posx, e.pageX)
+          //set cursor handle
+          if (options.canResize && x2 - posx < options.resizeZoneWidth ){//|| posx - x1 < options.resizeZoneWidth  )
+            el.addClass("deSVGhand");
+          }else{
+            el.removeClass("deSVGhand");
+          }
+        }
+
+      ).addClass("deSVG unselectable").attr("unselectable", "true");
+    }
+  });
+  return this;
+
+
+  function stopResize(e){
+    target.parents("svg:first").unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
+    if (target.attr("oldw")!=target.attr("width"))
+      options.stopResize.call(target.get(0),e); //callback
+    target=undefined;
+    $("body").clearUnselectable();
+  }
+
+  function drop(e){
+    target.parents("svg:first").unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
+    if (target.attr("oldx")!=target.attr("x"))
+      options.drop.call(target.get(0),e); //callback
+    target=undefined;
+    $("body").clearUnselectable();
+  }
+
 }

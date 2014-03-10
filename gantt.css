@@ -342,3 +342,59 @@ input[readonly]{
 }
 
 
+/*--------------------------------------------------- SVG --------------------------------------------------*/
+.ganttSVGBox{
+  position: absolute;
+  top:0;
+  left: 0;
+  height: 100%;
+  background-color: transparent;
+}
+
+.taskBoxSVG{
+  overflow: visible;
+}
+
+.taskBoxSVG .taskLayout{
+  stroke-width:1px;
+  stroke:#bbb;
+  fill:url(#taskGrad);
+}
+
+.ganttLinesSVG{
+  stroke:#eee;
+  strokeWidth:1;
+}
+
+.ganttTodaySVG{
+  strokeWidth:2px;
+  stroke:#13AFA5;
+  stroke-linecap:"round";
+
+  stroke-dasharray:2,2;
+}
+
+.taskStatusSVG[status=STATUS_ACTIVE]{
+  fill: #66FF99;
+}
+.taskStatusSVG[status=STATUS_DONE]{
+  fill: #0099FF;
+}
+.taskStatusSVG[status=STATUS_FAILED]{
+  fill: #660066;
+}
+.taskStatusSVG[status=STATUS_SUSPENDED]{
+  fill: #fbb11e;
+}
+.taskStatusSVG[status=STATUS_UNDEFINED]{
+  fill: #ffffff;
+}
+
+.deSVG.deSVGdrag {
+  cursor: move;
+}
+.deSVG.deSVGhand {
+  cursor: ew-resize;
+}
+
+

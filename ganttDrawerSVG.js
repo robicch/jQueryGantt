@@ -24,6 +24,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.master = master; // is the a GantEditor instance
   this.element; // is the jquery element containing gantt
   this.highlightBar;
+  this.svg; // instance of svg object containing gantt
   this.zoom = zoom;
   this.minGanttSize = minGanttSize;
   this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
@@ -265,7 +266,8 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     table.append(trBody).addClass("ganttTable");
 
 
-    table.height(self.master.editor.element.height());
+    var height = self.master.editor.element.height();
+    table.height(height);
 
     var box = $("<div>");
     box.addClass("gantt unselectable").attr("unselectable","true").css({position:"relative",width:computedTableWidth});
@@ -273,25 +275,50 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
     box.append(head);
 
+
     //highlightBar
     var hlb = $("<div>").addClass("ganttHighLight");
     box.append(hlb);
     self.highlightBar = hlb;
 
-    //create link container
-    var links = $("<div>");
-    links.addClass("ganttLinks").css({position:"absolute",top:0,width:computedTableWidth,height:"100%"});
-    box.append(links);
 
-    //compute scalefactor fx
-    self.fx = computedTableWidth / (endPeriod - startPeriod);
 
-    // drawTodayLine
-    if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
-      var x = Math.round(((new Date().getTime()) - self.startMillis) * self.fx);
-      var today = $("<div>").addClass("ganttToday").css("left", x);
-      box.append(today);
+    var rowHeight=30; // todo prenderla da css?
+    //create the svg
+    box.svg({settings:{class:"ganttSVGBox"},
+      onLoad:function (svg) {
+      console.debug("svg loaded",svg);
+
+      //creates gradient and definitions
+      var defs = svg.defs('myDefs');
+      svg.linearGradient(defs, 'taskGrad',[[0, '#ddd'],[.5, '#fff'],[1, '#ddd']], 0, 0, 0,"100%");
+
+
+        self.svg=svg;
+      $(svg).addClass("ganttSVGBox");
+
+      //creates rows grid
+      for (var i=40; i<=height; i+=rowHeight)
+        svg.line(0,i,"100%",i,{class:"ganttLinesSVG"});
+
+
+      //creates tasks group
+      svg.group("tasksSVG");
+
+      //creates links group
+      svg.group("linksSVG");
+
+      //compute scalefactor fx
+      self.fx = computedTableWidth / (endPeriod - startPeriod);
+
+      // drawTodayLine
+      if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
+        var x = Math.round(((new Date().getTime()) - self.startMillis) * self.fx);
+        svg.line(x,0,x,"100%",{class:"ganttTodaySVG"});
+      }
+
     }
+    });
 
     return box;
   }
@@ -319,7 +346,6 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 };
 
 
-
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
   //console.debug("drawTask", task.name,new Date(task.start));
@@ -329,94 +355,88 @@ Ganttalendar.prototype.drawTask = function (task) {
   editorRow = task.rowElement;
   var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
-  var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
 
+  task.hasChild=task.isParent();
 
-
-  //save row element on task
-  task.ganttElement = taskBox;
-
-  //if I'm parent
-  if (task.isParent())
-    taskBox.addClass("hasChild");
-
-
-  taskBox.css({top:top,left:x,width:Math.round((task.end - task.start) * self.fx)});
-
-  if (this.master.canWrite) {
-    taskBox.resizable({
-      handles: 'e' + ( task.depends ? "" : ",w"), //if depends cannot move start
-      //helper: "ui-resizable-helper",
-      //grid:[oneDaySize,oneDaySize],
-
-      resize:function(event, ui) {
-        //console.debug(ui)
-        $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
-        event.stopImmediatePropagation();
-        event.stopPropagation();
-      },
-      stop:function(event, ui) {
-        //console.debug(ui)
-        var task = self.master.getTask(ui.element.attr("taskId"));
-        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-        var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
-
-        self.master.beginTransaction();
-        self.master.changeTaskDates(task, new Date(s), new Date(e));
-        self.master.endTransaction();
-      }
-
-    }).on("mouseup",function(){
-        $(":focus").blur(); // in order to save grid field when moving task
-      });
-
-  }
+  var taskBox=$(_createTaskSVG(self.svg,task,{x:x,y:top,width:Math.round((task.end - task.start) * self.fx)}));
+  task.ganttElement=taskBox;
 
   taskBox.dblclick(function() {
-    self.master.showTaskEditor($(this).closest("[taskId]").attr("taskId"));
-
+    self.master.showTaskEditor($(this).attr("taskid"));
+  }).on("mouseup",function(){
+      $(":focus").blur(); // in order to save grid field when moving task
   }).mousedown(function() {
       var task = self.master.getTask($(this).attr("taskId"));
       task.rowElement.click();
-    });
-
-  //panning only if no depends
-  if (!task.depends && this.master.canWrite) {
-
-    taskBox.css("position", "absolute").draggable({
-      axis:'x',
-      drag:function (event, ui) {
-        $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
-      },
-      stop:function(event, ui) {
-        //console.debug(ui,$(this))
-        var task = self.master.getTask($(this).attr("taskId"));
-        var s = Math.round((ui.position.left / self.fx) + self.startMillis);
+  }).dragExtedSVG({
+      canResize:this.master.canWrite,
+      canDrag:!task.depends && this.master.canWrite,
+      drop:function(){
+        var taskbox=$(this);
+        var task = self.master.getTask(taskbox.attr("taskid"));
+        var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
 
         self.master.beginTransaction();
         self.master.moveTask(task, new Date(s));
         self.master.endTransaction();
-      }/*,
-       start:function(event, ui) {
-       var task = self.master.getTask($(this).attr("taskId"));
-       var s = Math.round((ui.position.left / self.fx) + self.startMillis);
-       }*/
+
+      },
+      resize:function(){
+        //todo gestione label
+        // $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
+        self.redrawLinks();
+      },
+      stopResize:function(){
+        //console.debug(ui)
+        var taskbox=$(this);
+        var task = self.master.getTask(taskbox.attr("taskid"));
+        var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
+        var e = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
+
+        self.master.beginTransaction();
+        self.master.changeTaskDates(task, new Date(s), new Date(e));
+        self.master.endTransaction();
+
+      }
     });
-  }
-
-
-  var taskBoxSeparator=$("<div class='ganttLines'></div>");
-  taskBoxSeparator.css({top:top+taskBoxSeparator.height()});
-//  taskBoxSeparator.css({top:top+18});
-
-
-  self.element.append(taskBox);
-  self.element.append(taskBoxSeparator);
 
   //ask for redraw link
   self.redrawLinks();
 
   //prof.stop();
+
+
+
+  function _createTaskSVG(svg,task,dimensions){
+    var taskSvg = svg.svg(dimensions.x,dimensions.y, dimensions.width,25,{class:"taskBoxSVG",taskid:task.id});
+
+    //external box
+    var layout=svg.rect(taskSvg,0,0,"100%","100%",{class:"taskLayout", rx:"6",ry:"6"});
+
+    //status
+    svg.rect(taskSvg,6,6,13,13,{stroke:1,rx:"2", ry:"2",status:task.status,class:"taskStatusSVG"} );
+
+    //progress
+    if (task.progress>0){
+      var progress=svg.rect(taskSvg,0,0,(task.progress>100?100:task.progress)+"%","100%",{fill:(task.progress>100?"red":"rgb(153,255,51)"),rx:"6",ry:"6",opacity:.4});
+      svg.text(taskSvg, (task.progress>90?90:task.progress)+"%",18,task.progress+"%",{stroke:"#888","font-size":"12px"});
+    }
+    if (task.hasChild)
+      svg.rect(taskSvg,0,0,"100%",3,{fill:"#000"});
+
+    if (task.startIsMilestone){
+      svg.image(taskSvg,-9,4,18,18,"milestone.png")
+    }
+
+    if (task.endIsMilestone){
+      svg.image(taskSvg,"100%",4,18,18,"milestone.png",{transform:"translate(-9)"})
+    }
+
+    //svg.rect(taskSvg,"100%",0,"100%","100%",{transform:"translate(-9)"})
+
+    return taskSvg
+  }
+
 };
 
 
@@ -427,269 +447,10 @@ Ganttalendar.prototype.addTask = function (task) {
 };
 
 
-//<%-------------------------------------- GANT DRAW LINK ELEMENT --------------------------------------%>
-//'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLink = function (from, to, type) {
-  var peduncolusSize = 10;
-  var lineSize = 2;
-
-  /**
-   * A representation of a Horizontal line
-   */
-  HLine = function(width, top, left) {
-    var hl = $("<div>").addClass("taskDepLine");
-    hl.css({
-      height: lineSize,
-      left: left,
-      width: width,
-      top: top - lineSize / 2
-    });
-    return hl;
-  };
-
-  /**
-   * A representation of a Vertical line
-   */
-  VLine = function(height, top, left) {
-    var vl = $("<div>").addClass("taskDepLine");
-    vl.css({
-      height: height,
-      left:left - lineSize / 2,
-      width: lineSize,
-      top: top
-    });
-    return vl;
-  };
-
-  /**
-   * Given an item, extract its rendered position
-   * width and height into a structure.
-   */
-  function buildRect(item) {
-    var rect = item.ganttElement.position();
-    rect.width = item.ganttElement.width();
-    rect.height = item.ganttElement.height();
-
-    return rect;
-  }
-
-  /**
-   * The default rendering method, which paints a start to end dependency.
-   *
-   * @see buildRect
-   */
-  function drawStartToEnd(rectFrom, rectTo, peduncolusSize) {
-    var left, top;
-
-    var ndo = $("<div>").attr({
-      from: from.id,
-      to: to.id
-    });
-
-    var currentX = rectFrom.left + rectFrom.width;
-    var currentY = rectFrom.height / 2 + rectFrom.top;
-
-    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
-
-    if (!useThreeLine) {
-      // L1
-      if (peduncolusSize > 0) {
-        var l1 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l1);
-      }
-
-      // L2
-      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
-      var l2;
-      if (l2_4size < 0) {
-        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l2 = new VLine(l2_4size, currentY, currentX);
-      }
-      currentY = currentY + l2_4size;
-
-      ndo.append(l2);
-
-      // L3
-      var l3size = rectFrom.left + rectFrom.width + peduncolusSize - (rectTo.left - peduncolusSize);
-      currentX = currentX - l3size;
-      var l3 = new HLine(l3size, currentY, currentX);
-      ndo.append(l3);
-
-      // L4
-      var l4;
-      if (l2_4size < 0) {
-        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l4 = new VLine(l2_4size, currentY, currentX);
-      }
-      ndo.append(l4);
-
-      currentY = currentY + l2_4size;
-
-      // L5
-      if (peduncolusSize > 0) {
-        var l5 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l5);
-
-      }
-    } else {
-      //L1
-      var l1_3Size = (rectTo.left - currentX) / 2;
-      var l1 = new HLine(l1_3Size, currentY, currentX);
-      currentX = currentX + l1_3Size;
-      ndo.append(l1);
-
-      //L2
-      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
-      var l2;
-      if (l2Size < 0) {
-        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
-      } else {
-        l2 = new VLine(l2Size, currentY, currentX);
-      }
-      ndo.append(l2);
-
-      currentY = currentY + l2Size;
-
-      //L3
-      var l3 = new HLine(l1_3Size, currentY, currentX);
-      currentX = currentX + l1_3Size;
-      ndo.append(l3);
-    }
-
-    //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
-      top: rectTo.top + rectTo.height / 2 - 5,
-      left: rectTo.left - 5
-    });
-
-    ndo.append(arr);
-
-    return ndo;
-  }
-
-  /**
-   * A rendering method which paints a start to start dependency.
-   *
-   * @see buildRect
-   */
-  function drawStartToStart(rectFrom, rectTo, peduncolusSize) {
-    var left, top;
-
-    var ndo = $("<div>").attr({
-      from: from.id,
-      to: to.id
-    });
-
-    var currentX = rectFrom.left;
-    var currentY = rectFrom.height / 2 + rectFrom.top;
-
-    var useThreeLine = (currentX + 2 * peduncolusSize) < rectTo.left;
-
-    if (!useThreeLine) {
-      // L1
-      if (peduncolusSize > 0) {
-        var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
-        currentX = currentX - peduncolusSize;
-        ndo.append(l1);
-      }
-
-      // L2
-      var l2_4size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2)) / 2;
-      var l2;
-      if (l2_4size < 0) {
-        l2 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l2 = new VLine(l2_4size, currentY, currentX);
-      }
-      currentY = currentY + l2_4size;
-
-      ndo.append(l2);
-
-      // L3
-      var l3size = (rectFrom.left - peduncolusSize) - (rectTo.left - peduncolusSize);
-      currentX = currentX - l3size;
-      var l3 = new HLine(l3size, currentY, currentX);
-      ndo.append(l3);
-
-      // L4
-      var l4;
-      if (l2_4size < 0) {
-        l4 = new VLine(-l2_4size, currentY + l2_4size, currentX);
-      } else {
-        l4 = new VLine(l2_4size, currentY, currentX);
-      }
-      ndo.append(l4);
-
-      currentY = currentY + l2_4size;
-
-      // L5
-      if (peduncolusSize > 0) {
-        var l5 = new HLine(peduncolusSize, currentY, currentX);
-        currentX = currentX + peduncolusSize;
-        ndo.append(l5);
-      }
-    } else {
-      //L1
-      
-      var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
-      currentX = currentX - peduncolusSize;
-      ndo.append(l1);
-
-      //L2
-      var l2Size = ((rectTo.top + rectTo.height / 2) - (rectFrom.top + rectFrom.height / 2));
-      var l2;
-      if (l2Size < 0) {
-        l2 = new VLine(-l2Size, currentY + l2Size, currentX);
-      } else {
-        l2 = new VLine(l2Size, currentY, currentX);
-      }
-      ndo.append(l2);
-
-      currentY = currentY + l2Size;
-
-      //L3
-
-      var l3 = new HLine(currentX + peduncolusSize + (rectTo.left - rectFrom.left), currentY, currentX);
-      currentX = currentX + peduncolusSize + (rectTo.left - rectFrom.left);
-      ndo.append(l3);
-    }
-
-    //arrow
-    var arr = $("<img src='linkArrow.png'>").css({
-      position: 'absolute',
-      top: rectTo.top + rectTo.height / 2 - 5,
-      left: rectTo.left - 5
-    });
-
-    ndo.append(arr);
-
-    return ndo;
-  }
-
-  var rectFrom = buildRect(from);
-  var rectTo = buildRect(to);
-
-  // Dispatch to the correct renderer
-  if (type == 'start-to-start') {
-    this.element.find(".ganttLinks").append(
-      drawStartToStart(rectFrom, rectTo, peduncolusSize)
-    );
-  } else {
-    this.element.find(".ganttLinks").append(
-      drawStartToEnd(rectFrom, rectTo, peduncolusSize)
-    );
-  }
-};
-
 //<%-------------------------------------- GANT DRAW LINK SVG ELEMENT --------------------------------------%>
 //'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLinkSVG = function (svg,from, to, type) {
-  //console.debug("drawLinkSVG")
+Ganttalendar.prototype.drawLink = function (svg,from, to, type) {
+  //console.debug("drawLink")
   var peduncolusSize = 10;
   var lineSize = 2;
 
@@ -698,9 +459,13 @@ Ganttalendar.prototype.drawLinkSVG = function (svg,from, to, type) {
    * width and height into a structure.
    */
   function buildRect(item) {
-    var rect = item.ganttElement.position();
-    rect.width = item.ganttElement.width();
-    rect.height = item.ganttElement.height();
+    const p = item.ganttElement.position();
+    var rect = {
+      left:parseFloat(item.ganttElement.attr("x")),
+      top:parseFloat(item.ganttElement.attr("y")),
+      width: parseFloat(item.ganttElement.attr("width")),
+      height :parseFloat(item.ganttElement.attr("height"))
+    };
     return rect;
   }
 
@@ -708,8 +473,7 @@ Ganttalendar.prototype.drawLinkSVG = function (svg,from, to, type) {
    * The default rendering method, which paints a start to end dependency.
    */
   function drawStartToEnd(svg,rectFrom, rectTo, ps) {
-
-    var offs=4; // todo error from padding?
+    var offs=0; // todo error from padding?
 
     var fx1=rectFrom.left;
     var fx2=rectFrom.left + rectFrom.width;
@@ -787,11 +551,15 @@ Ganttalendar.prototype.redrawLinks = function() {
   var self = this;
   this.element.stopTime("ganttlnksredr");
   this.element.oneTime(60, "ganttlnksredr", function() {
+
     //var prof=new Profiler("gd_drawLink_real");
-    self.element.find(".ganttLinks").empty();
+
+    //remove all links
+    $("#linksSVG").empty();
+
     for (var i=0;i<self.master.links.length;i++) {
       var link = self.master.links[i];
-      self.drawLink(link.from, link.to);
+      self.drawLink(self.svg,link.from, link.to);
     }
     //prof.stop();
   });
@@ -838,7 +606,7 @@ Ganttalendar.prototype.refreshGantt = function() {
 
   //set current task
   if (this.master.currentTask) {
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
+    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y"));
   }
 };
 
