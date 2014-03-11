@@ -386,8 +386,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     self.master.currentTask = self.master.getTask(row.attr("taskId"));
 
     //move highlighter
-    if (self.master.currentTask.ganttElement)
-      self.master.gantt.highlightBar.css("top", self.master.currentTask.ganttElement.position().top);
+    if (self.master.currentTask.rowElement)
+      self.master.gantt.highlightBar.css("top", self.master.currentTask.rowElement.position().top);
 
     //if offscreen scroll to element
     var top = row.position().top;

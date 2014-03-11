@@ -264,7 +264,7 @@ $.fn.dragExtedSVG = function (opt) {
   var options = {
     canDrag:        true,
     canResize:      true,
-    resizeZoneWidth:10,
+    resizeZoneWidth:15,
     minSize:10,
     drag:           function (e) {},
     drop:           function (e) {},
@@ -286,6 +286,10 @@ $.fn.dragExtedSVG = function (opt) {
     if (options.canResize || options.canDrag) {
       el.bind("mousedown.deSVG",
         function (e) {
+          if ($(e.target).is("image")){
+            e.preventDefault();
+          }
+
           target = $(this);
           var x1 = parseFloat(el.offset().left);
 
@@ -297,7 +301,8 @@ $.fn.dragExtedSVG = function (opt) {
 
 
           //start resize
-          if (options.canResize && x2 - posx < options.resizeZoneWidth ){
+          var x = x2 - posx;
+          if (options.canResize && (x>=0 && x <= options.resizeZoneWidth) ){
             //store offset mouse x1
             rectMouseDx=x2-e.pageX;
             target.attr("oldw",target.attr("width"));
@@ -312,7 +317,7 @@ $.fn.dragExtedSVG = function (opt) {
               //callback
               options.resize.call(target.get(0),e);
 
-            }).bind("mouseleave.deSVG",stopResize);
+            });//.bind("mouseleave.deSVG",stopResize);
 
             //bind mouse up on body to stop resizing
             $("body").one("mouseup.deSVG", stopResize );
@@ -346,9 +351,10 @@ $.fn.dragExtedSVG = function (opt) {
           var posx =  e.pageX;
 
 
-          //console.debug("mousemove", x1,x2,svgX,posx, e.pageX)
+          //console.debug("mousemove", options.canResize && x2 - posx)
           //set cursor handle
-          if (options.canResize && x2 - posx < options.resizeZoneWidth ){//|| posx - x1 < options.resizeZoneWidth  )
+          var x = x2 - posx;
+          if (options.canResize && (x>=0 && x <= options.resizeZoneWidth) ){
             el.addClass("deSVGhand");
           }else{
             el.removeClass("deSVGhand");

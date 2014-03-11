@@ -349,28 +349,43 @@ input[readonly]{
   left: 0;
   height: 100%;
   background-color: transparent;
+  width: 100%;
 }
 
 .taskBoxSVG{
   overflow: visible;
 }
 
+.taskBoxSVG:hover .taskLayout{
+  stroke-width:1px;
+  stroke:red;
+  stroke-dasharray:2,2;
+}
+
 .taskBoxSVG .taskLayout{
   stroke-width:1px;
   stroke:#bbb;
-  fill:url(#taskGrad);
+  /*stroke-dasharray:none;*/
+  /*fill:url('#taskGrad'); do not work on firefox*/
+}
+
+
+
+.taskLinkPathSVG{
+  stroke:#9999ff;
+  stroke-width:2px;
+  fill:none;
 }
 
 .ganttLinesSVG{
   stroke:#eee;
-  strokeWidth:1;
+  stroke-width:1;
 }
 
 .ganttTodaySVG{
-  strokeWidth:2px;
+  stroke-width:2px;
   stroke:#13AFA5;
   stroke-linecap:"round";
-
   stroke-dasharray:2,2;
 }
 
@@ -398,3 +413,17 @@ input[readonly]{
 }
 
 
+.taskLinkHandleSVG{
+  display:none;
+  stroke:#ddd;
+  stroke-width:2px;
+  fill:#eee;
+  cursor: pointer;
+}
+
+.linkLineSVG{
+  stroke-width:3px;
+  stroke:red;
+  stroke-linecap:"round";
+  stroke-dasharray:5,5;
+}

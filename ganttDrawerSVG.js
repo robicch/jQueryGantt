@@ -363,7 +363,15 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   taskBox.dblclick(function() {
     self.master.showTaskEditor($(this).attr("taskid"));
-  }).on("mouseup",function(){
+  }).mouseenter(function(){
+      //bring to top
+      var el = $(this);
+      el.find(".taskLinkHandleSVG").show();
+      el.parents("svg:first").append(el);
+  }).mouseleave(function(){
+      $(this).find(".taskLinkHandleSVG").hide();
+
+  }).mouseup(function(){
       $(":focus").blur(); // in order to save grid field when moving task
   }).mousedown(function() {
       var task = self.master.getTask($(this).attr("taskId"));
@@ -371,6 +379,9 @@ Ganttalendar.prototype.drawTask = function (task) {
   }).dragExtedSVG({
       canResize:this.master.canWrite,
       canDrag:!task.depends && this.master.canWrite,
+      drag:function(){
+        $("[from="+task.id+"],[to="+task.id+"]").trigger("update");
+      },
       drop:function(){
         var taskbox=$(this);
         var task = self.master.getTask(taskbox.attr("taskid"));
@@ -384,7 +395,8 @@ Ganttalendar.prototype.drawTask = function (task) {
       resize:function(){
         //todo gestione label
         // $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
-        self.redrawLinks();
+        $("[from="+task.id+"],[to="+task.id+"]").trigger("update");
+        //self.redrawLinks();
       },
       stopResize:function(){
         //console.debug(ui)
@@ -400,6 +412,34 @@ Ganttalendar.prototype.drawTask = function (task) {
       }
     });
 
+  //binding for creating link
+  taskBox.find(".taskLinkHandleSVG").mousedown(function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var taskBox=$(this).closest(".taskBoxSVG");
+    var svg = taskBox.parents("svg:first");
+    var offs=svg.offset();
+
+    // ccreate the line
+    var line=self.svg.line(parseFloat(taskBox.attr("x"))+parseFloat(taskBox.attr("width")),parseFloat(taskBox.attr("y"))+parseFloat(taskBox.attr("height"))/2, e.pageX-offs.left-5,e.pageY-offs.top-5,{class:"linkLineSVG"});
+
+    //bind mousemove to draw a line
+    svg.bind("mousemove.linkSVG",function(e){
+      var offs=svg.offset();
+      self.svg.change(line,{ x2:e.pageX-offs.left-5,y2:e.pageY-offs.top-5});
+    });
+
+    //bind mouseup un body to stop
+    $("body").one("mouseup.linkSVG",function(e){
+      line.remove();
+      taskBox.parents("svg:first").unbind("mousemove.linkSVG");
+      var targetBox=$(e.target).closest(".taskBoxSVG");
+      console.debug("create link from "+taskBox.attr("taskid")+" to "+ targetBox.attr("taskid"));
+      //self.master.createLink(tas)
+
+    })
+  });
+
   //ask for redraw link
   self.redrawLinks();
 
@@ -412,6 +452,7 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     //external box
     var layout=svg.rect(taskSvg,0,0,"100%","100%",{class:"taskLayout", rx:"6",ry:"6"});
+    layout.style.fill="url(#taskGrad)";
 
     //status
     svg.rect(taskSvg,6,6,13,13,{stroke:1,rx:"2", ry:"2",status:task.status,class:"taskStatusSVG"} );
@@ -432,7 +473,8 @@ Ganttalendar.prototype.drawTask = function (task) {
       svg.image(taskSvg,"100%",4,18,18,"milestone.png",{transform:"translate(-9)"})
     }
 
-    //svg.rect(taskSvg,"100%",0,"100%","100%",{transform:"translate(-9)"})
+    //link tool
+    svg.circle(taskSvg,"100%",12,8,{class:"taskLinkHandleSVG",transform:"translate(6)"});
 
     return taskSvg
   }
@@ -452,7 +494,6 @@ Ganttalendar.prototype.addTask = function (task) {
 Ganttalendar.prototype.drawLink = function (svg,from, to, type) {
   //console.debug("drawLink")
   var peduncolusSize = 10;
-  var lineSize = 2;
 
   /**
    * Given an item, extract its rendered position
@@ -472,77 +513,105 @@ Ganttalendar.prototype.drawLink = function (svg,from, to, type) {
   /**
    * The default rendering method, which paints a start to end dependency.
    */
-  function drawStartToEnd(svg,rectFrom, rectTo, ps) {
-    var offs=0; // todo error from padding?
+  function drawStartToEnd(svg,from, to, ps) {
 
-    var fx1=rectFrom.left;
-    var fx2=rectFrom.left + rectFrom.width;
-    var fy=rectFrom.height / 2 + rectFrom.top+offs;
+    //this function update an existing link
+    function update() {
+      var group=$(this);
+      var from=group.data("from");
+      var to=group.data("to");
 
-    var tx1=rectTo.left;
-    var tx2=rectTo.left + rectTo.width;
-    var ty=rectTo.height / 2 + rectTo.top+offs;
+      var rectFrom = buildRect(from);
+      var rectTo = buildRect(to);
+
+      var fx1 = rectFrom.left;
+      var fx2 = rectFrom.left + rectFrom.width;
+      var fy = rectFrom.height / 2 + rectFrom.top;
+
+      var tx1 = rectTo.left;
+      var tx2 = rectTo.left + rectTo.width;
+      var ty = rectTo.height / 2 + rectTo.top;
 
 
-    var p = svg.createPath();
+      var tooClose = tx1 < fx2 + 2 * ps;
+      var r = 5; //radius
+      var arrowOffset = 5;
+      var up = fy > ty;
+      var fup = up ? -1 : 1;
 
+      var prev = fx2 + 2 * ps > tx1;
+      var fprev = prev ? -1 : 1;
 
-    var tooClose = tx1<fx2+ 2 * ps;
-    var r=5; //radius
-    var arrowOffset=5;
-    var up=fy>ty;
-    var fup=up?-1:1;
+      var image=group.find("image");
+      var p = svg.createPath();
 
-    var prev=fx2+2*ps>tx1;
-    var fprev=prev?-1:1;
+      if (tooClose) {
+        var firstLine = fup * (rectFrom.height / 2 - 2 * r + 2);
+        p.move(fx2, fy)
+          .line(ps, 0, true)
+          .arc(r, r, 90, false, !up, r, fup * r, true)
+          .line(0, firstLine, true)
+          .arc(r, r, 90, false, !up, -r, fup * r, true)
+          .line(fprev * 2 * ps + (tx1 - fx2), 0, true)
+          .arc(r, r, 90, false, up, -r, fup * r, true)
+          .line(0, (Math.abs(ty - fy) - 4 * r - Math.abs(firstLine)) * fup - arrowOffset, true)
+          .arc(r, r, 90, false, up, r, fup * r, true)
+          .line(ps, 0, true);
+        //svg.image(group, tx1 - 5, ty - 5 - arrowOffset, 5, 10, "linkArrow.png");
+        image.attr({x:tx1 - 5,y:ty - 5 - arrowOffset});
 
-    if (tooClose) {
-      var firstLine = fup*(rectFrom.height / 2-2*r +2);
-      p.move(fx2,fy)
-        .line(ps,0,true)
-        .arc(r,r,90,false,!up,r,fup*r,true)
-        .line(0,firstLine,true)
-        .arc(r,r,90,false,!up,-r,fup*r,true)
-        .line(fprev*2*ps+(tx1-fx2),0,true)
-        .arc(r,r,90,false,up,-r,fup*r,true)
-        .line(0,(Math.abs(ty-fy) - 4*r - Math.abs(firstLine))*fup-arrowOffset,true)
-        .arc(r,r,90,false,up,r,fup*r,true)
-        .line(ps,0,true);
-      svg.image(tx1-5,ty-5-arrowOffset,5,10,"linkArrow.png");
+      } else {
+        p.move(fx2, fy)
+          .line((tx1 - fx2) / 2 - r, 0, true)
+          .arc(r, r, 90, false, !up, r, fup * r, true)
+          .line(0, ty - fy - fup * 2 * r + arrowOffset, true)
+          .arc(r, r, 90, false, up, r, fup * r, true)
+          .line((tx1 - fx2) / 2 - r, 0, true);
+        //svg.image(group, tx1 - 5, ty - 5 + arrowOffset, 5, 10, "linkArrow.png");
+        image.attr({x:tx1 - 5,y:ty - 5 + arrowOffset});
+      }
 
-    } else {
-      p.move(fx2,fy)
-        .line((tx1-fx2)/2-r,0,true)
-        .arc(r,r,90,false,!up,r,fup*r,true)
-        .line(0,ty-fy-fup*2*r+arrowOffset,true)
-        .arc(r,r,90,false,up,r,fup*r,true)
-        .line((tx1-fx2)/2-r,0,true);
-      svg.image(tx1-5,ty-5+arrowOffset,5,10,"linkArrow.png");
+      group.find("path").attr({d:p.path(),"stroke-width": 0});
+      //svg.change(group.find("path").get(0),{d:p.path()});
+      //svg.change(group.find("line").get(0),{x1:fx2,y1:fy,x2:tx2,y2:ty});
+      group.find("path").attr({"stroke-width": 2});
+
 
     }
 
-    var jqPath=$(svg.path(p,{fill: 'none', stroke: '#9999ff', strokeWidth: 2})).attr({
-      from: from.id,
-      to: to.id
-    });
 
+    // create the group
+    var group = svg.group(""+from.id+"-"+to.id);
+    var p = svg.createPath();
+
+    //add the arrow
+    svg.image(group,0,0,5,10,"linkArrow.png");
+    //create empty path
+    svg.path(group,p,{class:"taskLinkPathSVG"});
+    //svg.line(group,0,0,0,0,{fill: 'none', stroke: '#9999ff', strokeWidth: 2});
+
+
+    //set "from" and "to" to the group, bind "update" and trigger it
+    var jqGroup=$(group).data({from: from, to: to }).attr({from:from.id,to:to.id}).on("update",update).trigger("update");
+
+    return jqGroup;
   }
+
 
   /**
    * A rendering method which paints a start to start dependency.
    */
-  function drawStartToStart(rectFrom, rectTo, peduncolusSize) {
+  function drawStartToStart(from, to) {
     console.error("StartToStart not supported on SVG")
+    var rectFrom = buildRect(from);
+    var rectTo = buildRect(to);
   }
-
-  var rectFrom = buildRect(from);
-  var rectTo = buildRect(to);
 
   // Dispatch to the correct renderer
   if (type == 'start-to-start') {
-    drawStartToStart(svg,rectFrom, rectTo, peduncolusSize);
+    drawStartToStart(svg,from, to, peduncolusSize);
   } else {
-    drawStartToEnd(svg, rectFrom, rectTo, peduncolusSize);
+    drawStartToEnd(svg, from, to, peduncolusSize);
   }
 };
 
@@ -606,7 +675,7 @@ Ganttalendar.prototype.refreshGantt = function() {
 
   //set current task
   if (this.master.currentTask) {
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y"));
+    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y")+"px");
   }
 };
 
