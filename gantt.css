@@ -356,16 +356,9 @@ input[readonly]{
   overflow: visible;
 }
 
-.taskBoxSVG:hover .taskLayout{
-  stroke-width:1px;
-  stroke:red;
-  stroke-dasharray:2,2;
-}
-
 .taskBoxSVG .taskLayout{
   stroke-width:1px;
   stroke:#bbb;
-  /*stroke-dasharray:none;*/
   /*fill:url('#taskGrad'); do not work on firefox*/
 }
 
@@ -413,17 +406,30 @@ input[readonly]{
 }
 
 
-.taskLinkHandleSVG{
+.linkHandleSVG{
   display:none;
-  stroke:#ddd;
+  stroke:#888;
   stroke-width:2px;
   fill:#eee;
   cursor: pointer;
 }
 
 .linkLineSVG{
-  stroke-width:3px;
-  stroke:red;
+  stroke-width:5px;
+  stroke: #ffaf3a;
   stroke-linecap:"round";
-  stroke-dasharray:5,5;
+  opacity: .5;
+    /*stroke-dasharray:5,5;*/
 }
+
+.linkOnProgress .deSVG.taskBoxSVG  {
+  cursor:cell;
+}
+
+.taskBoxSVG.linkOver .taskLayout{
+  stroke-width:5px;
+  stroke:#ffaf3a;
+  opacity: .5;
+}
+
+

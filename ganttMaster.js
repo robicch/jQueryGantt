@@ -602,6 +602,7 @@ GanttMaster.prototype.updateLinks = function (task) {
     var newDepsString = "";
 
     var visited = [];
+    var depOk=[];
     for (var j = 0; j < deps.length; j++) {
       var dep = deps[j]; // in the form of row(lag) e.g. 2:3,3:4,5
       var par = dep.split(":");
@@ -626,8 +627,12 @@ GanttMaster.prototype.updateLinks = function (task) {
           todoOk = false;
           this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE + "\n" + task.name + " -> " + sup.name);
         } else {
-          this.links.push(new Link(sup, task, lag));
-          newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
+          //avoid duplicates
+          if (depOk.indexOf(sup.id)<0){
+            depOk.push(sup.id);
+            this.links.push(new Link(sup, task, lag));
+            newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
+          }
         }
       }
     }
