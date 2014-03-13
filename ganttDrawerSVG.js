@@ -292,7 +292,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     //create the svg
     box.svg({settings:{class:"ganttSVGBox"},
       onLoad:         function (svg) {
-        console.debug("svg loaded", svg);
+        //console.debug("svg loaded", svg);
 
         //creates gradient and definitions
         var defs = svg.defs('myDefs');
@@ -361,17 +361,30 @@ Ganttalendar.prototype.drawTask = function (task) {
   //console.debug("drawTask", task.name,new Date(task.start));
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
-  //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
   editorRow = task.rowElement;
   var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
-
   task.hasChild = task.isParent();
 
   var taskBox = $(_createTaskSVG(task, {x:x, y:top, width:Math.round((task.end - task.start) * self.fx)}));
   task.ganttElement = taskBox;
 
-  taskBox.dblclick(function () {
+  //bind all events on taskBox
+  taskBox
+    .click(function(e){ // manages selection
+      e.stopPropagation();// to avoid body remove focused
+      self.element.find(".focused").removeClass("focused");
+      $(".ganttSVGBox .focused").removeClass("focused");
+      var el = $(this);
+      if (!self.resDrop)
+        el.addClass("focused");
+      self.resDrop = false; //hack to avoid select
+
+      $("body").off("click.focused").one("click.focused", function () {
+        $(".ganttSVGBox .focused").removeClass("focused");
+      })
+
+    }).dblclick(function () {
       self.master.showTaskEditor($(this).attr("taskid"));
     }).mouseenter(function () {
       //bring to top
@@ -386,7 +399,7 @@ Ganttalendar.prototype.drawTask = function (task) {
       var el = $(this);
       el.removeClass("linkOver").find(".linkHandleSVG").hide();
 
-    }).mouseup(function () {
+    }).mouseup(function (e) {
       $(":focus").blur(); // in order to save grid field when moving task
     }).mousedown(function () {
       var task = self.master.getTask($(this).attr("taskId"));
@@ -394,32 +407,40 @@ Ganttalendar.prototype.drawTask = function (task) {
     }).dragExtedSVG($(self.svg.root()),{
       canResize: this.master.canWrite,
       canDrag:   !task.depends && this.master.canWrite,
-      drag:      function () {
+      startDrag:function(e){
+        $(".ganttSVGBox .focused").removeClass("focused");
+      },
+      drag:      function (e) {
         $("[from=" + task.id + "],[to=" + task.id + "]").trigger("update");
       },
-      drop:      function () {
+      drop:      function (e) {
+        self.resDrop=true; //hack to avoid select
         var taskbox = $(this);
         var task = self.master.getTask(taskbox.attr("taskid"));
-        var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
 
+        var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
         self.master.beginTransaction();
         self.master.moveTask(task, new Date(s));
         self.master.endTransaction();
-
       },
-      resize:    function () {
+      startResize:function(e){
+        console.debug("startResize");
+        $(".ganttSVGBox .focused").removeClass("focused");
+      },
+      resize:    function (e) {
         //find and update links from, to
         $("[from=" + task.id + "],[to=" + task.id + "]").trigger("update");
       },
-      stopResize:function () {
+      stopResize:function (e) {
+        self.resDrop=true; //hack to avoid select
         //console.debug(ui)
         var taskbox = $(this);
         var task = self.master.getTask(taskbox.attr("taskid"));
-        var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
-        var e = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
+        var st = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
 
+        var en = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
         self.master.beginTransaction();
-        self.master.changeTaskDates(task, new Date(s), new Date(e));
+        self.master.changeTaskDates(task, new Date(st), new Date(en));
         self.master.endTransaction();
       }
     });
@@ -438,17 +459,27 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     // create the line
     var startX = parseFloat(taskBox.attr("x")) + (self.linkFromEnd? parseFloat(taskBox.attr("width")) :0);
-    var line = self.svg.line(startX, parseFloat(taskBox.attr("y")) + parseFloat(taskBox.attr("height")) / 2, e.pageX - offs.left - 5, e.pageY - offs.top - 5, {class:"linkLineSVG"});
+    var startY = parseFloat(taskBox.attr("y")) + parseFloat(taskBox.attr("height")) / 2;
+    var line = self.svg.line(startX, startY, e.pageX - offs.left - 5, e.pageY - offs.top - 5, {class:"linkLineSVG"});
+    var circle = self.svg.circle(startX, startY, 5, {class:"linkLineSVG"});
+
 
     //bind mousemove to draw a line
     svg.bind("mousemove.linkSVG", function (e) {
       var offs = svg.offset();
-      self.svg.change(line, { x2:e.pageX - offs.left - 5, y2:e.pageY - offs.top - 5});
+      var nx = e.pageX - offs.left;
+      var ny = e.pageY - offs.top;
+      var c=Math.sqrt(Math.pow(nx-startX,2)+Math.pow(ny-startY,2));
+      nx=nx-(nx-startX)*10/c;
+      ny=ny-(ny-startY)*10/c;
+      self.svg.change(line, { x2:nx, y2:ny});
+      self.svg.change(circle, { cx:nx, cy:ny});
     });
 
     //bind mouseup un body to stop
     $("body").one("mouseup.linkSVG", function (e) {
       line.remove();
+      circle.remove();
       self.linkOnProgress=false;
       svg.removeClass("linkOnProgress");
 
@@ -467,7 +498,7 @@ Ganttalendar.prototype.drawTask = function (task) {
           taskTo = self.master.getTask(taskBox.attr("taskid"));
         }
 
-        if (taskTo) {
+        if (taskTo && taskFrom) {
           var gap = 0;
           var depInp = taskTo.rowElement.find("[name=depends]");
           depInp.val(depInp.val() + ((depInp.val() + "").length > 0 ? "," : "") + (taskFrom.getRow() + 1) + (gap != 0 ? ":" + gap : ""));
@@ -519,6 +550,7 @@ Ganttalendar.prototype.drawTask = function (task) {
   }
 
 };
+
 
 
 Ganttalendar.prototype.addTask = function (task) {
@@ -629,6 +661,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     //set "from" and "to" to the group, bind "update" and trigger it
     var jqGroup = $(group).data({from:from, to:to }).attr({from:from.id, to:to.id}).on("update", update).trigger("update");
 
+    jqGroup.addClass("linkGroupSVG");
     return jqGroup;
   }
 
@@ -642,12 +675,31 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     var rectTo = buildRect(to);
   }
 
+  var link;
   // Dispatch to the correct renderer
   if (type == 'start-to-start') {
-    drawStartToStart(from, to, peduncolusSize);
+    link=drawStartToStart(from, to, peduncolusSize);
   } else {
-    drawStartToEnd(from, to, peduncolusSize);
+    link=drawStartToEnd(from, to, peduncolusSize);
   }
+
+  link.click(function(e){
+    var el=$(this);
+    e.stopPropagation();// to avoid body remove focused
+    self.element.find(".focused").removeClass("focused");
+    $(".ganttSVGBox .focused").removeClass("focused");
+    var el = $(this);
+    if (!self.resDrop)
+      el.addClass("focused");
+    self.resDrop = false; //hack to avoid select
+
+    $("body").off("click.focused").one("click.focused", function () {
+      $(".ganttSVGBox .focused").removeClass("focused");
+    })
+
+  });
+
+
 };
 
 Ganttalendar.prototype.redrawLinks = function () {
@@ -746,8 +798,10 @@ $.fn.dragExtedSVG = function (svg,opt) {
     canResize:      true,
     resizeZoneWidth:15,
     minSize:10,
+    startDrag:           function (e) {},
     drag:           function (e) {},
     drop:           function (e) {},
+    startResize:         function (e) {},
     resize:         function (e) {},
     stopResize:     function (e) {}
   };
@@ -776,7 +830,6 @@ $.fn.dragExtedSVG = function (svg,opt) {
 
           $("body").unselectable();
 
-
           //start resize
           var x = x2 - posx;
           if (options.canResize && (x>=0 && x <= options.resizeZoneWidth) ){
@@ -784,8 +837,17 @@ $.fn.dragExtedSVG = function (svg,opt) {
             rectMouseDx=x2-e.pageX;
             target.attr("oldw",target.attr("width"));
 
+            var one=true;
+
             //bind event for start resizing
             $(svg).bind("mousemove.deSVG",function (e) {
+
+              if (one){
+                //trigger startResize
+                options.startResize.call(target.get(0),e);
+                one=false;
+              }
+
               //manage resizing
               var posx =  e.pageX;
               var nW = posx - x1 +rectMouseDx;
@@ -799,13 +861,20 @@ $.fn.dragExtedSVG = function (svg,opt) {
             $("body").one("mouseup.deSVG", stopResize );
 
             // start drag
-          }else if (options.canDrag ) {
+          } else if (options.canDrag ) {
             //store offset mouse x1
             rectMouseDx=parseFloat(target.attr("x"))-e.pageX;
             target.attr("oldx",target.attr("x"));
 
-            //bind event for start resizing
+            var one=true;
+            //bind event for start dragging
             $(svg).bind("mousemove.deSVG",function (e) {
+              if (one){
+                //trigger startDrag
+                options.startDrag.call(target.get(0),e);
+                one=false;
+              }
+
               //manage resizing
               target.attr("x",rectMouseDx+ e.pageX);
               //callback
@@ -837,7 +906,7 @@ $.fn.dragExtedSVG = function (svg,opt) {
           }
         }
 
-      ).addClass("deSVG unselectable").attr("unselectable", "true");
+      ).addClass("deSVG");
     }
   });
   return this;
@@ -845,7 +914,7 @@ $.fn.dragExtedSVG = function (svg,opt) {
 
   function stopResize(e){
     $(svg).unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
-    if (target.attr("oldw")!=target.attr("width"))
+    if (target && target.attr("oldw")!=target.attr("width"))
       options.stopResize.call(target.get(0),e); //callback
     target=undefined;
     $("body").clearUnselectable();
@@ -853,7 +922,7 @@ $.fn.dragExtedSVG = function (svg,opt) {
 
   function drop(e){
     $(svg).unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
-    if (target.attr("oldx")!=target.attr("x"))
+    if (target && target.attr("oldx")!=target.attr("x"))
       options.drop.call(target.get(0),e); //callback
     target=undefined;
     $("body").clearUnselectable();

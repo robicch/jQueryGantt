@@ -366,8 +366,9 @@ input[readonly]{
 
 .taskLinkPathSVG{
   stroke:#9999ff;
-  stroke-width:2px;
+  stroke-width:3px;
   fill:none;
+  cursor:pointer;
 }
 
 .ganttLinesSVG{
@@ -416,7 +417,7 @@ input[readonly]{
 
 .linkLineSVG{
   stroke-width:5px;
-  stroke: #ffaf3a;
+  stroke: #9999ff;
   stroke-linecap:"round";
   opacity: .5;
     /*stroke-dasharray:5,5;*/
@@ -428,8 +429,18 @@ input[readonly]{
 
 .taskBoxSVG.linkOver .taskLayout{
   stroke-width:5px;
-  stroke:#ffaf3a;
+  stroke:#9999ff;
   opacity: .5;
 }
 
+.taskBoxSVG.focused .taskLayout{
+  stroke-width:3px;
+  stroke:red;
+}
+
+
+.focused .taskLinkPathSVG{
+  stroke-width:5px;
+  stroke:red;
+}
 

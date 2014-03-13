@@ -46,6 +46,7 @@ function Task(id, name, code, level, start, end, duration) {
   this.code = code;
   this.level = level;
   this.status = "STATUS_UNDEFINED";
+  this.depends;
 
   this.start = start
   this.duration = duration;

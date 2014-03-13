@@ -69,11 +69,11 @@ GanttMaster.prototype.init = function (place) {
 
   //setup splitter
   var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
-  splitter.secondBox.scroll(function () {
+  splitter.secondBox.scroll(function() {
     var top = $(this).scrollTop();
     splitter.firstBox.scrollTop(top);
-    splitter.firstBox.find(".fixHead").css('top', top);
-    splitter.secondBox.find(".fixHead").css('top', top);
+    splitter.firstBox.find(".fixHead").css('top',top);
+    splitter.secondBox.find(".fixHead").css('top',top);
   });
 
 
@@ -82,118 +82,31 @@ GanttMaster.prototype.init = function (place) {
 
 
   //bindings
-  place.bind("deleteCurrentTask.gantt",function (e) {
-      if (!self.canWrite)
-        return;
-      var row = self.currentTask.getRow();
-      if (self.currentTask && (row > 0 || self.currentTask.isNew())) {
-        self.beginTransaction();
+  place.bind("refreshTasks.gantt",function () {
+    self.redrawTasks();
+  }).bind("refreshTask.gantt",function (e, task) {
+      self.drawTask(task);
 
-        self.currentTask.deleteTask();
-
-        self.currentTask = undefined;
-        //recompute depends string
-        self.updateDependsStrings();
-
-        //redraw
-        self.redraw();
-
-        //focus next row
-        row = row > self.tasks.length - 1 ? self.tasks.length - 1 : row;
-        if (row >= 0) {
-          self.currentTask = self.tasks[row];
-          self.currentTask.rowElement.click();
-          self.currentTask.rowElement.find("[name=name]").focus();
-        }
-        self.endTransaction();
-      }
-
+    }).bind("deleteCurrentTask.gantt",function (e) {
+      self.deleteCurrentTask();
 
     }).bind("addAboveCurrentTask.gantt",function () {
-      if (!self.canWrite)
-        return;
-      var factory = new TaskFactory();
-
-      var ch;
-      var row = 0;
-      if (self.currentTask) {
-        //cannot add brothers to root
-        if (self.currentTask.level <= 0)
-          return;
-
-        ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level, self.currentTask.start, 1);
-        row = self.currentTask.getRow();
-      } else {
-        ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
-      }
-      self.beginTransaction();
-      var task = self.addTask(ch, row);
-      if (task) {
-        task.rowElement.click();
-        task.rowElement.find("[name=name]").focus();
-      }
-      self.endTransaction();
+      self.addAboveCurrentTask();
 
     }).bind("addBelowCurrentTask.gantt",function () {
-      if (!self.canWrite)
-        return;
-
-      var factory = new TaskFactory();
-      self.beginTransaction();
-      var ch;
-      var row = 0;
-      if (self.currentTask) {
-        ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level + 1, self.currentTask.start, 1);
-        row = self.currentTask.getRow() + 1;
-      } else {
-        ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
-      }
-      var task = self.addTask(ch, row);
-      if (task) {
-        task.rowElement.click();
-        task.rowElement.find("[name=name]").focus();
-      }
-      self.endTransaction();
-
+      self.addBelowCurrentTask();
 
     }).bind("indentCurrentTask.gantt",function () {
-      if (!self.canWrite)
-        return;
-
-      if (self.currentTask) {
-        self.beginTransaction();
-        self.currentTask.indent();
-        self.endTransaction();
-      }
+      self.indentCurrentTask();
 
     }).bind("outdentCurrentTask.gantt",function () {
-      if(!self.canWrite)
-        return;
-
-      if (self.currentTask) {
-        self.beginTransaction();
-        self.currentTask.outdent();
-        self.endTransaction();
-      }
+      self.outdentCurrentTask();
 
     }).bind("moveUpCurrentTask.gantt",function () {
-      if(!self.canWrite)
-        return;
+      self.moveUpCurrentTask();
 
-      if (self.currentTask) {
-        self.beginTransaction();
-        self.currentTask.moveUp();
-        self.endTransaction();
-      }
     }).bind("moveDownCurrentTask.gantt",function () {
-      if(!self.canWrite)
-        return;
-
-      if (self.currentTask) {
-        self.beginTransaction();
-        self.currentTask.moveDown();
-        self.endTransaction();
-      }
+      self.moveDownCurrentTask();
 
     }).bind("zoomPlus.gantt",function () {
       self.gantt.zoomGantt(true);
@@ -209,6 +122,62 @@ GanttMaster.prototype.init = function (place) {
         return;
       self.redo();
     });
+
+
+    //keyboard management bindings
+  $("body").bind("keyup.body", function (e) {
+    //console.debug(""e.keyCode, e.target.nodeName,e)
+
+    //manage only events for body -> not from inputs
+    if (e.target.nodeName.toLowerCase()=="body"){
+      e.preventDefault();
+      e.stopPropagation();
+      //something focused?
+        //console.debug(e.keyCode)
+        switch (e.keyCode) {
+          case 46: //del
+          case 8: //backspace
+            var focused = self.gantt.element.find(".focused.focused");// orrible hack for chrome that seems to keep in memory a cached object
+            if (focused.is(".taskBoxSVG")){
+              self.deleteCurrentTask();
+            } else if(focused.is(".linkGroupSVG")){
+              console.debug("deleting link from to",focused.data("from"),focused.data("to"))
+              self.removeLink(focused.data("from"),focused.data("to"))
+
+
+            }
+            break;
+
+          case 38: //up
+            if (self.currentTask){
+              if (self.currentTask.ganttElement.is(".focused"))  {
+                self.moveUpCurrentTask();
+                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
+
+              } else{
+                self.currentTask.rowElement.prev().click();
+              }
+            }
+            break;
+
+          case 40: //down
+            if (self.currentTask){
+              if (self.currentTask.ganttElement.is(".focused"))  {
+                self.moveDownCurrentTask();
+                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
+              } else{
+                self.currentTask.rowElement.next().click();
+              }
+            }
+            break;
+        }
+
+
+    }
+  });
+
+
+
 };
 
 GanttMaster.messages = {
@@ -225,15 +194,14 @@ GanttMaster.messages = {
   "CANNOT_DEPENDS_ON_ANCESTORS":          "CANNOT_DEPENDS_ON_ANCESTORS",
   "CANNOT_DEPENDS_ON_DESCENDANTS":        "CANNOT_DEPENDS_ON_DESCENDANTS",
   "INVALID_DATE_FORMAT":                  "INVALID_DATE_FORMAT",
-  "GANTT_QUARTER_SHORT":                  "GANTT_QUARTER_SHORT",
-  "GANTT_SEMESTER_SHORT":                 "GANTT_SEMESTER_SHORT",
-  "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE":      "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE"
+  "GANTT_QUARTER_SHORT": "GANTT_QUARTER_SHORT",
+  "GANTT_SEMESTER_SHORT":"GANTT_SEMESTER_SHORT",
+  "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE":"CANNOT_CLOSE_TASK_IF_OPEN_ISSUE"
 };
 
 
 GanttMaster.prototype.createTask = function (id, name, code, level, start, duration) {
   var factory = new TaskFactory();
-
   return factory.build(id, name, code, level, start, duration);
 };
 
@@ -256,6 +224,25 @@ GanttMaster.prototype.updateDependsStrings = function () {
     var dep = link.to.depends;
     link.to.depends = link.to.depends + (link.to.depends == "" ? "" : ",") + (link.from.getRow() + 1) + (link.lag ? ":" + link.lag : "");
   }
+
+};
+
+GanttMaster.prototype.removeLink = function (fromTask,toTask) {
+  var found=false;
+  for (var i = 0; i < this.links.length; i++) {
+    if (this.links[i].from==fromTask && this.links[i].to==toTask){
+      console.debug("removeLink");
+      this.links.splice(i,1);
+      found=true;
+      break;
+    }
+  }
+
+  if (found){
+    this.updateDependsStrings();
+    this.redraw();
+  }
+
 
 };
 
@@ -538,16 +525,16 @@ GanttMaster.prototype.updateLinks = function (task) {
     var sups = task.getSuperiors();
 
     //my parent' superiors are my superiors too
-    var p = task.getParent();
-    while (p) {
-      sups = sups.concat(p.getSuperiors());
-      p = p.getParent();
+    var p= task.getParent();
+    while (p){
+      sups=sups.concat(p.getSuperiors());
+      p= p.getParent();
     }
 
     //my children superiors are my superiors too
-    var chs = task.getChildren();
-    for (var i = 0; i < chs.length; i++) {
-      sups = sups.concat(chs[i].getSuperiors());
+    var chs=task.getChildren();
+    for (var i=0;i<chs.length;i++){
+      sups=sups.concat(chs[i].getSuperiors());
     }
 
 
@@ -559,8 +546,8 @@ GanttMaster.prototype.updateLinks = function (task) {
         loop = true;
         break;
       } else {
-        if (visited.indexOf(supLink.from.id + "x" + target.id) <= 0) {
-          visited.push(supLink.from.id + "x" + target.id);
+        if (visited.indexOf(supLink.from.id+"x"+target.id) <= 0) {
+          visited.push(supLink.from.id+"x"+target.id);
           if (isLoop(supLink.from, target, visited)) {
             loop = true;
             break;
@@ -570,11 +557,11 @@ GanttMaster.prototype.updateLinks = function (task) {
     }
 
     //check target parent
-    var tpar = target.getParent();
-    if (tpar) {
-      if (visited.indexOf(task.id + "x" + tpar.id) <= 0) {
-        visited.push(task.id + "x" + tpar.id);
-        if (isLoop(task, tpar, visited)) {
+    var tpar=target.getParent();
+    if (tpar ){
+      if (visited.indexOf(task.id+"x"+tpar.id) <= 0) {
+        visited.push(task.id+"x"+tpar.id);
+        if (isLoop(task,tpar, visited)) {
           loop = true;
         }
       }
@@ -598,11 +585,9 @@ GanttMaster.prototype.updateLinks = function (task) {
     var descendants = task.getDescendant();
 
     var deps = task.depends.split(",");
-
     var newDepsString = "";
 
     var visited = [];
-    var depOk=[];
     for (var j = 0; j < deps.length; j++) {
       var dep = deps[j]; // in the form of row(lag) e.g. 2:3,3:4,5
       var par = dep.split(":");
@@ -627,18 +612,14 @@ GanttMaster.prototype.updateLinks = function (task) {
           todoOk = false;
           this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE + "\n" + task.name + " -> " + sup.name);
         } else {
-          //avoid duplicates
-          if (depOk.indexOf(sup.id)<0){
-            depOk.push(sup.id);
-            this.links.push(new Link(sup, task, lag));
-            newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
-          }
+          this.links.push(new Link(sup, task, lag));
+          newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
         }
       }
     }
-
     if (todoOk) {
       task.depends = newDepsString;
+
     }
 
   }
@@ -647,6 +628,139 @@ GanttMaster.prototype.updateLinks = function (task) {
 
   return todoOk;
 };
+
+
+GanttMaster.prototype.moveUpCurrentTask=function(){
+  var self=this;
+  console.debug("moveUpCurrentTask",self.currentTask)
+  if(!self.canWrite)
+    return;
+
+  if (self.currentTask) {
+    self.beginTransaction();
+    self.currentTask.moveUp();
+    self.endTransaction();
+  }
+};
+
+GanttMaster.prototype.moveDownCurrentTask=function(){
+  var self=this;
+  console.debug("moveDownCurrentTask",self.currentTask)
+  if(!self.canWrite)
+    return;
+
+  if (self.currentTask) {
+    self.beginTransaction();
+    self.currentTask.moveDown();
+    self.endTransaction();
+  }
+};
+
+GanttMaster.prototype.outdentCurrentTask=function(){
+  var self=this;
+  if(!self.canWrite)
+    return;
+
+  if (self.currentTask) {
+    self.beginTransaction();
+    self.currentTask.outdent();
+    self.endTransaction();
+  }
+
+};
+
+GanttMaster.prototype.indentCurrentTask=function(){
+  var self=this;
+  if (!self.canWrite)
+    return;
+
+  if (self.currentTask) {
+    self.beginTransaction();
+    self.currentTask.indent();
+    self.endTransaction();
+  }
+};
+
+GanttMaster.prototype.addBelowCurrentTask=function(){
+  var self=this;
+  if (!self.canWrite)
+    return;
+
+  var factory = new TaskFactory();
+  self.beginTransaction();
+  var ch;
+  var row = 0;
+  if (self.currentTask) {
+    ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level + 1, self.currentTask.start, 1);
+    row = self.currentTask.getRow() + 1;
+  } else {
+    ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
+  }
+  var task = self.addTask(ch, row);
+  if (task) {
+    task.rowElement.click();
+    task.rowElement.find("[name=name]").focus();
+  }
+  self.endTransaction();
+
+};
+
+GanttMaster.prototype.addAboveCurrentTask=function(){
+  var self=this;
+  if (!self.canWrite)
+    return;
+  var factory = new TaskFactory();
+
+  var ch;
+  var row = 0;
+  if (self.currentTask) {
+    //cannot add brothers to root
+    if (self.currentTask.level <= 0)
+      return;
+
+    ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level, self.currentTask.start, 1);
+    row = self.currentTask.getRow();
+  } else {
+    ch = factory.build("tmp_" + new Date().getTime(), "", "", 0, new Date().getTime(), 1);
+  }
+  self.beginTransaction();
+  var task = self.addTask(ch, row);
+  if (task) {
+    task.rowElement.click();
+    task.rowElement.find("[name=name]").focus();
+  }
+  self.endTransaction();
+
+};
+
+GanttMaster.prototype.deleteCurrentTask=function(){
+  var self=this;
+  if (!self.canWrite)
+    return;
+  var row = self.currentTask.getRow();
+  if (self.currentTask && (row > 0 || self.currentTask.isNew())) {
+    self.beginTransaction();
+
+    self.currentTask.deleteTask();
+
+    self.currentTask = undefined;
+    //recompute depends string
+    self.updateDependsStrings();
+
+    //redraw
+    self.redraw();
+
+    //focus next row
+    row = row > self.tasks.length - 1 ? self.tasks.length - 1 : row;
+    if (row >= 0) {
+      self.currentTask = self.tasks[row];
+      self.currentTask.rowElement.click();
+      self.currentTask.rowElement.find("[name=name]").focus();
+    }
+    self.endTransaction();
+  }
+};
+
 
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
@@ -740,7 +854,6 @@ GanttMaster.prototype.undo = function () {
   if (this.__undoStack.length > 0) {
     var his = this.__undoStack.pop();
     this.__redoStack.push(JSON.stringify(this.saveGantt()));
-
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds = oldTasks.deletedTaskIds;
     this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
@@ -756,7 +869,6 @@ GanttMaster.prototype.redo = function () {
   if (this.__redoStack.length > 0) {
     var his = this.__redoStack.pop();
     this.__undoStack.push(JSON.stringify(this.saveGantt()));
-
     var oldTasks = JSON.parse(his);
     this.deletedTaskIds = oldTasks.deletedTaskIds;
     this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
