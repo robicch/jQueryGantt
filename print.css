@@ -48,10 +48,6 @@ BODY, TBODY {
   page-break-before: always !important;
 }
 
-.ganttLinks,.ganttTable{
-  height:auto !important;
-}
-
 .fixHead{
   display: none !important;
 }

@@ -286,7 +286,7 @@ input[readonly]{
   background-color:#fff;
   margin-top:-2px;
   margin-left:-2px;
-  padding: 3px
+  padding: 3px;
 }
 .taskStatus{
   width:15px;
@@ -295,6 +295,7 @@ input[readonly]{
   text-indent: 0;
   position:relative;
 }
+
 .taskStatus[status=STATUS_ACTIVE]{
  background-color: #66FF99;
 }
@@ -317,7 +318,6 @@ input[readonly]{
 .ganttTaskEditor {
     padding: 10px
 }
-
 
 
 .unselectable {

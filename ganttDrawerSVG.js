@@ -425,7 +425,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         self.master.endTransaction();
       },
       startResize:function(e){
-        console.debug("startResize");
+        //console.debug("startResize");
         $(".ganttSVGBox .focused").removeClass("focused");
       },
       resize:    function (e) {
@@ -479,8 +479,8 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     //bind mouseup un body to stop
     $("body").one("mouseup.linkSVG", function (e) {
-      line.remove();
-      circle.remove();
+      $(line).remove();
+      $(circle).remove();
       self.linkOnProgress=false;
       svg.removeClass("linkOnProgress");
 

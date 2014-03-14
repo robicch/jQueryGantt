@@ -324,14 +324,9 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 Ganttalendar.prototype.drawTask = function (task) {
   //console.debug("drawTask", task.name,new Date(task.start));
 
-  //var initialOffset = 40;
-  //var elementOffset = 30;
-
   //var prof = new Profiler("ganttDrawTask");
   var self = this;
   editorRow = task.rowElement;
-  //var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
-  //var top = self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * editorRow.index());
   var top = editorRow.position().top+ editorRow.offsetParent().scrollTop();
 
   var x = Math.round((task.start - self.startMillis) * self.fx);
@@ -691,102 +686,6 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
   }
 };
 
-//<%-------------------------------------- GANT DRAW LINK SVG ELEMENT --------------------------------------%>
-//'from' and 'to' are tasks already drawn
-Ganttalendar.prototype.drawLinkSVG = function (svg,from, to, type) {
-  //console.debug("drawLinkSVG")
-  var peduncolusSize = 10;
-  var lineSize = 2;
-
-  /**
-   * Given an item, extract its rendered position
-   * width and height into a structure.
-   */
-  function buildRect(item) {
-    var rect = item.ganttElement.position();
-    rect.width = item.ganttElement.width();
-    rect.height = item.ganttElement.height();
-    return rect;
-  }
-
-  /**
-   * The default rendering method, which paints a start to end dependency.
-   */
-  function drawStartToEnd(svg,rectFrom, rectTo, ps) {
-
-    var offs=4; // todo error from padding?
-
-    var fx1=rectFrom.left;
-    var fx2=rectFrom.left + rectFrom.width;
-    var fy=rectFrom.height / 2 + rectFrom.top+offs;
-
-    var tx1=rectTo.left;
-    var tx2=rectTo.left + rectTo.width;
-    var ty=rectTo.height / 2 + rectTo.top+offs;
-
-
-    var p = svg.createPath();
-
-
-    var tooClose = tx1<fx2+ 2 * ps;
-    var r=5; //radius
-    var arrowOffset=5;
-    var up=fy>ty;
-    var fup=up?-1:1;
-
-    var prev=fx2+2*ps>tx1;
-    var fprev=prev?-1:1;
-
-    if (tooClose) {
-      var firstLine = fup*(rectFrom.height / 2-2*r +2);
-      p.move(fx2,fy)
-        .line(ps,0,true)
-        .arc(r,r,90,false,!up,r,fup*r,true)
-        .line(0,firstLine,true)
-        .arc(r,r,90,false,!up,-r,fup*r,true)
-        .line(fprev*2*ps+(tx1-fx2),0,true)
-        .arc(r,r,90,false,up,-r,fup*r,true)
-        .line(0,(Math.abs(ty-fy) - 4*r - Math.abs(firstLine))*fup-arrowOffset,true)
-        .arc(r,r,90,false,up,r,fup*r,true)
-        .line(ps,0,true);
-      svg.image(tx1-5,ty-5-arrowOffset,5,10,"linkArrow.png");
-
-    } else {
-      p.move(fx2,fy)
-        .line((tx1-fx2)/2-r,0,true)
-        .arc(r,r,90,false,!up,r,fup*r,true)
-        .line(0,ty-fy-fup*2*r+arrowOffset,true)
-        .arc(r,r,90,false,up,r,fup*r,true)
-        .line((tx1-fx2)/2-r,0,true);
-      svg.image(tx1-5,ty-5+arrowOffset,5,10,"linkArrow.png");
-
-    }
-
-    var jqPath=$(svg.path(p,{fill: 'none', stroke: '#9999ff', strokeWidth: 2})).attr({
-      from: from.id,
-      to: to.id
-    });
-
-  }
-
-  /**
-   * A rendering method which paints a start to start dependency.
-   */
-  function drawStartToStart(rectFrom, rectTo, peduncolusSize) {
-    console.error("StartToStart not supported on SVG")
-  }
-
-  var rectFrom = buildRect(from);
-  var rectTo = buildRect(to);
-
-  // Dispatch to the correct renderer
-  if (type == 'start-to-start') {
-    drawStartToStart(svg,rectFrom, rectTo, peduncolusSize);
-  } else {
-    drawStartToEnd(svg, rectFrom, rectTo, peduncolusSize);
-  }
-};
-
 Ganttalendar.prototype.redrawLinks = function() {
   //console.debug("redrawLinks ");
   var self = this;
@@ -818,7 +717,7 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  console.debug("refreshGantt")
+  //console.debug("refreshGantt")
   var par = this.element.parent();
 
   //try to maintain last scroll
@@ -838,7 +737,6 @@ Ganttalendar.prototype.refreshGantt = function() {
 
   //set current task
   this.synchHighlight();
-
 
   //set old scroll  
   //console.debug("old scroll:",scrollX,scrollY)

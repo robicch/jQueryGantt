@@ -69,9 +69,6 @@ GanttMaster.prototype.init = function (place) {
   var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
   self.splitter=splitter;
 
-  //splitter.firstBox.scroll(function() {console.debug("scroll 1")});
-
-
   //prepend buttons
   place.before($.JST.createFromTemplate({}, "GANTBUTTONS"));
 
@@ -125,75 +122,74 @@ GanttMaster.prototype.init = function (place) {
     //console.debug(e.keyCode+ " "+e.target.nodeName)
 
     //manage only events for body -> not from inputs
-    if (e.target.nodeName.toLowerCase()=="body" || e.target.nodeName.toLowerCase()=="svg"){ // chrome,ff receive "body" ie "svg"
+    if (e.target.nodeName.toLowerCase() == "body" || e.target.nodeName.toLowerCase() == "svg") { // chrome,ff receive "body" ie "svg"
       e.preventDefault();
       e.stopPropagation();
       //something focused?
-        console.debug(e.keyCode, e.ctrlKey)
-        switch (e.keyCode) {
-          case 46: //del
-          case 8: //backspace
-            var focused = self.gantt.element.find(".focused.focused");// orrible hack for chrome that seems to keep in memory a cached object
-            if (focused.is(".taskBox")){ // remove task
-              self.deleteCurrentTask();
-            } else if(focused.is(".linkGroup")){
-              self.removeLink(focused.data("from"),focused.data("to"));
+      //console.debug(e.keyCode, e.ctrlKey)
+      switch (e.keyCode) {
+        case 46: //del
+        case 8: //backspace
+          var focused = self.gantt.element.find(".focused.focused");// orrible hack for chrome that seems to keep in memory a cached object
+          if (focused.is(".taskBox")) { // remove task
+            self.deleteCurrentTask();
+          } else if (focused.is(".linkGroup")) {
+            self.removeLink(focused.data("from"), focused.data("to"));
+          }
+          break;
+
+        case 38: //up
+          if (self.currentTask) {
+            if (self.currentTask.ganttElement.is(".focused")) {
+              self.moveUpCurrentTask();
+              self.gantt.element.oneTime(100, function () {self.currentTask.ganttElement.addClass("focused");});
+
+            } else {
+              self.currentTask.rowElement.prev().click();
             }
-            break;
+          }
+          break;
 
-          case 38: //up
-            if (self.currentTask){
-              if (self.currentTask.ganttElement.is(".focused"))  {
-                self.moveUpCurrentTask();
-                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
-
-              } else{
-                self.currentTask.rowElement.prev().click();
-              }
+        case 40: //down
+          if (self.currentTask) {
+            if (self.currentTask.ganttElement.is(".focused")) {
+              self.moveDownCurrentTask();
+              self.gantt.element.oneTime(100, function () {self.currentTask.ganttElement.addClass("focused");});
+            } else {
+              self.currentTask.rowElement.next().click();
             }
-            break;
+          }
+          break;
 
-          case 40: //down
-            if (self.currentTask){
-              if (self.currentTask.ganttElement.is(".focused"))  {
-                self.moveDownCurrentTask();
-                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
-              } else{
-                self.currentTask.rowElement.next().click();
-              }
+        case 39: //right
+          if (self.currentTask) {
+            if (self.currentTask.ganttElement.is(".focused")) {
+              self.indentCurrentTask();
+              self.gantt.element.oneTime(100, function () {self.currentTask.ganttElement.addClass("focused");});
             }
-            break;
+          }
+          break;
 
-          case 39: //right
-            if (self.currentTask){
-              if (self.currentTask.ganttElement.is(".focused"))  {
-                self.indentCurrentTask();
-                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
-              }
+        case 37: //left
+          if (self.currentTask) {
+            if (self.currentTask.ganttElement.is(".focused")) {
+              self.outdentCurrentTask();
+              self.gantt.element.oneTime(100, function () {self.currentTask.ganttElement.addClass("focused");});
             }
-            break;
-
-          case 37: //left
-            if (self.currentTask){
-              if (self.currentTask.ganttElement.is(".focused"))  {
-                self.outdentCurrentTask();
-                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
-              }
-            }
-            break;
+          }
+          break;
 
 
+        case 89: //Y
+          if (e.ctrlKey) {
+            self.redo();
+          }
 
-          case 89: //Y
-            if (e.ctrlKey){
-              self.redo();
-            }
-
-          case 90: //Z
-            if (e.ctrlKey){
-              self.undo();
-            }
-        }
+        case 90: //Z
+          if (e.ctrlKey) {
+            self.undo();
+          }
+      }
     }
   });
 };
@@ -246,11 +242,11 @@ GanttMaster.prototype.updateDependsStrings = function () {
 };
 
 GanttMaster.prototype.removeLink = function (fromTask,toTask) {
+  //console.debug("removeLink");
   this.beginTransaction();
   var found=false;
   for (var i = 0; i < this.links.length; i++) {
     if (this.links[i].from==fromTask && this.links[i].to==toTask){
-      console.debug("removeLink");
       this.links.splice(i,1);
       found=true;
       break;
@@ -649,7 +645,7 @@ GanttMaster.prototype.updateLinks = function (task) {
 
 GanttMaster.prototype.moveUpCurrentTask=function(){
   var self=this;
-  console.debug("moveUpCurrentTask",self.currentTask)
+  //console.debug("moveUpCurrentTask",self.currentTask)
   if(!self.canWrite)
     return;
 
@@ -662,7 +658,7 @@ GanttMaster.prototype.moveUpCurrentTask=function(){
 
 GanttMaster.prototype.moveDownCurrentTask=function(){
   var self=this;
-  console.debug("moveDownCurrentTask",self.currentTask)
+  //console.debug("moveDownCurrentTask",self.currentTask)
   if(!self.canWrite)
     return;
 
