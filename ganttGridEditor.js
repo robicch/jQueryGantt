@@ -333,13 +333,17 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
   //change status
   taskRow.find(".taskStatus").click(function () {
+
+    var initialOffset = 40;
+    var elementOffset = 30;
+    
     var el = $(this);
     var tr = el.closest("[taskId]");
     var taskId = tr.attr("taskId");
     var task = self.master.getTask(taskId);
 
     var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
-    changer.css("top", tr.position().top + self.element.parent().scrollTop());
+    changer.css("top", self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * task.rowElement.index()));
     changer.find("[status=" + task.status + "]").addClass("selected");
     changer.find(".taskStatus").click(function () {
       self.master.beginTransaction();
