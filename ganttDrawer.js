@@ -322,12 +322,16 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
+
+  var initialOffset = 40;
+  var elementOffset = 30;
+  
   //console.debug("drawTask", task.name,new Date(task.start));
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
   //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
   editorRow = task.rowElement;
-  var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
+  var top = self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * editorRow.index());
   var x = Math.round((task.start - self.startMillis) * self.fx);
   var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
 

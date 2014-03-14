@@ -121,6 +121,8 @@ GanttMaster.prototype.init = function (place) {
       if(!self.canWrite)
         return;
       self.redo();
+    }).bind("resize.gantt", function () {
+      resizeGantt(self);
     });
 
 
@@ -878,3 +880,58 @@ GanttMaster.prototype.redo = function () {
   }
 };
 
+
+
+function resizeGantt(workspaceData) {
+  var workspaceMargin = 10;
+
+  var tableWidthPercentage = 0.60;
+  var separatorWidth = 5;
+console.log(workspaceData.element);
+  var workspace = new Object();
+  workspace.element = $(workspaceData.element);
+
+  workspace.width = $(window).width() - workspaceMargin;
+  workspace.height = $(window).height() - workspace.element.offset().top; // fixs buttons fluid layout
+
+  var table = new Object();
+  table.element = workspace.element.children('.splitBox1');
+
+  var separator = new Object();
+  separator.element = workspace.element.children('.vSplitBar');
+
+  var diagram = new Object();
+  diagram.element = workspace.element.children('.splitBox2');
+
+  table.left = 0;
+  table.width = workspace.width * tableWidthPercentage;
+
+  var tableMaxWidth = workspace.element.children('.gdfTable.fixHead').width();
+  if (table.width > tableMaxWidth) {
+    table.width = tableMaxWidth;
+  }
+
+  separator.left = table.width;
+  separator.width = separatorWidth;
+
+  diagram.left = table.width + separatorWidth;
+  diagram.width = workspace.width - diagram.left;
+
+  workspace.element.css({
+    width : workspace.width,
+    height : workspace.height
+  });
+  table.element.css({
+    left : table.left,
+    width : table.width
+  });
+  separator.element.css({
+    left : separator.left,
+    width : separator.width
+  });
+  diagram.element.css({
+    left : diagram.left,
+    width : diagram.width
+  });
+
+}
