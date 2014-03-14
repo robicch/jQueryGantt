@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2013 Open Lab
+ Copyright (c) 2012-2014 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -285,7 +285,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     });
 
   //cursor key movement
-  taskRow.find("input").keyup(function (event) {
+  taskRow.find("input").keydown(function (event) {
     var theCell = $(this);
     var theTd = theCell.parent();
     var theRow = theTd.parent();
@@ -295,7 +295,13 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     switch (event.keyCode) {
 
       case 37: //left arrow
-       break;
+        if(this.selectionEnd==0)
+          theTd.prev().find("input").focus();
+        break;
+      case 39: //right arrow
+        if(this.selectionEnd==this.value.length)
+          theTd.next().find("input").focus();
+        break;
 
       case 38: //up arrow
         var prevRow = theRow.prev();
@@ -321,7 +327,6 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
       case 9: //tab
        case 13: //enter
-       case 39: //right arrow
        break;
     }
     return ret;
@@ -333,32 +338,26 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
   //change status
   taskRow.find(".taskStatus").click(function () {
-
-    var initialOffset = 40;
-    var elementOffset = 30;
-    
     var el = $(this);
     var tr = el.closest("[taskId]");
     var taskId = tr.attr("taskId");
     var task = self.master.getTask(taskId);
 
     var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
-    changer.css("top", self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * task.rowElement.index()));
     changer.find("[status=" + task.status + "]").addClass("selected");
-    changer.find(".taskStatus").click(function () {
+    changer.find(".taskStatus").click(function (e) {
+      e.stopPropagation();
+      var newStatus = $(this).attr("status");
+      changer.remove();
       self.master.beginTransaction();
-      task.changeStatus($(this).attr("status"));
+      task.changeStatus(newStatus);
       self.master.endTransaction();
       el.attr("status", task.status);
-      changer.remove();
-      el.show();
-
     });
-    el.hide().oneTime(3000, "hideChanger", function () {
+    el.oneTime(3000, "hideChanger", function () {
       changer.remove();
-      $(this).show();
     });
-    el.after(changer);
+    el.append(changer);
   });
 
 
@@ -390,13 +389,14 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     self.master.currentTask = self.master.getTask(row.attr("taskId"));
 
     //move highlighter
-    if (self.master.currentTask.rowElement)
-      self.master.gantt.highlightBar.css("top", self.master.currentTask.rowElement.position().top);
+    self.master.gantt.synchHighlight();
 
     //if offscreen scroll to element
     var top = row.position().top;
-    if (row.position().top > self.element.parent().height()) {
-      self.master.gantt.element.parent().scrollTop(row.position().top - self.element.parent().height() + 100);
+    if (top > self.element.parent().height()) {
+      row.offsetParent().scrollTop(top - self.element.parent().height() + 100);
+    } else if (top<40){
+      row.offsetParent().scrollTop(row.offsetParent().scrollTop()-40+top);
     }
   });
 
@@ -528,19 +528,18 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
     taskEditor.find("#status").click(function () {
       var tskStatusChooser = $(this);
       var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
-      changer.css("top", tskStatusChooser.position().top);
       changer.find("[status=" + task.status + "]").addClass("selected");
-      changer.find(".taskStatus").click(function () {
+      changer.find(".taskStatus").click(function (e) {
+        e.stopPropagation();
         tskStatusChooser.attr("status", $(this).attr("status"));
         changer.remove();
-        tskStatusChooser.show();
       });
-      tskStatusChooser.hide().oneTime(3000, "hideChanger", function () {
+      tskStatusChooser.oneTime(3000, "hideChanger", function () {
         changer.remove();
-        $(this).show();
       });
-      tskStatusChooser.after(changer);
+      tskStatusChooser.append(changer);
     });
+
 
     //save task
     taskEditor.find("#saveButton").click(function () {

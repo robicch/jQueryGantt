@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Open Lab
+  Copyright (c) 2012-2014 Open Lab
   Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -119,19 +119,21 @@ $.splittify = {
 
     perc=perc || 50;
 
-    var splitter = $("<div>").addClass("splitterContainer");
-
+    var element = $("<div>").addClass("splitterContainer");
     var firstBox = $("<div>").addClass("splitElement splitBox1");
     var splitterBar = $("<div>").addClass("splitElement vSplitBar").attr("unselectable", "on").html("|").css("padding-top",where.height()/2+"px");
     var secondBox = $("<div>").addClass("splitElement splitBox2");
+
+    var splitter= new Splitter(element,firstBox,secondBox,splitterBar);
+    splitter.perc=perc;
 
 
     firstBox.append(first);
     secondBox.append(second);
 
-    splitter.append(firstBox).append(secondBox).append(splitterBar);
+    element.append(firstBox).append(secondBox).append(splitterBar);
 
-    where.append(splitter);
+    where.append(element);
 
     var w = where.innerWidth();
     var fbw = w *perc/ 100 - splitterBar.width();
@@ -140,6 +142,7 @@ $.splittify = {
     firstBox.width(fbw).css({left:0});
     splitterBar.css({left:firstBox.width()});
     secondBox.width(w -fbw-splitterBar.width() ).css({left:firstBox.width() + splitterBar.width()});
+
 
     splitterBar.bind("mousedown.gdf", function(e) {
       $.splittify.splitterBar = $(this);
@@ -152,12 +155,13 @@ $.splittify = {
         var sb = $.splittify.splitterBar;
         var pos = e.pageX - sb.parent().offset().left;
         var w = sb.parent().width();
-        var fbw=firstBox
+        var fbw=firstBox;
         if (pos > 10 && pos < realW) {
           sb.css({left:pos});
           firstBox.width(pos);
           secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
         }
+        splitter.perc=(firstBox.width()/splitter.element.width())*100;
 
         //bind mouse up on body to stop resizing
       }).bind("mouseup.gdf", function() {
@@ -168,10 +172,47 @@ $.splittify = {
       });
     });
 
-    return {firstBox:firstBox,secondBox:secondBox,splitterBar:splitterBar};
 
+    // keep both side in synch when scroll
+    var stopScroll=false;
+    var fs=firstBox.add(secondBox);
+    fs.scroll(function() {
+      if (!stopScroll){
+        var top = $(this).scrollTop();
+        stopScroll=true;
+        if ($(this).is(".splitBox1"))
+          secondBox.scrollTop(top);
+        else
+          firstBox.scrollTop(top);
+        firstBox.find(".fixHead").css('top',top);
+        secondBox.find(".fixHead").css('top',top);
+      }
+      stopScroll=false;
+    });
+
+
+    function Splitter(element,firstBox, secondBox, splitterBar) {
+      this.element=element;
+      this.firstBox = firstBox;
+      this.secondBox = secondBox;
+      this.splitterBar = splitterBar;
+      this.perc=0;
+
+      this.resize=function(){
+        var totW=this.element.width();
+        var realW=this.firstBox.get(0).scrollWidth;
+        var newW=totW*this.perc/100;
+        newW=newW<realW?newW:realW;
+        this.firstBox.css({width:newW});
+        this.splitterBar.css({left:newW});
+        this.secondBox.css({left:newW + this.splitterBar.width(),width:totW - newW - this.splitterBar.width()});
+      }
+    }
+
+    return splitter;
   }
 };
+
 
 
 

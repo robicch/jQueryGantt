@@ -18,6 +18,10 @@
   padding:4px 2px
 }
 
+.gdfCell.noClip{
+  overflow: visible;
+}
+
 .gdfColHeader {
   min-width: 5px;
   height: 30px;
@@ -180,14 +184,14 @@
 
 /* -------------------------------------- TASK -----------------------------------*/
 
-.taskBox{
+.taskBoxDiv{
   position:absolute;
   height:25px;
   margin-top:3px;
   z-index:100;
 }
 
-.taskBox .layout {
+.taskBoxDiv .layout {
   height:100%;
   color:red;
   border-radius:2px;
@@ -195,7 +199,7 @@
   border:1px solid #bbb;
 }
 
-.taskBox .taskStatus {
+.taskBoxDiv .taskStatus {
     left:5px;
     top:10px;
     position:absolute;
@@ -203,7 +207,7 @@
     height:10px;
 }
 
-.taskBox .layout .milestone{
+.taskBoxDiv .layout .milestone{
   top:0px;
   position:absolute;
   width:18px;
@@ -211,23 +215,23 @@
   height:18px;
   display:none;
 }
-.taskBox .layout .milestone.end{
+.taskBoxDiv .layout .milestone.end{
   right:0;
 }
-.taskBox .layout .milestone.active{
+.taskBoxDiv .layout .milestone.active{
   display:block;
 }
 
-.taskBox.hasChild .layout{
+.taskBoxDiv.hasChild .layout{
   border-top:2px solid black;
 }
 
-.taskBox .taskProgress{
+.taskBoxDiv .taskProgress{
   height:5px;
   position:absolute;
 }
 
-.taskBox .layout.extDep{
+.taskBoxDiv .layout.extDep{
   background-image:url(hasExternalDeps.png);
 }
 
@@ -280,14 +284,16 @@ input[readonly]{
   height:24px;
   border:1px solid #a0a0a0;
   background-color:#fff;
-  margin-top:2px;
-  margin-left:-1px;
-  padding: 2px
+  margin-top:-2px;
+  margin-left:-2px;
+  padding: 3px
 }
 .taskStatus{
   width:15px;
   height:15px;
   display:inline-block;
+  text-indent: 0;
+  position:relative;
 }
 .taskStatus[status=STATUS_ACTIVE]{
  background-color: #66FF99;
@@ -361,8 +367,6 @@ input[readonly]{
   stroke:#bbb;
   /*fill:url('#taskGrad'); do not work on firefox*/
 }
-
-
 
 .taskLinkPathSVG{
   stroke:#9999ff;

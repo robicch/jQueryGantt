@@ -135,6 +135,12 @@ $(function() {
     $("#ndo").html(x+" "+new Date(mill))
   });*/
 
+
+  $(window).resize(function(){
+    workSpace.css({width:$(window).width() - 20,height:$(window).height() - 100});
+    workSpace.trigger("resize.gantt");
+  })
+
 });
 
 
@@ -412,7 +418,7 @@ function saveInLocalStorage() {
   <div class="__template__" type="TASKROW"><!--
   <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
     <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
-    <td class="gdfCell" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
+    <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
 
@@ -427,7 +433,7 @@ function saveInLocalStorage() {
   <div class="__template__" type="TASKEMPTYROW"><!--
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
-    <td class="gdfCell" align="center"></td>
+    <td class="gdfCell noClip" align="center"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
@@ -439,7 +445,7 @@ function saveInLocalStorage() {
   --></div>
 
   <div class="__template__" type="TASKBAR"><!--
-  <div class="taskBox" taskId="(#=obj.id#)" >
+  <div class="taskBox taskBoxDiv" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
       <div class="taskStatus" status="(#=obj.status#)"></div>
       <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>

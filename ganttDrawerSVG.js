@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2013 Open Lab
+ Copyright (c) 2012-2014 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -362,7 +362,8 @@ Ganttalendar.prototype.drawTask = function (task) {
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
   editorRow = task.rowElement;
-  var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
+  //var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
+  var top = editorRow.position().top+ editorRow.offsetParent().scrollTop();
   var x = Math.round((task.start - self.startMillis) * self.fx);
   task.hasChild = task.isParent();
 
@@ -516,7 +517,7 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   function _createTaskSVG(task, dimensions) {
     var svg = self.svg;
-    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, 25, {class:"taskBoxSVG", taskid:task.id});
+    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, 25, {class:"taskBox taskBoxSVG", taskid:task.id});
 
     svg.title(taskSvg, task.name);
     //external box
@@ -661,7 +662,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     //set "from" and "to" to the group, bind "update" and trigger it
     var jqGroup = $(group).data({from:from, to:to }).attr({from:from.id, to:to.id}).on("update", update).trigger("update");
 
-    jqGroup.addClass("linkGroupSVG");
+    jqGroup.addClass("linkGroup");
     return jqGroup;
   }
 
@@ -761,9 +762,7 @@ Ganttalendar.prototype.refreshGantt = function () {
   par.scrollLeft(scrollX);
 
   //set current task
-  if (this.master.currentTask) {
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y") + "px");
-  }
+  this.synchHighlight();
 };
 
 
@@ -771,6 +770,12 @@ Ganttalendar.prototype.fitGantt = function () {
   delete this.zoom;
   this.refreshGantt();
 };
+
+Ganttalendar.prototype.synchHighlight = function() {
+  if (this.master.currentTask && this.master.currentTask.ganttElement)
+    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y")+"px");
+};
+
 
 Ganttalendar.prototype.centerOnToday = function () {
   var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx) - 30;

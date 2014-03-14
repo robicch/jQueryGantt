@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012-2013 Open Lab
+  Copyright (c) 2012-2014 Open Lab
   Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -322,17 +322,20 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
-
-  var initialOffset = 40;
-  var elementOffset = 30;
-  
   //console.debug("drawTask", task.name,new Date(task.start));
-  var self = this;
+
+  //var initialOffset = 40;
+  //var elementOffset = 30;
+
   //var prof = new Profiler("ganttDrawTask");
-  //var editorRow = self.master.editor.element.find("tr[taskId=" + task.id + "]");
+  var self = this;
   editorRow = task.rowElement;
-  var top = self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * editorRow.index());
+  //var top = editorRow.position().top+self.master.editor.element.parent().scrollTop();
+  //var top = self.master.editor.element.parent().scrollTop() + initialOffset + (elementOffset * editorRow.index());
+  var top = editorRow.position().top+ editorRow.offsetParent().scrollTop();
+
   var x = Math.round((task.start - self.startMillis) * self.fx);
+
   var taskBox = $.JST.createFromTemplate(task, "TASKBAR");
 
 
@@ -343,7 +346,6 @@ Ganttalendar.prototype.drawTask = function (task) {
   //if I'm parent
   if (task.isParent())
     taskBox.addClass("hasChild");
-
 
   taskBox.css({top:top,left:x,width:Math.round((task.end - task.start) * self.fx)});
 
@@ -373,7 +375,6 @@ Ganttalendar.prototype.drawTask = function (task) {
     }).on("mouseup",function(){
         $(":focus").blur(); // in order to save grid field when moving task
       });
-
   }
 
   taskBox.dblclick(function() {
@@ -817,7 +818,7 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  //console.debug("refreshGantt")
+  console.debug("refreshGantt")
   var par = this.element.parent();
 
   //try to maintain last scroll
@@ -835,21 +836,26 @@ Ganttalendar.prototype.refreshGantt = function() {
   par.append(domEl);
   this.redrawTasks();
 
+  //set current task
+  this.synchHighlight();
+
+
   //set old scroll  
   //console.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
 
-  //set current task
-  if (this.master.currentTask) {
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.position().top);
-  }
 };
 
 
 Ganttalendar.prototype.fitGantt = function() {
   delete this.zoom;
   this.refreshGantt();
+};
+
+Ganttalendar.prototype.synchHighlight = function() {
+  if (this.master.currentTask && this.master.currentTask.ganttElement)
+    this.highlightBar.css("top", this.master.currentTask.ganttElement.css("top"));
 };
 
 Ganttalendar.prototype.centerOnToday = function() {

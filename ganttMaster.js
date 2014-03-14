@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2013 Open Lab
+ Copyright (c) 2012-2014 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -54,9 +54,7 @@ function GanttMaster() {
 
 GanttMaster.prototype.init = function (place) {
   this.element = place;
-
   var self = this;
-
   //load templates
   $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
 
@@ -69,12 +67,9 @@ GanttMaster.prototype.init = function (place) {
 
   //setup splitter
   var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
-  splitter.secondBox.scroll(function() {
-    var top = $(this).scrollTop();
-    splitter.firstBox.scrollTop(top);
-    splitter.firstBox.find(".fixHead").css('top',top);
-    splitter.secondBox.find(".fixHead").css('top',top);
-  });
+  self.splitter=splitter;
+
+  //splitter.firstBox.scroll(function() {console.debug("scroll 1")});
 
 
   //prepend buttons
@@ -122,31 +117,27 @@ GanttMaster.prototype.init = function (place) {
         return;
       self.redo();
     }).bind("resize.gantt", function () {
-      resizeGantt(self);
+      self.resize();
     });
-
 
     //keyboard management bindings
   $("body").bind("keyup.body", function (e) {
-    //console.debug(""e.keyCode, e.target.nodeName,e)
+    //console.debug(e.keyCode+ " "+e.target.nodeName)
 
     //manage only events for body -> not from inputs
-    if (e.target.nodeName.toLowerCase()=="body"){
+    if (e.target.nodeName.toLowerCase()=="body" || e.target.nodeName.toLowerCase()=="svg"){ // chrome,ff receive "body" ie "svg"
       e.preventDefault();
       e.stopPropagation();
       //something focused?
-        //console.debug(e.keyCode)
+        console.debug(e.keyCode, e.ctrlKey)
         switch (e.keyCode) {
           case 46: //del
           case 8: //backspace
             var focused = self.gantt.element.find(".focused.focused");// orrible hack for chrome that seems to keep in memory a cached object
-            if (focused.is(".taskBoxSVG")){
+            if (focused.is(".taskBox")){ // remove task
               self.deleteCurrentTask();
-            } else if(focused.is(".linkGroupSVG")){
-              console.debug("deleting link from to",focused.data("from"),focused.data("to"))
-              self.removeLink(focused.data("from"),focused.data("to"))
-
-
+            } else if(focused.is(".linkGroup")){
+              self.removeLink(focused.data("from"),focused.data("to"));
             }
             break;
 
@@ -172,14 +163,39 @@ GanttMaster.prototype.init = function (place) {
               }
             }
             break;
+
+          case 39: //right
+            if (self.currentTask){
+              if (self.currentTask.ganttElement.is(".focused"))  {
+                self.indentCurrentTask();
+                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
+              }
+            }
+            break;
+
+          case 37: //left
+            if (self.currentTask){
+              if (self.currentTask.ganttElement.is(".focused"))  {
+                self.outdentCurrentTask();
+                self.gantt.element.oneTime(100,function(){self.currentTask.ganttElement.addClass("focused");});
+              }
+            }
+            break;
+
+
+
+          case 89: //Y
+            if (e.ctrlKey){
+              self.redo();
+            }
+
+          case 90: //Z
+            if (e.ctrlKey){
+              self.undo();
+            }
         }
-
-
     }
   });
-
-
-
 };
 
 GanttMaster.messages = {
@@ -230,6 +246,7 @@ GanttMaster.prototype.updateDependsStrings = function () {
 };
 
 GanttMaster.prototype.removeLink = function (fromTask,toTask) {
+  this.beginTransaction();
   var found=false;
   for (var i = 0; i < this.links.length; i++) {
     if (this.links[i].from==fromTask && this.links[i].to==toTask){
@@ -244,8 +261,7 @@ GanttMaster.prototype.removeLink = function (fromTask,toTask) {
     this.updateDependsStrings();
     this.redraw();
   }
-
-
+  this.endTransaction();
 };
 
 //------------------------------------  ADD TASK --------------------------------------------
@@ -285,7 +301,6 @@ GanttMaster.prototype.addTask = function (task, row) {
     task.status = task.getParent().status;
   else
     task.status = "STATUS_ACTIVE";
-
 
   var ret = task;
   if (linkLoops || !task.setPeriod(task.start, task.end)) {
@@ -742,10 +757,9 @@ GanttMaster.prototype.deleteCurrentTask=function(){
   var row = self.currentTask.getRow();
   if (self.currentTask && (row > 0 || self.currentTask.isNew())) {
     self.beginTransaction();
-
     self.currentTask.deleteTask();
-
     self.currentTask = undefined;
+
     //recompute depends string
     self.updateDependsStrings();
 
@@ -881,57 +895,7 @@ GanttMaster.prototype.redo = function () {
 };
 
 
-
-function resizeGantt(workspaceData) {
-  var workspaceMargin = 10;
-
-  var tableWidthPercentage = 0.60;
-  var separatorWidth = 5;
-console.log(workspaceData.element);
-  var workspace = new Object();
-  workspace.element = $(workspaceData.element);
-
-  workspace.width = $(window).width() - workspaceMargin;
-  workspace.height = $(window).height() - workspace.element.offset().top; // fixs buttons fluid layout
-
-  var table = new Object();
-  table.element = workspace.element.children('.splitBox1');
-
-  var separator = new Object();
-  separator.element = workspace.element.children('.vSplitBar');
-
-  var diagram = new Object();
-  diagram.element = workspace.element.children('.splitBox2');
-
-  table.left = 0;
-  table.width = workspace.width * tableWidthPercentage;
-
-  var tableMaxWidth = workspace.element.children('.gdfTable.fixHead').width();
-  if (table.width > tableMaxWidth) {
-    table.width = tableMaxWidth;
-  }
-
-  separator.left = table.width;
-  separator.width = separatorWidth;
-
-  diagram.left = table.width + separatorWidth;
-  diagram.width = workspace.width - diagram.left;
-
-  workspace.element.css({
-    width : workspace.width,
-    height : workspace.height
-  });
-  table.element.css({
-    left : table.left,
-    width : table.width
-  });
-  separator.element.css({
-    left : separator.left,
-    width : separator.width
-  });
-  diagram.element.css({
-    left : diagram.left,
-    width : diagram.width
-  });
-
-}
+GanttMaster.prototype.resize = function () {
+  //console.debug("GanttMaster.resize")
+  this.splitter.resize();
+};
