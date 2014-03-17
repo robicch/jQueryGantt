@@ -442,6 +442,11 @@ input[readonly]{
   stroke:red;
 }
 
+.taskLabelSVG {
+  stroke: none;
+  fill:#999;
+  font-size: 12px;
+}
 
 .focused .taskLinkPathSVG{
   stroke-width:5px;

@@ -427,18 +427,31 @@ Ganttalendar.prototype.drawTask = function (task) {
       startResize:function(e){
         //console.debug("startResize");
         $(".ganttSVGBox .focused").removeClass("focused");
+        var taskbox = $(this);
+        var text=$(self.svg.text(parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width")+5), parseInt(taskbox.attr("y")),"", {stroke:"#888", "font-size":"12px"}));
+
+        taskBox.data("textDur",text);
       },
       resize:    function (e) {
         //find and update links from, to
+        var taskbox = $(this);
+        var st = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
+        var en = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
+        var d=computeStartDate(st).distanceInWorkingDays(computeEndDate(en));
+        var text = taskBox.data("textDur");
+        text.attr("x",parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width"))+5).html(d);
+
         $("[from=" + task.id + "],[to=" + task.id + "]").trigger("update");
       },
       stopResize:function (e) {
         self.resDrop=true; //hack to avoid select
         //console.debug(ui)
+        var textBox=taskBox.data("textDur");
+        if (textBox)
+          textBox.remove();
         var taskbox = $(this);
         var task = self.master.getTask(taskbox.attr("taskid"));
         var st = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
-
         var en = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
         self.master.beginTransaction();
         self.master.changeTaskDates(task, new Date(st), new Date(en));
@@ -542,6 +555,9 @@ Ganttalendar.prototype.drawTask = function (task) {
     if (task.endIsMilestone) {
       svg.image(taskSvg, "100%", 4, 18, 18, "milestone.png", {transform:"translate(-9)"})
     }
+
+    //task label
+    svg.text(taskSvg, "100%", 18, task.name, {class:"taskLabelSVG",  transform: "translate(8,-8)"});
 
     //link tool
     svg.circle(taskSvg, "0", 12, 4, {class:"taskLinkStartSVG linkHandleSVG", transform:"translate(0)"});
@@ -919,7 +935,8 @@ $.fn.dragExtedSVG = function (svg,opt) {
 
   function stopResize(e){
     $(svg).unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
-    if (target && target.attr("oldw")!=target.attr("width"))
+    //if (target && target.attr("oldw")!=target.attr("width"))
+    if (target )
       options.stopResize.call(target.get(0),e); //callback
     target=undefined;
     $("body").clearUnselectable();
