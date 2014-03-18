@@ -176,19 +176,22 @@ $.splittify = {
     // keep both side in synch when scroll
     var stopScroll=false;
     var fs=firstBox.add(secondBox);
-    fs.scroll(function() {
-      if (!stopScroll){
-        var top = $(this).scrollTop();
-        stopScroll=true;
-        if ($(this).is(".splitBox1"))
-          secondBox.scrollTop(top);
-        else
-          firstBox.scrollTop(top);
-        firstBox.find(".fixHead").css('top',top);
-        secondBox.find(".fixHead").css('top',top);
+    fs.scroll(function(e) {
+      var el = $(this);
+      var top = el.scrollTop();
+      if (el.is(".splitBox1") && stopScroll!="splitBox2"){
+        stopScroll="splitBox1";
+        secondBox.scrollTop(top);
+      }else if (el.is(".splitBox2") && stopScroll!="splitBox1"){
+        stopScroll="splitBox2";
+        firstBox.scrollTop(top);
       }
-      stopScroll=false;
+      secondBox.find(".fixHead").css('top', top);
+      firstBox.find(".fixHead").css('top', top);
+
+      where.stopTime("reset").oneTime(100,"reset",function(){stopScroll="";})
     });
+
 
 
     function Splitter(element,firstBox, secondBox, splitterBar) {

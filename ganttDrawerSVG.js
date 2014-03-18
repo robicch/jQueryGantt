@@ -33,8 +33,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.minGanttSize = minGanttSize;
   this.includeToday = true; //when true today is always visible. If false boundaries comes from tasks periods
 
-  //this.zoomLevels = ["d","w","m","q","s","y"];
-  this.zoomLevels = ["w", "m", "q", "s", "y"];
+  this.zoomLevels = ["d","w", "m", "q", "s", "y"];
 
   this.element = this.create(zoom, startmillis, endMillis);
 
@@ -74,6 +73,11 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     if (zoomLevel == "d") {
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
+
+      start.setFirstDayOfThisWeek();
+      end.setFirstDayOfThisWeek();
+      end.setDate(end.getDate() + 6);
+
 
       //reset day of week
     } else if (zoomLevel == "w") {
@@ -233,28 +237,30 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
       //week
     } else if (zoom == "w") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 30); //1 day= 30px
+      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 40); //1 day= 40px
       iterate(function (date) {
         var end = new Date(date.getTime());
         end.setDate(end.getDate() + 6);
         tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
         date.setDate(date.getDate() + 7);
       }, function (date) {
-        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, 30));
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, 40));
         trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
 
       //days
     } else if (zoom == "d") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
+      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 100); //1 day= 100px
       iterate(function (date) {
-        tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
-        date.setDate(date.getDate() + 1);
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 6);
+        tr1.append(createHeadCell(date.format("MMMM d") + " - " + end.format("MMMM d yyyy"), 7));
+        date.setDate(date.getDate() + 7);
       }, function (date) {
-        tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null), 200);
-        trBody.append(createBodyCell(1, date.getHours() > 17, isHoliday(date) ? "holy" : null));
-        date.setHours(date.getHours() + 6);
+        tr2.append(createHeadCell(date.format("EEE d"), 1, isHoliday(date) ? "holyH" : null, 100));
+        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
+        date.setDate(date.getDate() + 1);
       });
 
     } else {
@@ -418,7 +424,6 @@ Ganttalendar.prototype.drawTask = function (task) {
         self.resDrop=true; //hack to avoid select
         var taskbox = $(this);
         var task = self.master.getTask(taskbox.attr("taskid"));
-
         var s = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
         self.master.beginTransaction();
         self.master.moveTask(task, new Date(s));
@@ -429,7 +434,6 @@ Ganttalendar.prototype.drawTask = function (task) {
         $(".ganttSVGBox .focused").removeClass("focused");
         var taskbox = $(this);
         var text=$(self.svg.text(parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width")+5), parseInt(taskbox.attr("y")),"", {stroke:"#888", "font-size":"12px"}));
-
         taskBox.data("textDur",text);
       },
       resize:    function (e) {
@@ -470,13 +474,11 @@ Ganttalendar.prototype.drawTask = function (task) {
     self.linkFromEnd=$(this).is(".taskLinkEndSVG");
     svg.addClass("linkOnProgress");
 
-
     // create the line
     var startX = parseFloat(taskBox.attr("x")) + (self.linkFromEnd? parseFloat(taskBox.attr("width")) :0);
     var startY = parseFloat(taskBox.attr("y")) + parseFloat(taskBox.attr("height")) / 2;
     var line = self.svg.line(startX, startY, e.pageX - offs.left - 5, e.pageY - offs.top - 5, {class:"linkLineSVG"});
     var circle = self.svg.circle(startX, startY, 5, {class:"linkLineSVG"});
-
 
     //bind mousemove to draw a line
     svg.bind("mousemove.linkSVG", function (e) {

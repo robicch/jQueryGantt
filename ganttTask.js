@@ -756,7 +756,8 @@ Task.prototype.indent = function() {
     }
 
     var parent = this.getParent();
-    if(parent && this.start < parent.start && parent.depends && !this.depends){
+    // set start date to parent' start if no deps
+    if(parent && !this.depends){
     	var new_end = computeEndByDuration(parent.start, this.duration);
     	this.master.changeTaskDates(this, parent.start, new_end);
     }

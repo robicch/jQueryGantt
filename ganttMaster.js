@@ -118,15 +118,14 @@ GanttMaster.prototype.init = function (place) {
     });
 
     //keyboard management bindings
-  $("body").bind("keyup.body", function (e) {
+  $("body").bind("keydown.body", function (e) {
     //console.debug(e.keyCode+ " "+e.target.nodeName)
 
     //manage only events for body -> not from inputs
     if (e.target.nodeName.toLowerCase() == "body" || e.target.nodeName.toLowerCase() == "svg") { // chrome,ff receive "body" ie "svg"
-      e.preventDefault();
-      e.stopPropagation();
       //something focused?
       //console.debug(e.keyCode, e.ctrlKey)
+      var eventManaged=true;
       switch (e.keyCode) {
         case 46: //del
         case 8: //backspace
@@ -184,11 +183,22 @@ GanttMaster.prototype.init = function (place) {
           if (e.ctrlKey) {
             self.redo();
           }
+          break;
 
         case 90: //Z
           if (e.ctrlKey) {
             self.undo();
           }
+          break;
+
+        default :{
+          eventManaged=false;
+        }
+
+      }
+      if (eventManaged){
+        e.preventDefault();
+        e.stopPropagation();
       }
     }
   });

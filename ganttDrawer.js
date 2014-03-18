@@ -28,8 +28,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.minGanttSize = minGanttSize;
   this.includeToday=true; //when true today is always visible. If false boundaries comes from tasks periods
 
-  //this.zoomLevels = ["d","w","m","q","s","y"];
-  this.zoomLevels = ["w","m","q","s","y"];
+  this.zoomLevels = ["d","w", "m", "q", "s", "y"];
 
   this.element = this.create(zoom, startmillis, endMillis);
 
@@ -67,6 +66,10 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
     if (zoomLevel == "d") {
       start.setHours(0, 0, 0, 0);
       end.setHours(23, 59, 59, 999);
+
+      start.setFirstDayOfThisWeek();
+      end.setFirstDayOfThisWeek();
+      end.setDate(end.getDate() + 6);
 
       //reset day of week
     } else if (zoomLevel == "w") {
@@ -226,28 +229,30 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
       //week
     } else if (zoom == "w") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 30); //1 day= 30px
+      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 40); //1 day= 40px
       iterate(function(date) {
         var end = new Date(date.getTime());
         end.setDate(end.getDate() + 6);
         tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
         date.setDate(date.getDate() + 7);
       }, function(date) {
-        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null,30));
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, 40));
         trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
 
       //days
     } else if (zoom == "d") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 200); //1 day= 200px
+      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 100); //1 day= 100px
       iterate(function(date) {
-        tr1.append(createHeadCell(date.format("EEEE d MMMM yyyy"), 4, isHoliday(date) ? "holyH" : null));
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 6);
+        tr1.append(createHeadCell(date.format("MMMM d") + " - " + end.format("MMMM d yyyy"), 7));
+        date.setDate(date.getDate() + 7);
+      }, function (date) {
+        tr2.append(createHeadCell(date.format("EEE d"), 1, isHoliday(date) ? "holyH" : null, 100));
+        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
-      }, function(date) {
-        tr2.append(createHeadCell(date.format("HH"), 1, isHoliday(date) ? "holyH" : null),200);
-        trBody.append(createBodyCell(1, date.getHours() > 17, isHoliday(date) ? "holy" : null));
-        date.setHours(date.getHours() + 6);
       });
 
     } else {
