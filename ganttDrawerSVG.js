@@ -433,7 +433,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         //console.debug("startResize");
         $(".ganttSVGBox .focused").removeClass("focused");
         var taskbox = $(this);
-        var text=$(self.svg.text(parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width")+5), parseInt(taskbox.attr("y")),"", {stroke:"#888", "font-size":"12px"}));
+        var text=$(self.svg.text(parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width")+8), parseInt(taskbox.attr("y")),"", {"font-size":"10px","fill":"red"}));
         taskBox.data("textDur",text);
       },
       resize:    function (e) {
@@ -443,7 +443,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         var en = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
         var d=computeStartDate(st).distanceInWorkingDays(computeEndDate(en));
         var text = taskBox.data("textDur");
-        text.attr("x",parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width"))+5).html(d);
+        text.attr("x",parseInt(taskbox.attr("x"))+parseInt(taskbox.attr("width"))+8).html(d);
 
         $("[from=" + task.id + "],[to=" + task.id + "]").trigger("update");
       },
