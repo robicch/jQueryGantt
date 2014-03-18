@@ -532,7 +532,7 @@ Ganttalendar.prototype.drawTask = function (task) {
     var svg = self.svg;
     var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, 25, {class:"taskBox taskBoxSVG", taskid:task.id});
 
-    svg.title(taskSvg, task.name);
+    //svg.title(taskSvg, task.name);
     //external box
     var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"6", ry:"6"});
     layout.style.fill = "url(#taskGrad)";
@@ -667,12 +667,15 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 
     // create the group
     var group = svg.group(self.linksGroup, "" + from.id + "-" + to.id);
+    svg.title(group, from.name+" -> "+to.name);
+
     var p = svg.createPath();
 
     //add the arrow
     svg.image(group, 0, 0, 5, 10, "linkArrow.png");
     //create empty path
     svg.path(group, p, {class:"taskLinkPathSVG"});
+
 
 
     //set "from" and "to" to the group, bind "update" and trigger it
