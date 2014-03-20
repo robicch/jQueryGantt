@@ -539,14 +539,21 @@ Ganttalendar.prototype.drawTask = function (task) {
     var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"6", ry:"6"});
     layout.style.fill = "url(#taskGrad)";
 
-    //status
-    svg.rect(taskSvg, 6, 6, 13, 13, {stroke:1, rx:"2", ry:"2", status:task.status, class:"taskStatusSVG"});
-
     //progress
     if (task.progress > 0) {
       var progress = svg.rect(taskSvg, 0, 0, (task.progress > 100 ? 100 : task.progress) + "%", "100%", {fill:(task.progress > 100 ? "red" : "rgb(153,255,51)"), rx:"6", ry:"6", opacity:.4});
-      svg.text(taskSvg, (task.progress > 90 ? 90 : task.progress) + "%", 18, task.progress + "%", {stroke:"#888", "font-size":"12px"});
+      if (dimensions.width>50){
+        var textStyle={fill:"#888", "font-size":"10px"};
+        if (task.progress>90)
+        textStyle.transform="translate(-30)";
+        svg.text(taskSvg, (task.progress > 90 ? 100 : task.progress) + "%", 18, task.progress + "%", textStyle);
+      }
     }
+
+    //status
+    if (dimensions.width>15)
+      svg.rect(taskSvg, 6, 6, 13, 13, {stroke:1, rx:"2", ry:"2", status:task.status, class:"taskStatusSVG"});
+
     if (task.hasChild)
       svg.rect(taskSvg, 0, 0, "100%", 3, {fill:"#000"});
 
