@@ -672,6 +672,14 @@ Task.prototype.getSuperiors = function() {
   return ret;
 };
 
+Task.prototype.getSuperiorTasks = function() {
+  var ret=[];
+  var sups = this.getSuperiors();
+  for (var i=0;i<sups.length;i++)
+    ret.push(sups[i].from);
+  return ret;
+};
+
 
 Task.prototype.getInferiors = function() {
   var ret = [];
@@ -684,8 +692,15 @@ Task.prototype.getInferiors = function() {
   return ret;
 };
 
+Task.prototype.getInferiorTasks = function() {
+  var ret=[];
+  var infs = this.getInferiors();
+  for (var i=0;i<infs.length;i++)
+    ret.push(infs[i].to);
+  return ret;
+};
 
-Task.prototype.deleteTask = function() {
+  Task.prototype.deleteTask = function() {
   //delete both dom elements
   this.rowElement.remove();
   this.ganttElement.remove();
@@ -717,6 +732,33 @@ Task.prototype.deleteTask = function() {
 Task.prototype.isNew=function(){
   return (this.id+"").indexOf("tmp_")==0;
 };
+
+Task.prototype.isDependent=function(t) {
+  //console.debug("isDependent",this.name, t.name)
+  var task=this;
+  var dep= this.master.links.filter(function(link) {
+    return link.from == task ;
+  });
+
+  // is t a direct dependency?
+  for (var i=0;i<dep.length;i++) {
+    if (dep[i].to== t)
+      return true;
+  }
+  // is t an indirect dependency
+  for (var i=0;i<dep.length;i++) {
+    if (dep[i].to.isDependent(t)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+Task.prototype.setLatest=function(maxCost) {
+  this.latestStart = maxCost - this.criticalCost;
+  this.latestFinish = this.latestStart + this.duration;
+};
+
 
 //<%------------------------------------------  INDENT/OUTDENT --------------------------------%>
 Task.prototype.indent = function() {

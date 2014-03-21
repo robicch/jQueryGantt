@@ -38,7 +38,6 @@
   <!--<script src="ganttDrawer.js"></script>-->
   <script src="ganttGridEditor.js"></script>
   <script src="ganttMaster.js"></script>
-
 </head>
 <body style="background-color: #fff;">
 
@@ -396,6 +395,8 @@ function saveInLocalStorage() {
     <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual" title="zoom in"><span class="teamworkIcon">(</span></button>
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
+    <span class="ganttButtonSeparator"></span>
+    <button onclick="ge.gantt.showCriticalPath=!ge.gantt.showCriticalPath; ge.redraw();" class="button textual" title="Critical Path"><span class="teamworkIcon">&pound;</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
       <button onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
     </div></div>

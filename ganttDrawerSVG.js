@@ -32,6 +32,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.zoom = zoom;
   this.minGanttSize = minGanttSize;
   this.includeToday = true; //when true today is always visible. If false boundaries comes from tasks periods
+  this.showCriticalPath=false; //when true critical path is highlighted
 
   this.zoomLevels = ["d","w", "m", "q", "s", "y"];
 
@@ -294,7 +295,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     self.highlightBar = hlb;
 
 
-    var rowHeight = 30; // todo prenderla da css?
+    var rowHeight = 30; // todo get it from css?
     //create the svg
     box.svg({settings:{class:"ganttSVGBox"},
       onLoad:         function (svg) {
@@ -375,6 +376,9 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   var taskBox = $(_createTaskSVG(task, {x:x, y:top, width:Math.round((task.end - task.start) * self.fx)}));
   task.ganttElement = taskBox;
+  if (self.showCriticalPath && task.isCritical)
+    taskBox.addClass("critical");
+
 
   //bind all events on taskBox
   taskBox
@@ -685,10 +689,11 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     //create empty path
     svg.path(group, p, {class:"taskLinkPathSVG"});
 
-
-
     //set "from" and "to" to the group, bind "update" and trigger it
     var jqGroup = $(group).data({from:from, to:to }).attr({from:from.id, to:to.id}).on("update", update).trigger("update");
+
+    if (self.showCriticalPath && from.isCritical && to.isCritical)
+      jqGroup.addClass("critical");
 
     jqGroup.addClass("linkGroup");
     return jqGroup;
@@ -752,7 +757,7 @@ Ganttalendar.prototype.redrawLinks = function () {
 
 
 Ganttalendar.prototype.reset = function () {
-  this.element.find(".ganttLinks").empty();
+  this.element.find(".linkGroup").remove();
   this.element.find("[taskId]").remove();
 };
 
@@ -767,6 +772,12 @@ Ganttalendar.prototype.redrawTasks = function () {
 
 Ganttalendar.prototype.refreshGantt = function () {
   //console.debug("refreshGantt")
+
+  if (this.showCriticalPath){
+    this.master.computeCriticalPath();
+  }
+
+
   var par = this.element.parent();
 
   //try to maintain last scroll
@@ -791,6 +802,7 @@ Ganttalendar.prototype.refreshGantt = function () {
 
   //set current task
   this.synchHighlight();
+
 };
 
 
@@ -810,8 +822,6 @@ Ganttalendar.prototype.centerOnToday = function () {
   //console.debug("centerOnToday "+x);
   this.element.parent().scrollLeft(x);
 };
-
-
 
 
 /**

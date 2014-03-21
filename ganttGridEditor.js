@@ -266,8 +266,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
               if (!sups[i].from.synchronizeStatus())
                 break;
             }
-
-            self.master.changeTaskDates(task, task.start, task.end);
+            self.master.changeTaskDates(task, task.start, task.end); // fake change to force date recomputation from dependencies
           }
 
         } else if (field == "duration") {

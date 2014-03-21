@@ -437,19 +437,26 @@ input[readonly]{
   opacity: .5;
 }
 
-.taskBoxSVG.focused .taskLayout{
-  stroke-width:3px;
-  stroke:red;
-}
-
 .taskLabelSVG {
   stroke: none;
   fill:#999;
   font-size: 12px;
 }
 
-.focused .taskLinkPathSVG{
-  stroke-width:5px;
+.critical .taskLinkPathSVG{
   stroke:red;
 }
 
+.taskBoxSVG.critical .taskLayout{
+  stroke:red;
+}
+
+.focused .taskLinkPathSVG{
+  stroke-width:5px;
+  stroke: #4286ff;
+}
+
+.taskBoxSVG.focused .taskLayout{
+  stroke-width:3px;
+  stroke: #4286ff;
+}

@@ -265,7 +265,8 @@ GanttMaster.prototype.removeLink = function (fromTask,toTask) {
 
   if (found){
     this.updateDependsStrings();
-    this.redraw();
+    if(this.updateLinks(toTask))
+      this.changeTaskDates(toTask, toTask.start, toTask.end); // fake change to force date recomputation from dependencies
   }
   this.endTransaction();
 };
@@ -904,4 +905,160 @@ GanttMaster.prototype.redo = function () {
 GanttMaster.prototype.resize = function () {
   //console.debug("GanttMaster.resize")
   this.splitter.resize();
+};
+
+/**
+ * Compute the critical path using Backflow algorithm.
+ * Translated from Java code supplied by M. Jessup here http://stackoverflow.com/questions/2985317/critical-path-method-algorithm
+ *
+ * For each task computes:
+ * earlyStart, earlyFinish, latestStart, latestFinish, criticalCost
+ *
+ * A task on the critical path has isCritical=true
+ * A task not in critical path can float by latestStart-earlyStart days
+ *
+ * If you use critical path avoid usage of dependencies between different levels of tasks
+ *
+ * WARNNG: It ignore milestones!!!!
+ * @return {*}
+ */
+GanttMaster.prototype.computeCriticalPath = function () {
+
+  if (!this.tasks)
+    return false;
+
+  // do not consider grouping tasks
+  var tasks = this.tasks.filter(function (t) {
+    return !t.isParent()
+  });
+
+  // reset values
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    t.earlyStart = -1;
+    t.earlyFinish = -1;
+    t.latestStart = -1;
+    t.latestFinish = -1;
+    t.criticalCost = -1;
+    t.isCritical=false;
+  }
+
+  // tasks whose critical cost has been calculated
+  var completed = [];
+  // tasks whose critical cost needs to be calculated
+  var remaining = tasks.concat(); // put all tasks in remaining
+
+
+  // Backflow algorithm
+  // while there are tasks whose critical cost isn't calculated.
+  while (remaining.length > 0) {
+    var progress = false;
+
+    // find a new task to calculate
+    for (var i = 0; i < remaining.length; i++) {
+      var task = remaining[i];
+      var inferiorTasks = task.getInferiorTasks();
+
+      if (containsAll(completed, inferiorTasks)) {
+        // all dependencies calculated, critical cost is max dependency critical cost, plus our cost
+        var critical = 0;
+        for (var j = 0; j < inferiorTasks.length; j++) {
+          var t = inferiorTasks[j];
+          if (t.criticalCost > critical) {
+            critical = t.criticalCost;
+          }
+        }
+        task.criticalCost = critical + task.duration;
+        // set task as calculated an remove
+        completed.push(task);
+        remaining.splice(i, 1);
+
+        // note we are making progress
+        progress = true;
+      }
+    }
+    // If we haven't made any progress then a cycle must exist in
+    // the graph and we wont be able to calculate the critical path
+    if (!progress) {
+      console.error("Cyclic dependency, algorithm stopped!");
+      return false;
+    }
+  }
+
+  // set earlyStart, earlyFinish, latestStart, latestFinish
+  computeMaxCost(tasks);
+  var initialNodes = initials(tasks);
+  calculateEarly(initialNodes);
+  calculateCritical(tasks);
+
+
+/*
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    console.debug("Task ", t.name, t.duration, t.earlyStart, t.earlyFinish, t.latestStart, t.latestFinish, t.latestStart - t.earlyStart, t.earlyStart == t.latestStart)
+  }*/
+
+  return tasks;
+
+
+  function containsAll(set, targets) {
+    for (var i = 0; i < targets.length; i++) {
+      if (set.indexOf(targets[i]) < 0)
+        return false;
+    }
+    return true;
+  }
+
+  function computeMaxCost(tasks) {
+    var max = -1;
+    for (var i = 0; i < tasks.length; i++) {
+      var t = tasks[i];
+
+      if (t.criticalCost > max)
+        max = t.criticalCost;
+    }
+    //console.debug("Critical path length (cost): " + max);
+    for (var i = 0; i < tasks.length; i++) {
+      var t = tasks[i];
+      t.setLatest(max);
+    }
+  }
+
+  function initials(tasks) {
+    var initials = [];
+    for (var i = 0; i < tasks.length; i++) {      
+      if (!tasks[i].depends || tasks[i].depends == "")
+        initials.push(tasks[i]);
+    }
+    return initials;
+  }
+
+  function calculateEarly(initials) {
+    for (var i = 0; i < initials.length; i++) {
+      var initial = initials[i];
+      initial.earlyStart = 0;
+      initial.earlyFinish = initial.duration;
+      setEarly(initial);
+    }
+  }
+
+  function setEarly(initial) {
+    var completionTime = initial.earlyFinish;
+    var inferiorTasks = initial.getInferiorTasks();
+    for (var i = 0; i < inferiorTasks.length; i++) {
+      var t = inferiorTasks[i];
+      if (completionTime >= t.earlyStart) {
+        t.earlyStart = completionTime;
+        t.earlyFinish = completionTime + t.duration;
+      }
+      setEarly(t);
+    }
+  }
+
+  function calculateCritical(tasks) {
+    for (var i = 0; i < tasks.length; i++) {
+      var t = tasks[i];
+      t.isCritical=(t.earlyStart == t.latestStart)
+    }
+  }
 };
