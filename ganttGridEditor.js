@@ -145,8 +145,8 @@ GridEditor.prototype.reset = function () {
 
 GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   var self = this;
-  //console.debug("bindRowEvents",this,this.master,this.master.canWrite);
-  if (this.master.canWrite) {
+  //console.debug("bindRowEvents",this,this.master,this.master.canWrite, task.canWrite);
+  if (this.master.canWrite && task.canWrite ) {
     self.bindRowInputEvents(task, taskRow);
 
   } else { //cannot write: disable input
@@ -207,12 +207,11 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
             self.master.endTransaction();
 
           } else {
-            var end_as_date = new Date(date.getTime());
-            lend = end_as_date.getTime();
+            lend = date.getTime();
             if (lstart >= lend) {
-              end_as_date.add('d', -1 * task.duration);
-              lstart = end_as_date.getTime();
+              lend=lstart;
             }
+            lend=lend+3600000*20; // this 20 hours are mandatory to reach the correct day end (snap to grid)
 
             //update task from editor
             self.master.beginTransaction();
@@ -276,6 +275,10 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
           var newEnd = computeEndByDuration(task.start, dur);
           self.master.changeTaskDates(task, task.start, newEnd);
 
+      } else if (field == "name") {
+        if (el.val()==""){
+          task.deleteTask();
+        }
         } else {
           task[field] = el.val();
         }
@@ -469,7 +472,7 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
   }
 
 
-  if (!self.master.canWrite) {
+  if (!self.master.canWrite || !task.canWrite) {
     taskEditor.find("input,textarea").attr("readOnly", true);
     taskEditor.find("input:checkbox,select").attr("disabled", true);
   } else {

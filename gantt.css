@@ -193,7 +193,7 @@
 
 .taskBoxDiv .layout {
   height:100%;
-  color:red;
+  color:#DB2727;
   border-radius:2px;
   background: #eee; /* Old browsers */
   border:1px solid #bbb;
@@ -297,7 +297,7 @@ input[readonly]{
 }
 
 .taskStatus[status=STATUS_ACTIVE]{
- background-color: #66FF99;
+ background-color: #3BBF67;
 }
 .taskStatus[status=STATUS_DONE]{
  background-color: #0099FF;
@@ -388,7 +388,7 @@ input[readonly]{
 }
 
 .taskStatusSVG[status=STATUS_ACTIVE]{
-  fill: #66FF99;
+  fill: #3BBF67;
 }
 .taskStatusSVG[status=STATUS_DONE]{
   fill: #0099FF;

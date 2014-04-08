@@ -47,6 +47,7 @@ function Task(id, name, code, level, start, end, duration) {
   this.level = level;
   this.status = "STATUS_UNDEFINED";
   this.depends;
+  this.canWrite=true; // by default all tasks are writeable
 
   this.start = start
   this.duration = duration;
@@ -166,6 +167,12 @@ Task.prototype.setPeriod = function (start, end) {
   if (!somethingChanged)
     return true;
 
+  //cannot write exit
+  if(!this.canWrite){
+    this.master.setErrorOnTransaction(GanttMaster.messages["CANNOT_WRITE"] + "\n" + this.name, this);
+    return false;
+  }
+
   //external dependencies: exit with error
   if (this.hasExternalDep) {
     this.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + this.name, this);
@@ -227,6 +234,10 @@ Task.prototype.setPeriod = function (start, end) {
     if (infs && infs.length > 0) {
       for (var i=0;i<infs.length;i++) {
         var link = infs[i];
+        if (!link.to.canWrite){
+          this.master.setErrorOnTransaction(GanttMaster.messages["CANNOT_WRITE"] + "\n" + link.to.name, link.to);
+          break;
+        }
         todoOk = link.to.moveTo(end, false); //this is not the right date but moveTo checks start
         if (!todoOk)
           break;
@@ -324,8 +335,11 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
       for (var i=0;i<infs.length;i++) {
         var link = infs[i];
 
+
         //this is not the right date but moveTo checks start
-        if (!link.to.moveTo(end, false)) {
+        if (!link.to.canWrite ) {
+          this.master.setErrorOnTransaction(GanttMaster.messages["CANNOT_WRITE"]+ "\n"+link.to.name, link.to);
+        } else if (!link.to.moveTo(end, false)) {
           return false;
         }
       }
@@ -347,7 +361,6 @@ function updateTree(task) {
   //no parent:exit
   if (!p)
     return true;
-
 
   var newStart = p.start;
   var newEnd = p.end;
@@ -375,6 +388,13 @@ function updateTree(task) {
 
   //propagate updates if needed
   if (newStart != p.start || newEnd != p.end) {
+
+    //can write?
+    if (!p.canWrite){
+      task.master.setErrorOnTransaction(GanttMaster.messages["CANNOT_WRITE"] + "\n" + p.name, task);
+      return false;
+    }
+
     //has external deps ?
     if (p.hasExternalDep) {
       task.master.setErrorOnTransaction(GanttMaster.messages["TASK_HAS_EXTERNAL_DEPS"] + "\n" + p.name, task);
@@ -395,6 +415,7 @@ Task.prototype.changeStatus = function(newStatus) {
   var cone = this.getDescendant();
 
   function propagateStatus(task, newStatus, manuallyChanged, propagateFromParent, propagateFromChildren) {
+    //console.debug("propagateStatus",task.name, task.status,newStatus)
     var oldStatus = task.status;
 
     //no changes exit

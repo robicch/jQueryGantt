@@ -205,6 +205,7 @@ GanttMaster.prototype.init = function (place) {
 };
 
 GanttMaster.messages = {
+  "CANNOT_WRITE":                  "CANNOT_WRITE",
   "CHANGE_OUT_OF_SCOPE":                  "NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
   "START_IS_MILESTONE":                   "START_IS_MILESTONE",
   "END_IS_MILESTONE":                     "END_IS_MILESTONE",
@@ -657,7 +658,7 @@ GanttMaster.prototype.updateLinks = function (task) {
 GanttMaster.prototype.moveUpCurrentTask=function(){
   var self=this;
   //console.debug("moveUpCurrentTask",self.currentTask)
-  if(!self.canWrite)
+  if(!self.canWrite )
     return;
 
   if (self.currentTask) {
@@ -682,7 +683,7 @@ GanttMaster.prototype.moveDownCurrentTask=function(){
 
 GanttMaster.prototype.outdentCurrentTask=function(){
   var self=this;
-  if(!self.canWrite)
+  if(!self.canWrite|| !self.currentTask.canWrite)
     return;
 
   if (self.currentTask) {
@@ -695,7 +696,7 @@ GanttMaster.prototype.outdentCurrentTask=function(){
 
 GanttMaster.prototype.indentCurrentTask=function(){
   var self=this;
-  if (!self.canWrite)
+  if (!self.canWrite|| !self.currentTask.canWrite)
     return;
 
   if (self.currentTask) {
@@ -759,7 +760,7 @@ GanttMaster.prototype.addAboveCurrentTask=function(){
 
 GanttMaster.prototype.deleteCurrentTask=function(){
   var self=this;
-  if (!self.canWrite)
+  if (!self.canWrite || !self.currentTask.canWrite)
     return;
   var row = self.currentTask.getRow();
   if (self.currentTask && (row > 0 || self.currentTask.isNew())) {

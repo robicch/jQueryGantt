@@ -309,6 +309,10 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
           [1, '#ddd']
         ], 0, 0, 0, "100%");
 
+        //create backgound
+        var extDep=svg.pattern(defs,"extDep", 0, 0, 40, 40,  0, 0, 40, 40, {patternUnits: 'userSpaceOnUse'});
+        svg.image(extDep, 0, 0, 40, 40, "hasExternalDeps.png");
+
         self.svg = svg;
         $(svg).addClass("ganttSVGBox");
 
@@ -416,8 +420,8 @@ Ganttalendar.prototype.drawTask = function (task) {
       var task = self.master.getTask($(this).attr("taskId"));
       task.rowElement.click();
     }).dragExtedSVG($(self.svg.root()),{
-      canResize: this.master.canWrite,
-      canDrag:   !task.depends && this.master.canWrite,
+      canResize: this.master.canWrite && task.canWrite,
+      canDrag:   !task.depends && this.master.canWrite && task.canWrite,
       startDrag:function(e){
         $(".ganttSVGBox .focused").removeClass("focused");
       },
@@ -541,7 +545,12 @@ Ganttalendar.prototype.drawTask = function (task) {
     //svg.title(taskSvg, task.name);
     //external box
     var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"6", ry:"6"});
-    layout.style.fill = "url(#taskGrad)";
+
+    if (task.hasExternalDep){
+      layout.style.fill = "url(#extDep)";
+    }else{
+      layout.style.fill = "url(#taskGrad)";
+    }
 
     //progress
     if (task.progress > 0) {
