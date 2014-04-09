@@ -275,10 +275,9 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
           var newEnd = computeEndByDuration(task.start, dur);
           self.master.changeTaskDates(task, task.start, newEnd);
 
-      } else if (field == "name") {
-        if (el.val()==""){
-          task.deleteTask();
-        }
+        } else if (field == "name" && el.val() == "") { // remove unfilled task
+            task.deleteTask();
+
         } else {
           task[field] = el.val();
         }
