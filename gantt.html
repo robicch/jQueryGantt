@@ -43,7 +43,7 @@
 
 
 <div id="ndo" style="position:absolute;right:5px;top:5px;width:378px;padding:5px;background-color: #FFF5E6; border:1px solid #F9A22F; font-size:12px" class="noprint">
-  This Gantt can be used in a complete project management solution - imports your Gantt and more - <a href="http://twproject.com" target="_blank">Twproject: give it a try</a>.
+  This Gantt editor is free thanks to <a href="http://twproject.com" target="_blank">Twproject</a> where it can be used on a complete and flexible project management solution.<br> Get your projects done! Give <a href="http://twproject.com" target="_blank">Twproject a try now</a>.
 </div>
 <div id="workSpace" style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
 
@@ -84,8 +84,6 @@
     font-weight: bold;
     font-size: 28px;
     margin-left: 10px;
-    margin-top: 15px;
-
   }
 
 </style>
@@ -111,8 +109,8 @@ $(function() {
           .append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
           .append("<button onclick='openResourceEditor();' class='button'>edit resources</button>")
           .append("<button onclick='getFile();' class='button'>export</button>");
-  $(".ganttButtonBar h1").html("Twproject<br>jQuery Gantt");
-//  $(".ganttButtonBar h1").html("<img src='twGanttSmall.png'>");
+//  $(".ganttButtonBar h1").html("Twproject<br>jQuery Gantt");
+  $(".ganttButtonBar h1").html("<a href='http://twproject.com' title='Twproject the friendly project and work management tool' target='_blank'><img width='80%' src='twBanner.jpg'></a>");
   $(".ganttButtonBar div").addClass('buttons');
   //overwrite with localized ones
   loadI18n();
