@@ -760,7 +760,7 @@ GanttMaster.prototype.addAboveCurrentTask=function(){
 
 GanttMaster.prototype.deleteCurrentTask=function(){
   var self=this;
-  if (!self.canWrite || !self.currentTask.canWrite)
+  if (!self.currentTask || !self.canWrite || !self.currentTask.canWrite)
     return;
   var row = self.currentTask.getRow();
   if (self.currentTask && (row > 0 || self.currentTask.isNew())) {
