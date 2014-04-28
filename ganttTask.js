@@ -43,16 +43,17 @@ function TaskFactory() {
 function Task(id, name, code, level, start, end, duration) {
   this.id = id;
   this.name = name;
+  this.progress=0;
+  this.description = "";
   this.code = code;
   this.level = level;
   this.status = "STATUS_UNDEFINED";
-  this.depends;
+  this.depends="";
   this.canWrite=true; // by default all tasks are writeable
 
   this.start = start
   this.duration = duration;
   this.end = end;
-
   this.startIsMilestone = false;
   this.endIsMilestone = false;
 
