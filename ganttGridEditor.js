@@ -111,6 +111,25 @@ GridEditor.prototype.addTask = function (task, row) {
   return taskRow;
 };
 
+GridEditor.prototype.refreshExpandStatus = function(task){
+  //[expand]
+  var child = task.getChildren();
+  if(child.length > 0 && task.rowElement.has(".expcoll").length == 0)
+  {
+    task.rowElement.find(".exp-controller").addClass('expcoll exp');
+  }
+  else if(child.length == 0 && task.rowElement.has(".expcoll").length > 0)
+  {
+    task.rowElement.find(".exp-controller").removeClass('expcoll exp');
+  }
+
+  var par = task.getParent();
+  if(par && par.rowElement.has(".expcoll").length == 0)
+  {
+    par.rowElement.find(".exp-controller").addClass('expcoll exp');
+  }
+
+}
 
 GridEditor.prototype.refreshTaskRow = function (task) {
   //console.debug("refreshTaskRow")

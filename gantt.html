@@ -37,10 +37,7 @@
   <script src="ganttDrawerSVG.js"></script>
   <!--<script src="ganttDrawer.js"></script>-->
   <script src="ganttGridEditor.js"></script>
-  <script src="ganttMaster.js"></script>
-
-  <link rel="stylesheet" type="text/css" href="libs/font-awesome-4.0.3/css/font-awesome.min.css">
-  
+  <script src="ganttMaster.js"></script>  
 </head>
 <body style="background-color: #fff;">
 
@@ -418,6 +415,7 @@ function saveInLocalStorage() {
       <th class="gdfColHeader gdfResizable" style="width:50px;">dur.</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">dep.</th>
       <th class="gdfColHeader gdfResizable" style="width:200px;">assignees</th>
+      <th class="gdfColHeader gdfResizable" style="width:200px;">Attachments</th>
     </tr>
     </thead>
   </table>
@@ -429,7 +427,7 @@ function saveInLocalStorage() {
     <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
     <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;">
-       <div class="(#=obj.isParent()?'expcoll exp':''#)" align="center"></div>
+      <div class="(#=obj.isParent()?'exp-controller expcoll exp':'exp-controller'#)" align="center"></div>
       <input type="text" name="name" value="(#=obj.name#)">
     </td>
 
@@ -438,6 +436,7 @@ function saveInLocalStorage() {
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
     <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
+    <td class="gdfCell taskAttachments">//TODO:</td>
   </tr>
   --></div>
 
@@ -445,6 +444,7 @@ function saveInLocalStorage() {
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
     <td class="gdfCell noClip" align="center"></td>
+    <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
@@ -515,13 +515,23 @@ function saveInLocalStorage() {
     </tr>
     </table>
 
-    <h2>assignments</h2>
+  <h2>assignments</h2>
   <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
     <tr>
       <th style="width:100px;">name</th>
       <th style="width:70px;">role</th>
       <th style="width:30px;">est.wklg.</th>
       <th style="width:30px;" id="addAssig"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
+    </tr>
+  </table>
+
+  <h2>Attachments //TODO:</h2>
+  <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
+    <tr>
+      <th style="width:100px;">File Name</th>
+      <th style="width:70px;">Description</th>
+      <th style="width:30px;">Size</th>
+      <th style="width:30px;" id="addAttachment"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
     </tr>
   </table>
 
