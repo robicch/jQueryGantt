@@ -329,16 +329,21 @@ input[readonly]{
 }
 
 .expcoll{
-  width:6px;
-  height:6px;
-  margin:1px;
-  padding:1px;
-  background-color:yellow;
   display:inline-block;
-  border:1px solid gray;
+  cursor: pointer;
+  margin-left: -10px;
+  margin-right:2px;
+  width:16px;
+  height:16px;
+  background-image: url(res/img/toggle-expand.png);
+  position: relative;
+  top: 2px;
 }
+
+
+
 .expcoll.exp{
-  display:none;
+  background-image: url(res/img/toggle_collapse.png); 
 }
 
 .ui-resizable-helper { border: 1px dotted #00F;  }

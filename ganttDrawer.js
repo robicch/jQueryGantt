@@ -699,8 +699,12 @@ Ganttalendar.prototype.redrawLinks = function() {
   this.element.oneTime(60, "ganttlnksredr", function() {
     //var prof=new Profiler("gd_drawLink_real");
     self.element.find(".ganttLinks").empty();
+
+    //[expand]
+    var collapsedDescendant = self.master.getCollapsedDescendant();        
     for (var i=0;i<self.master.links.length;i++) {
       var link = self.master.links[i];
+      if(collapsedDescendant.indexOf(link.from) >= 0 || collapsedDescendant.indexOf(link.to) >= 0) continue;      
       self.drawLink(link.from, link.to);
     }
     //prof.stop();
@@ -714,9 +718,12 @@ Ganttalendar.prototype.reset = function() {
 };
 
 
-Ganttalendar.prototype.redrawTasks = function() {
+Ganttalendar.prototype.redrawTasks = function() {  
+  //[expand]
+  var collapsedDescendant = this.master.getCollapsedDescendant();  
   for (var i=0;i<this.master.tasks.length;i++) {
     var task = this.master.tasks[i];
+    if(collapsedDescendant.indexOf(task) >= 0) continue;    
     this.drawTask(task);
   }
 };

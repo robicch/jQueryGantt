@@ -118,7 +118,7 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   var row = task.rowElement;
 
   row.find(".taskRowIndex").html(task.getRow() + 1);
-  row.find(".indentCell").css("padding-left", task.level * 10);
+  row.find(".indentCell").css("padding-left", task.level * 16 + 12);
   row.find("[name=name]").val(task.name);
   row.find("[name=code]").val(task.code);
   row.find("[status]").attr("status", task.status);
@@ -362,22 +362,32 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   });
 
 
-  /*//expand collapse todo to be completed
+  //expand collapse todo to be completed
    taskRow.find(".expcoll").click(function(){
    //expand?
-   var el=$(this);
-   var taskId=el.closest("[taskId]").attr("taskId");
-   var task=self.master.getTask(taskId);
-   var descs=task.getDescendant();
-   if (el.is(".exp")){
-   for (var i=0;i<descs.length;i++)
-   descs[i].rowElement.show();
-   } else {
-   for (var i=0;i<descs.length;i++)
-   descs[i].rowElement.hide();
-   }
+     var el=$(this);
+     var taskId=el.closest("[taskId]").attr("taskId");
+     var task=self.master.getTask(taskId);
+     var descs=task.getDescendant();
+     el.toggleClass('exp');
+     task.collapsed = !el.is(".exp");
+    var collapsedDescendant = self.master.getCollapsedDescendant();
 
-   });*/
+     if (el.is(".exp")){
+        for (var i=0;i<descs.length;i++)
+        {
+          var childTask = descs[i];
+          if(collapsedDescendant.indexOf(childTask) >= 0) continue;
+          childTask.rowElement.show();
+        }
+
+     } else {
+        for (var i=0;i<descs.length;i++)
+        descs[i].rowElement.hide();
+     }
+     self.master.gantt.refreshGantt();
+
+   });
 
   //bind row selection
   taskRow.click(function () {

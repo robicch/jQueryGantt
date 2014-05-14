@@ -52,6 +52,8 @@ function GanttMaster() {
   var self = this;
 }
 
+
+
 GanttMaster.prototype.init = function (place) {
   this.element = place;
   var self = this;
@@ -908,6 +910,19 @@ GanttMaster.prototype.resize = function () {
   this.splitter.resize();
 };
 
+
+GanttMaster.prototype.getCollapsedDescendant = function(){
+    var allTasks = this.tasks;
+    var collapsedDescendant = [];
+    for (var i = 0; i < allTasks.length; i++) {
+       var task = allTasks[i];
+       if(collapsedDescendant.indexOf(task) >= 0) continue;
+       if(task.collapsed) collapsedDescendant = collapsedDescendant.concat(task.getDescendant());
+    }
+    return collapsedDescendant;
+}
+
+
 /**
  * Compute the critical path using Backflow algorithm.
  * Translated from Java code supplied by M. Jessup here http://stackoverflow.com/questions/2985317/critical-path-method-algorithm
@@ -993,6 +1008,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
   calculateCritical(tasks);
 
 
+
 /*
   for (var i = 0; i < tasks.length; i++) {
     var t = tasks[i];
@@ -1062,4 +1078,6 @@ GanttMaster.prototype.computeCriticalPath = function () {
       t.isCritical=(t.earlyStart == t.latestStart)
     }
   }
+
+
 };
