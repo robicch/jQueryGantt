@@ -37,7 +37,7 @@
   <script src="ganttDrawerSVG.js"></script>
   <!--<script src="ganttDrawer.js"></script>-->
   <script src="ganttGridEditor.js"></script>
-  <script src="ganttMaster.js"></script>
+  <script src="ganttMaster.js"></script>  
 </head>
 <body style="background-color: #fff;">
 
@@ -425,7 +425,10 @@ function saveInLocalStorage() {
     <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
     <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)"></td>
-    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;"><input type="text" name="name" value="(#=obj.name#)" style="(#=obj.level>0?'border-left:2px dotted orange':''#)"></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;">
+      <div class="(#=obj.isParent()?'exp-controller expcoll exp':'exp-controller'#)" align="center"></div>
+      <input type="text" name="name" value="(#=obj.name#)">
+    </td>
 
     <td class="gdfCell"><input type="text" name="start"  value="" class="date"></td>
     <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
@@ -509,7 +512,7 @@ function saveInLocalStorage() {
     </tr>
     </table>
 
-    <h2>assignments</h2>
+  <h2>assignments</h2>
   <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
     <tr>
       <th style="width:100px;">name</th>

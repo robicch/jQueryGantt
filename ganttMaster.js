@@ -52,6 +52,8 @@ function GanttMaster() {
   var self = this;
 }
 
+
+
 GanttMaster.prototype.init = function (place) {
   this.element = place;
   var self = this;
@@ -81,16 +83,12 @@ GanttMaster.prototype.init = function (place) {
 
     }).bind("deleteCurrentTask.gantt",function (e) {
       self.deleteCurrentTask();
-
     }).bind("addAboveCurrentTask.gantt",function () {
       self.addAboveCurrentTask();
-
     }).bind("addBelowCurrentTask.gantt",function () {
       self.addBelowCurrentTask();
-
     }).bind("indentCurrentTask.gantt",function () {
       self.indentCurrentTask();
-
     }).bind("outdentCurrentTask.gantt",function () {
       self.outdentCurrentTask();
 
@@ -687,11 +685,15 @@ GanttMaster.prototype.outdentCurrentTask=function(){
     return;
 
   if (self.currentTask) {
+    var par = self.currentTask.getParent();
+
     self.beginTransaction();
     self.currentTask.outdent();
     self.endTransaction();
-  }
 
+    //[expand]
+    if(par) self.editor.refreshExpandStatus(par);
+  }
 };
 
 GanttMaster.prototype.indentCurrentTask=function(){
@@ -727,7 +729,6 @@ GanttMaster.prototype.addBelowCurrentTask=function(){
     task.rowElement.find("[name=name]").focus();
   }
   self.endTransaction();
-
 };
 
 GanttMaster.prototype.addAboveCurrentTask=function(){
@@ -755,7 +756,6 @@ GanttMaster.prototype.addAboveCurrentTask=function(){
     task.rowElement.find("[name=name]").focus();
   }
   self.endTransaction();
-
 };
 
 GanttMaster.prototype.deleteCurrentTask=function(){
@@ -764,6 +764,7 @@ GanttMaster.prototype.deleteCurrentTask=function(){
     return;
   var row = self.currentTask.getRow();
   if (self.currentTask && (row > 0 || self.currentTask.isNew())) {
+    var par = self.currentTask.getParent();
     self.beginTransaction();
     self.currentTask.deleteTask();
     self.currentTask = undefined;
@@ -773,6 +774,10 @@ GanttMaster.prototype.deleteCurrentTask=function(){
 
     //redraw
     self.redraw();
+  
+    //[expand]
+    if(par) self.editor.refreshExpandStatus(par);
+
 
     //focus next row
     row = row > self.tasks.length - 1 ? self.tasks.length - 1 : row;
@@ -853,6 +858,9 @@ GanttMaster.prototype.endTransaction = function () {
   //reset transaction
   this.__currentTransaction = undefined;
 
+  //[expand]
+  this.editor.refreshExpandStatus(this.currentTask);
+
   return ret;
 };
 
@@ -907,6 +915,19 @@ GanttMaster.prototype.resize = function () {
   //console.debug("GanttMaster.resize")
   this.splitter.resize();
 };
+
+
+GanttMaster.prototype.getCollapsedDescendant = function(){
+    var allTasks = this.tasks;
+    var collapsedDescendant = [];
+    for (var i = 0; i < allTasks.length; i++) {
+       var task = allTasks[i];
+       if(collapsedDescendant.indexOf(task) >= 0) continue;
+       if(task.collapsed) collapsedDescendant = collapsedDescendant.concat(task.getDescendant());
+    }
+    return collapsedDescendant;
+}
+
 
 /**
  * Compute the critical path using Backflow algorithm.
@@ -993,6 +1014,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
   calculateCritical(tasks);
 
 
+
 /*
   for (var i = 0; i < tasks.length; i++) {
     var t = tasks[i];
@@ -1062,4 +1084,6 @@ GanttMaster.prototype.computeCriticalPath = function () {
       t.isCritical=(t.earlyStart == t.latestStart)
     }
   }
+
+
 };
