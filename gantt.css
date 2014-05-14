@@ -328,6 +328,12 @@ input[readonly]{
   user-select: none;
 }
 
+
+.exp-controller{
+
+  display: none;  
+}
+
 .expcoll{
   display:inline-block;
   cursor: pointer;

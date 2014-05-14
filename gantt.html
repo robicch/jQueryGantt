@@ -415,7 +415,6 @@ function saveInLocalStorage() {
       <th class="gdfColHeader gdfResizable" style="width:50px;">dur.</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">dep.</th>
       <th class="gdfColHeader gdfResizable" style="width:200px;">assignees</th>
-      <th class="gdfColHeader gdfResizable" style="width:200px;">Attachments</th>
     </tr>
     </thead>
   </table>
@@ -436,7 +435,6 @@ function saveInLocalStorage() {
     <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
     <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
-    <td class="gdfCell taskAttachments">//TODO:</td>
   </tr>
   --></div>
 
@@ -444,7 +442,6 @@ function saveInLocalStorage() {
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
     <td class="gdfCell noClip" align="center"></td>
-    <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
@@ -522,16 +519,6 @@ function saveInLocalStorage() {
       <th style="width:70px;">role</th>
       <th style="width:30px;">est.wklg.</th>
       <th style="width:30px;" id="addAssig"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
-    </tr>
-  </table>
-
-  <h2>Attachments //TODO:</h2>
-  <table  cellspacing="1" cellpadding="0" width="100%" id="assigsTable">
-    <tr>
-      <th style="width:100px;">File Name</th>
-      <th style="width:70px;">Description</th>
-      <th style="width:30px;">Size</th>
-      <th style="width:30px;" id="addAttachment"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
     </tr>
   </table>
 

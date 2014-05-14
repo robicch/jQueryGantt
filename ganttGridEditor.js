@@ -382,7 +382,9 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
 
   //expand collapse todo to be completed
-   taskRow.find(".expcoll").click(function(){
+
+  
+   taskRow.find(".exp-controller").click(function(){
    //expand?
      var el=$(this);
      var taskId=el.closest("[taskId]").attr("taskId");
