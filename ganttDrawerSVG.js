@@ -311,7 +311,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
         //create backgound
         var extDep=svg.pattern(defs,"extDep", 0, 0, 40, 40,  0, 0, 40, 40, {patternUnits: 'userSpaceOnUse'});
-        svg.image(extDep, 0, 0, 40, 40, "hasExternalDeps.png");
+        svg.image(extDep, 0, 0, 40, 40, "res/hasExternalDeps.png");
 
         self.svg = svg;
         $(svg).addClass("ganttSVGBox");
@@ -571,11 +571,11 @@ Ganttalendar.prototype.drawTask = function (task) {
       svg.rect(taskSvg, 0, 0, "100%", 3, {fill:"#000"});
 
     if (task.startIsMilestone) {
-      svg.image(taskSvg, -9, 4, 18, 18, "milestone.png")
+      svg.image(taskSvg, -9, 4, 18, 18, "res/milestone.png")
     }
 
     if (task.endIsMilestone) {
-      svg.image(taskSvg, "100%", 4, 18, 18, "milestone.png", {transform:"translate(-9)"})
+      svg.image(taskSvg, "100%", 4, 18, 18, "res/milestone.png", {transform:"translate(-9)"})
     }
 
     //task label
@@ -611,7 +611,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
    * width and height into a structure.
    */
   function buildRect(item) {
-    const p = item.ganttElement.position();
+    var p = item.ganttElement.position();
     var rect = {
       left:  parseFloat(item.ganttElement.attr("x")),
       top:   parseFloat(item.ganttElement.attr("y")),
@@ -669,7 +669,6 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
           .line(0, (Math.abs(ty - fy) - 4 * r - Math.abs(firstLine)) * fup - arrowOffset, true)
           .arc(r, r, 90, false, up, r, fup * r, true)
           .line(ps, 0, true);
-        //svg.image(group, tx1 - 5, ty - 5 - arrowOffset, 5, 10, "linkArrow.png");
         image.attr({x:tx1 - 5, y:ty - 5 - arrowOffset});
 
       } else {
@@ -679,7 +678,6 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
           .line(0, ty - fy - fup * 2 * r + arrowOffset, true)
           .arc(r, r, 90, false, up, r, fup * r, true)
           .line((tx1 - fx2) / 2 - r, 0, true);
-        //svg.image(group, tx1 - 5, ty - 5 + arrowOffset, 5, 10, "linkArrow.png");
         image.attr({x:tx1 - 5, y:ty - 5 + arrowOffset});
       }
 
@@ -694,7 +692,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     var p = svg.createPath();
 
     //add the arrow
-    svg.image(group, 0, 0, 5, 10, "linkArrow.png");
+    svg.image(group, 0, 0, 5, 10, "res/linkArrow.png");
     //create empty path
     svg.path(group, p, {class:"taskLinkPathSVG"});
 

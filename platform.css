@@ -323,7 +323,7 @@ select {
   height: 25px;
   mmmargin-left: -20px;
   mmmposition: absolute;
-  background: url("alert.gif") no-repeat;
+  background: url("res/alert.gif") no-repeat;
 }
 
 
