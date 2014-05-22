@@ -18,7 +18,7 @@ These are some key features:
 * keyboard editing support
 * SVG visual editor
 * print friendly
-* ollapsible branches
+* collapsible branches
 
 Try the online working demo here: http://gantt.twproject.com
 
