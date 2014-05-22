@@ -18,10 +18,11 @@ These are some key features:
 * keyboard editing support
 * SVG visual editor
 * print friendly
+* collapsible branches
 
 Try the online working demo here: http://gantt.twproject.com
 
-Read here about latest release: http://roberto.open-lab.com/2014/04/10/jquery-gantt-editor-svg-and-critical-path/
+Read here about latest release: http://roberto.open-lab.com/2014/05/15/jquery-gantt-editor-collapsible-branches/
 
 Read the genesis of this component here: http://roberto.open-lab.com/2012/06/14/the-javascript-gantt-odyssey/
 

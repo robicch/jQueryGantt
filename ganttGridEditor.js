@@ -112,6 +112,7 @@ GridEditor.prototype.addTask = function (task, row) {
 };
 
 GridEditor.prototype.refreshExpandStatus = function(task){
+  if(!task) return;
   //[expand]
   var child = task.getChildren();
   if(child.length > 0 && task.rowElement.has(".expcoll").length == 0)
@@ -172,10 +173,42 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
     taskRow.find("input").attr("readonly", true);
   }
 
+  self.bindRowExpandEvents(task, taskRow);
+
   taskRow.find(".edit").click(function () {self.openFullEditor(task, taskRow)});
 
 };
 
+
+GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
+  var self = this;
+  //expand collapse
+   taskRow.find(".exp-controller").click(function(){
+   //expand?
+     var el=$(this);
+     var taskId=el.closest("[taskId]").attr("taskId");
+     var task=self.master.getTask(taskId);
+     var descs=task.getDescendant();
+     el.toggleClass('exp');
+     task.collapsed = !el.is(".exp");
+    var collapsedDescendant = self.master.getCollapsedDescendant();
+
+     if (el.is(".exp")){
+        for (var i=0;i<descs.length;i++)
+        {
+          var childTask = descs[i];
+          if(collapsedDescendant.indexOf(childTask) >= 0) continue;
+          childTask.rowElement.show();
+        }
+
+     } else {
+        for (var i=0;i<descs.length;i++)
+        descs[i].rowElement.hide();
+     }
+     self.master.gantt.refreshGantt();
+
+   });
+}
 
 GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   var self = this;
@@ -381,34 +414,6 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   });
 
 
-  //expand collapse todo to be completed
-
-  
-   taskRow.find(".exp-controller").click(function(){
-   //expand?
-     var el=$(this);
-     var taskId=el.closest("[taskId]").attr("taskId");
-     var task=self.master.getTask(taskId);
-     var descs=task.getDescendant();
-     el.toggleClass('exp');
-     task.collapsed = !el.is(".exp");
-    var collapsedDescendant = self.master.getCollapsedDescendant();
-
-     if (el.is(".exp")){
-        for (var i=0;i<descs.length;i++)
-        {
-          var childTask = descs[i];
-          if(collapsedDescendant.indexOf(childTask) >= 0) continue;
-          childTask.rowElement.show();
-        }
-
-     } else {
-        for (var i=0;i<descs.length;i++)
-        descs[i].rowElement.hide();
-     }
-     self.master.gantt.refreshGantt();
-
-   });
 
   //bind row selection
   taskRow.click(function () {
