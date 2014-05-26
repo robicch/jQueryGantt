@@ -348,6 +348,10 @@ GanttMaster.prototype.loadProject = function (project) {
 
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
+  
+  //[expand]
+  this.gantt.refreshGantt();
+
   this.endTransaction();
   var self = this;
   this.gantt.element.oneTime(200, function () {self.gantt.centerOnToday()});
@@ -362,7 +366,7 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
   for (var i = 0; i < tasks.length; i++) {
     var task = tasks[i];
     if (!(task instanceof Task)) {
-      var t = factory.build(task.id, task.name, task.code, task.level, task.start, task.duration);
+      var t = factory.build(task.id, task.name, task.code, task.level, task.start, task.duration, task.collapsed);
       for (var key in task) {
         if (key != "end" && key != "start")
           t[key] = task[key]; //copy all properties
@@ -398,7 +402,7 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
       this.tasks.splice(task.getRow(), 1);
     } else {
       //append task to editor
-      this.editor.addTask(task);
+      this.editor.addTask(task, null, true);
       //append task to gantt
       this.gantt.addTask(task);
     }
@@ -412,7 +416,6 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
     selectedRow = selectedRow ? selectedRow : 0;
     this.tasks[selectedRow].rowElement.click();
   }
-
 };
 
 
