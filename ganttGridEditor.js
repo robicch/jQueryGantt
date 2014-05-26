@@ -75,7 +75,7 @@ GridEditor.prototype.fillEmptyLines = function () {
 };
 
 
-GridEditor.prototype.addTask = function (task, row) {
+GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
   //console.debug("GridEditor.addTask",task,row);
   //var prof = new Profiler("editorAddTaskHtml");
 
@@ -107,6 +107,16 @@ GridEditor.prototype.addTask = function (task, row) {
     $(el).html(i + 1);
   });
   //prof.stop();
+
+
+  //[expand]
+  if(hideIfParentCollapsed)
+  {
+    if(task.collapsed) taskRow.find(".exp-controller").removeClass('exp');
+    var collapsedDescendant = this.master.getCollapsedDescendant();
+    if(collapsedDescendant.indexOf(task) >= 0) taskRow.hide();
+  }
+          
 
   return taskRow;
 };
@@ -176,7 +186,6 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   self.bindRowExpandEvents(task, taskRow);
 
   taskRow.find(".edit").click(function () {self.openFullEditor(task, taskRow)});
-
 };
 
 
