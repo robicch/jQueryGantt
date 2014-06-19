@@ -252,19 +252,22 @@ GanttMaster.prototype.updateDependsStrings = function () {
 
 GanttMaster.prototype.removeLink = function (fromTask,toTask) {
   //console.debug("removeLink");
+  if (!this.canWrite || (!fromTask.canWrite && !toTask.canWrite))
+    return;
+
   this.beginTransaction();
-  var found=false;
+  var found = false;
   for (var i = 0; i < this.links.length; i++) {
-    if (this.links[i].from==fromTask && this.links[i].to==toTask){
-      this.links.splice(i,1);
-      found=true;
+    if (this.links[i].from == fromTask && this.links[i].to == toTask) {
+      this.links.splice(i, 1);
+      found = true;
       break;
     }
   }
 
-  if (found){
+  if (found) {
     this.updateDependsStrings();
-    if(this.updateLinks(toTask))
+    if (this.updateLinks(toTask))
       this.changeTaskDates(toTask, toTask.start, toTask.end); // fake change to force date recomputation from dependencies
   }
   this.endTransaction();

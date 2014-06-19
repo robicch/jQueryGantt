@@ -107,7 +107,6 @@ $(function() {
   //inject some buttons (for this demo only)
   $(".ganttButtonBar div").append("<button onclick='clearGantt();' class='button'>clear</button>")
           .append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
-          .append("<button onclick='openResourceEditor();' class='button'>edit resources</button>")
           .append("<button onclick='getFile();' class='button'>export</button>");
   $(".ganttButtonBar h1").html("<a href='http://twproject.com' title='Twproject the friendly project and work management tool' target='_blank'><img width='80%' src='res/twBanner.jpg'></a>");
   $(".ganttButtonBar div").addClass('buttons');
@@ -258,6 +257,10 @@ function setResource() {
 }
 
 
+function editResources(){
+
+}
+
 function clearGantt() {
   ge.reset();
 }
@@ -286,31 +289,6 @@ function loadI18n() {
 }
 
 
-//-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
-function openResourceEditor() {
-  var editor = $("<div>");
-  editor.append("<h2>Resource editor</h2>");
-  editor.addClass("resEdit");
-
-  for (var i in ge.resources) {
-    var res = ge.resources[i];
-    var inp = $("<input type='text'>").attr("pos", i).addClass("resLine").val(res.name);
-    editor.append(inp).append("<br>");
-  }
-
-  var sv = $("<div>save</div>").css("float", "right").addClass("button").click(function() {
-    $(this).closest(".resEdit").find("input").each(function() {
-      var el = $(this);
-      var pos = el.attr("pos");
-      ge.resources[pos].name = el.val();
-    });
-    ge.editor.redraw();
-    closeBlackPopup();
-  });
-  editor.append(sv);
-
-  var ndo = createBlackPage(800, 500).append(editor);
-}
 
 //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
 function getFile() {
@@ -369,6 +347,72 @@ function saveInLocalStorage() {
 }
 
 
+//-------------------------------------------  Open a black popup for managing resources. This is only an axample of implementation (usually resources come from server) ------------------------------------------------------
+
+function editResources(){
+
+  //make resource editor
+  var resourceEditor = $.JST.createFromTemplate({}, "RESOURCE_EDITOR");
+  var resTbl=resourceEditor.find("#resourcesTable");
+
+  for (var i=0;i<ge.resources.length;i++){
+    var res=ge.resources[i];
+    resTbl.append($.JST.createFromTemplate(res, "RESOURCE_ROW"))
+  }
+
+
+  //bind add resource
+  resourceEditor.find("#addResource").click(function(){
+    resTbl.append($.JST.createFromTemplate({id:"new",name:"resource"}, "RESOURCE_ROW"))
+  });
+
+  //bind save event
+  resourceEditor.find("#resSaveButton").click(function(){
+    var newRes=[];
+    //find for deleted res
+    for (var i=0;i<ge.resources.length;i++){
+      var res=ge.resources[i];
+      var row = resourceEditor.find("[resId="+res.id+"]");
+      if (row.size()>0){
+        //if still there save it
+        var name = row.find("input[name]").val();
+        if (name && name!="")
+          res.name=name;
+        newRes.push(res);
+      } else {
+        //remove assignments
+        for (var j=0;j<ge.tasks.length;j++){
+          var task=ge.tasks[j];
+          var newAss=[];
+          for (var k=0;k<task.assigs.length;k++){
+            var ass=task.assigs[k];
+            if (ass.resourceId!=res.id)
+              newAss.push(ass);
+          }
+          task.assigs=newAss;
+        }
+      }
+    }
+
+    //loop on new rows
+    resourceEditor.find("[resId=new]").each(function(){
+      var row = $(this);
+      var name = row.find("input[name]").val();
+      if (name && name!="")
+        newRes.push (new Resource("tmp_"+new Date().getTime(),name));
+    });
+
+    ge.resources=newRes;
+
+    closeBlackPopup();
+    ge.redraw();
+  });
+
+
+  var ndo = createBlackPage(400, 500).append(resourceEditor);
+}
+
+
 </script>
 
 
@@ -394,9 +438,11 @@ function saveInLocalStorage() {
     <span class="ganttButtonSeparator"></span>
     <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual" title="delete"><span class="teamworkIcon">&cent;</span></button>
     <span class="ganttButtonSeparator"></span>
-    <button onclick="print();" class="button textual" title="stampa"><span class="teamworkIcon">p</span></button>
+    <button onclick="print();" class="button textual" title="print"><span class="teamworkIcon">p</span></button>
     <span class="ganttButtonSeparator"></span>
     <button onclick="ge.gantt.showCriticalPath=!ge.gantt.showCriticalPath; ge.redraw();" class="button textual" title="Critical Path"><span class="teamworkIcon">&pound;</span></button>
+    <span class="ganttButtonSeparator"></span>
+    <button onclick="editResources();" class="button textual" title="edit resources"><span class="teamworkIcon">M</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
       <button onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
     </div></div>
@@ -536,6 +582,31 @@ function saveInLocalStorage() {
     <td align="center"><span class="teamworkIcon delAssig" style="cursor: pointer">d</span></td>
   </tr>
   --></div>
+
+
+  <div class="__template__" type="RESOURCE_EDITOR"><!--
+  <div class="resourceEditor" style="padding: 5px;">
+
+    <h2>Project team</h2>
+    <table  cellspacing="1" cellpadding="0" width="100%" id="resourcesTable">
+      <tr>
+        <th style="width:100px;">name</th>
+        <th style="width:30px;" id="addResource"><span class="teamworkIcon" style="cursor: pointer">+</span></th>
+      </tr>
+    </table>
+
+    <div style="text-align: right; padding-top: 20px"><button id="resSaveButton" class="button big">save</button></div>
+  </div>
+  --></div>
+
+
+  <div class="__template__" type="RESOURCE_ROW"><!--
+  <tr resId="(#=obj.id#)" class="resRow" >
+    <td ><input type="text" name="name" value="(#=obj.name#)" style="width:100%;" class="formElements"></td>
+    <td align="center"><span class="teamworkIcon delRes" style="cursor: pointer">d</span></td>
+  </tr>
+  --></div>
+
 
 </div>
 <script type="text/javascript">

@@ -135,11 +135,12 @@ h4 {
   -webkit-box-shadow:0px 0px 5px #999;
   -o-box-shadow:0px 0px 5px #999;
   text-indent:10px;
-  border-radius:5px
+  border-radius:5px;
+  cursor: pointer;
 }
 
-.cvcColorSquare:hover{
-  opacity:0.8
+ .cvcColorSquare:hover{
+  opacity:.7;
 }
 
 

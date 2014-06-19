@@ -141,8 +141,9 @@
   height:55px;
 }
 
-.ganttButtonBar .buttons {
-    float:left; margin:45px 0 0 10px
+.ganttButtonBar .buttons, .ganttButtonBar h1 {
+  display:inline-block;
+  margin:0px 0 0 10px;
 }
 
 
@@ -285,9 +286,10 @@ input[readonly]{
   height:24px;
   border:1px solid #a0a0a0;
   background-color:#fff;
-  margin-top:-2px;
+  margin-top:-21px;
   margin-left:-2px;
   padding: 3px;
+  z-index: 100;
 }
 .taskStatus{
   width:15px;

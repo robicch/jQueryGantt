@@ -419,7 +419,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     el.oneTime(3000, "hideChanger", function () {
       changer.remove();
     });
-    el.append(changer);
+    el.after(changer);
   });
 
 
@@ -583,7 +583,7 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
       tskStatusChooser.oneTime(3000, "hideChanger", function () {
         changer.remove();
       });
-      tskStatusChooser.append(changer);
+      tskStatusChooser.after(changer);
     });
 
 
