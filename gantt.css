@@ -474,3 +474,8 @@ input[readonly]{
   stroke-width:3px;
   stroke: #4286ff;
 }
+
+body{
+  overflow: hidden;
+}
+
