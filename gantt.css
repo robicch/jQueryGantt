@@ -210,7 +210,7 @@
 }
 
 .taskBoxDiv .layout .milestone{
-  top:0px;
+  top:0;
   position:absolute;
   width:18px;
   background: url(res/milestone.png) no-repeat;
@@ -267,9 +267,10 @@
   font-size: 14px;
   height: 20px;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 4px;
   width: 100%;
-  font-family: Arial, sans-serif
+  border-radius: 0;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 
 .taskEditRow.rowSelected td,.taskEditRow.rowSelected input{
@@ -283,12 +284,12 @@ input[readonly]{
 .taskStatusBox{
   position:absolute;
   width:100px;
-  height:24px;
+  height:26px;
   border:1px solid #a0a0a0;
   background-color:#fff;
   margin-top:-21px;
   margin-left:-2px;
-  padding: 3px;
+  padding: 4px;
   z-index: 100;
 }
 .taskStatus{
@@ -297,6 +298,10 @@ input[readonly]{
   display:inline-block;
   text-indent: 0;
   position:relative;
+  box-shadow: none;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.20)
+
 }
 
 .taskStatus[status=STATUS_ACTIVE]{

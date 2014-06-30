@@ -156,11 +156,12 @@ $.splittify = {
         var pos = e.pageX - sb.parent().offset().left;
         var w = sb.parent().width();
         var fbw=firstBox;
-        if (pos > 10 && pos < realW) {
-          sb.css({left:pos});
-          firstBox.width(pos);
-          secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
-        }
+
+        pos=pos>splitter.firstBoxMinWidth?pos:splitter.firstBoxMinWidth;
+        pos=pos<realW-10?pos:realW-10;
+        sb.css({left:pos});
+        firstBox.width(pos);
+        secondBox.css({left:pos + sb.width(),width:w - pos - sb.width()});
         splitter.perc=(firstBox.width()/splitter.element.width())*100;
 
         //bind mouse up on body to stop resizing
@@ -200,11 +201,15 @@ $.splittify = {
       this.secondBox = secondBox;
       this.splitterBar = splitterBar;
       this.perc=0;
+      this.firstBoxMinWidth=0;
 
-      this.resize=function(){
+      this.resize=function(newPerc){
+        //console.debug("resize",newPerc)
+        this.perc=newPerc?newPerc:this.perc;
         var totW=this.element.width();
         var realW=this.firstBox.get(0).scrollWidth;
         var newW=totW*this.perc/100;
+        newW=newW>this.firstBoxMinWidth?newW:this.firstBoxMinWidth;
         newW=newW<realW?newW:realW;
         this.firstBox.css({width:newW});
         this.splitterBar.css({left:newW});

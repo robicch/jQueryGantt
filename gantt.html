@@ -135,11 +135,10 @@ $(function() {
     $("#ndo").html(x+" "+new Date(mill))
   });*/
 
-
   $(window).resize(function(){
-    workSpace.css({width:$(window).width() - 20,height:$(window).height() - 100});
+    workSpace.css({width:$(window).width() - 1,height:$(window).height() - workSpace.position().top});
     workSpace.trigger("resize.gantt");
-  })
+  }).oneTime(150,"resize",function(){$(this).trigger("resize")});
 
 });
 

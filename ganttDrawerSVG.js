@@ -774,7 +774,7 @@ Ganttalendar.prototype.redrawLinks = function () {
 
 Ganttalendar.prototype.reset = function () {
   this.element.find(".linkGroup").remove();
-  this.element.find("[taskId]").remove();
+  this.element.find("[taskid]").remove();
 };
 
 

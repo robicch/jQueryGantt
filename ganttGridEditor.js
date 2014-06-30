@@ -169,7 +169,7 @@ GridEditor.prototype.redraw = function () {
 };
 
 GridEditor.prototype.reset = function () {
-  this.element.find("[taskId]").remove();
+  this.element.find("[taskid]").remove();
 };
 
 
@@ -195,7 +195,7 @@ GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
    taskRow.find(".exp-controller").click(function(){
    //expand?
      var el=$(this);
-     var taskId=el.closest("[taskId]").attr("taskId");
+     var taskId=el.closest("[taskid]").attr("taskid");
      var task=self.master.getTask(taskId);
      var descs=task.getDescendant();
      el.toggleClass('exp');
@@ -401,8 +401,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   //change status
   taskRow.find(".taskStatus").click(function () {
     var el = $(this);
-    var tr = el.closest("[taskId]");
-    var taskId = tr.attr("taskId");
+    var tr = el.closest("[taskid]");
+    var taskId = tr.attr("taskid");
     var task = self.master.getTask(taskId);
 
     var changer = $.JST.createFromTemplate({}, "CHANGE_STATUS");
@@ -519,6 +519,8 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
   if (!self.master.canWrite || !task.canWrite) {
     taskEditor.find("input,textarea").attr("readOnly", true);
     taskEditor.find("input:checkbox,select").attr("disabled", true);
+    taskEditor.find("#saveButton").remove();
+
   } else {
 
     //bind dateField on dates

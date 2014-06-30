@@ -70,6 +70,7 @@ GanttMaster.prototype.init = function (place) {
   //setup splitter
   var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
   self.splitter=splitter;
+  self.splitter.firstBoxMinWidth=30;
 
   //prepend buttons
   place.before($.JST.createFromTemplate({}, "GANTBUTTONS"));
@@ -957,7 +958,8 @@ GanttMaster.prototype.computeCriticalPath = function () {
 
   // do not consider grouping tasks
   var tasks = this.tasks.filter(function (t) {
-    return !t.isParent()
+    //return !t.isParent()
+    return (t.getRow()  > 0) && (!t.isParent() || (t.isParent() && !t.isDependent()));
   });
 
   // reset values

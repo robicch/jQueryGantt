@@ -921,7 +921,7 @@ Task.prototype.moveUp = function() {
     var top = this.master.tasks.splice(0, newRow);
     this.master.tasks = [].concat(top, blockToMove, this.master.tasks);
     //move on dom
-    var rows = this.master.editor.element.find("tr[taskId]");
+    var rows = this.master.editor.element.find("tr[taskid]");
     var domBlockToMove = rows.slice(row, row + descNumber + 1);
     rows.eq(newRow).before(domBlockToMove);
 
@@ -979,7 +979,7 @@ Task.prototype.moveDown = function() {
 
 
     //move on dom
-    var rows = this.master.editor.element.find("tr[taskId]");
+    var rows = this.master.editor.element.find("tr[taskid]");
     var aft = rows.eq(newRow - 1);
     var domBlockToMove = rows.slice(row, row + descNumber + 1);
     aft.after(domBlockToMove);
