@@ -7,6 +7,7 @@ BODY, TBODY {
   font-size: 12px;
   margin: 0;
   color: #000;
+  overflow: visible!important;
 }
 
 .mainColumn{
