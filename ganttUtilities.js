@@ -82,9 +82,9 @@ $.gridify = function (table, opt) {
         //console.debug("start resizing");
         $(document).bind("mousemove.gdf",function (e) {
           //manage resizing
-          $.gridify.columInResize.width(e.pageX - $.gridify.columInResize.offset().left);
-          $.gridify.columInResize.data("fTh").width($.gridify.columInResize.outerWidth());
-
+          var w = e.pageX - $.gridify.columInResize.offset().left;
+          $.gridify.columInResize.width(w);
+          $.gridify.columInResize.data("fTh").width(w);
 
           //bind mouse up on body to stop resizing
         }).bind("mouseup.gdf", function () {
