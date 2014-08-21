@@ -382,8 +382,8 @@ input[readonly]{
 }
 
 .taskBoxSVG .taskLayout{
-  stroke-width:1px;
-  stroke:#bbb;
+  stroke-width:0;
+  stroke:#999;
   /*fill:url('#taskGrad'); do not work on firefox*/
 }
 
@@ -419,7 +419,17 @@ input[readonly]{
   fill: #fbb11e;
 }
 .taskStatusSVG[status=STATUS_UNDEFINED]{
-  fill: #ffffff;
+  fill: #f0f0f0;
+}
+.taskStatusSVG[status=STATUS_UNDEFINED] .taskLayout{
+  stroke: #ccc;
+  stroke-width:1;
+}
+
+.taskStatusSVG[status=STATUS_DONE] .textPerc,
+.taskStatusSVG[status=STATUS_ACTIVE] .textPerc,
+.taskStatusSVG[status=STATUS_FAILED] .textPerc{
+  fill: #fff;
 }
 
 .deSVG.deSVGdrag {
@@ -451,9 +461,9 @@ input[readonly]{
 }
 
 .taskBoxSVG.linkOver .taskLayout{
-  stroke-width:5px;
+  stroke-width:1px;
   stroke:#9999ff;
-  opacity: .5;
+  opacity: 1;
 }
 
 .taskLabelSVG {

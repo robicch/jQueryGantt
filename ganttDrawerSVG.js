@@ -40,6 +40,10 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 
   this.linkOnProgress = false; //set to true when creating a new link
 
+  this.rowHeight = 30; // todo get it from css?
+  this.taskHeight=20;
+  this.taskVertOffset=(this.rowHeight-this.taskHeight)/2
+
 }
 
 Ganttalendar.prototype.zoomGantt = function (isPlus) {
@@ -294,8 +298,6 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     box.append(hlb);
     self.highlightBar = hlb;
 
-
-    var rowHeight = 30; // todo get it from css?
     //create the svg
     box.svg({settings:{class:"ganttSVGBox"},
       onLoad:         function (svg) {
@@ -303,15 +305,17 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
         //creates gradient and definitions
         var defs = svg.defs('myDefs');
-        svg.linearGradient(defs, 'taskGrad', [
+
+        /*svg.linearGradient(defs, 'taskGrad', [
           [0, '#ddd'],
           [.5, '#fff'],
           [1, '#ddd']
-        ], 0, 0, 0, "100%");
+        ], 0, 0, 0, "100%");*/
+
 
         //create backgound
-        var extDep = svg.pattern(defs, "extDep", 0, 0, 40, 40, 0, 0, 40, 40, {patternUnits:'userSpaceOnUse'});
-        svg.image(extDep, 0, 0, 40, 40, "res/hasExternalDeps.png");
+        var extDep = svg.pattern(defs, "extDep", 0, 0, 10, 10, 0, 0, 10, 10, {patternUnits:'userSpaceOnUse'});
+        var img=svg.image(extDep, 0, 0, 10, 10, "res/hasExternalDeps.png",{opacity:.3});
 
         self.svg = svg;
         $(svg).addClass("ganttSVGBox");
@@ -320,7 +324,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
         var gridGroup = svg.group("gridGroup");
 
         //creates rows grid
-        for (var i = 40; i <= height; i += rowHeight)
+        for (var i = 40; i <= height; i += self.rowHeight)
           svg.line(gridGroup, 0, i, "100%", i, {class:"ganttLinesSVG"});
 
         //creates links group
@@ -378,7 +382,7 @@ Ganttalendar.prototype.drawTask = function (task) {
   var x = Math.round((task.start - self.startMillis) * self.fx);
   task.hasChild = task.isParent();
 
-  var taskBox = $(_createTaskSVG(task, {x:x, y:top, width:Math.round((task.end - task.start) * self.fx)}));
+  var taskBox = $(_createTaskSVG(task, {x:x, y:top+self.taskVertOffset, width:Math.round((task.end - task.start) * self.fx),height:self.taskHeight}));
   task.ganttElement = taskBox;
   if (self.showCriticalPath && task.isCritical)
     taskBox.addClass("critical");
@@ -541,51 +545,50 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   function _createTaskSVG(task, dimensions) {
     var svg = self.svg;
-    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, 25, {class:"taskBox taskBoxSVG", taskid:task.id});
+    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, dimensions.height, {class:"taskBox taskBoxSVG taskStatusSVG", status:task.status, taskid:task.id });
 
     //svg.title(taskSvg, task.name);
     //external box
-    var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"6", ry:"6"});
+    var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"2", ry:"2"});
 
-    if (task.hasExternalDep) {
-      layout.style.fill = "url(#extDep)";
-    } else {
-      layout.style.fill = "url(#taskGrad)";
-    }
+    svg.rect(taskSvg, 0, 0, "100%", "100%", {fill:"rgba(255,255,255,.3)"});
+
+    //external dep
+    if (task.hasExternalDep)
+      svg.rect(taskSvg, 0, 0, "100%", "100%", {fill:"url(#extDep)"});
 
     //progress
     if (task.progress > 0) {
-      var progress = svg.rect(taskSvg, 0, 0, (task.progress > 100 ? 100 : task.progress) + "%", "100%", {fill:(task.progress > 100 ? "red" : "rgb(153,255,51)"), rx:"6", ry:"6", opacity:.4});
+      var progress = svg.rect(taskSvg, 0, 0, (task.progress > 100 ? 100 : task.progress) + "%", "100%", {rx:"2", ry:"2"});
       if (dimensions.width > 50) {
-        var textStyle = {fill:"#888", "font-size":"10px"};
+        var textStyle = {fill:"#888", "font-size":"10px",class:"textPerc teamworkIcons",transform:"translate(5)"};
+        if (task.progress > 100)
+          textStyle["font-weight"]="bold";
         if (task.progress > 90)
-          textStyle.transform = "translate(-30)";
-        svg.text(taskSvg, (task.progress > 90 ? 100 : task.progress) + "%", 18, task.progress + "%", textStyle);
+          textStyle.transform = "translate(-40)";
+        svg.text(taskSvg, (task.progress > 90 ? 100 : task.progress) + "%", (self.rowHeight-5)/2, (task.progress>100?"!!! ":"")+ task.progress + "%", textStyle);
       }
     }
-
-    //status
-    if (dimensions.width > 15)
-      svg.rect(taskSvg, 6, 6, 13, 13, {stroke:1, rx:"2", ry:"2", status:task.status, class:"taskStatusSVG"});
 
     if (task.hasChild)
       svg.rect(taskSvg, 0, 0, "100%", 3, {fill:"#000"});
 
     if (task.startIsMilestone) {
-      svg.image(taskSvg, -9, 4, 18, 18, "res/milestone.png")
+      svg.image(taskSvg, -9, dimensions.height/2-9, 18, 18, "res/milestone.png")
     }
 
     if (task.endIsMilestone) {
-      svg.image(taskSvg, "100%", 4, 18, 18, "res/milestone.png", {transform:"translate(-9)"})
+      svg.image(taskSvg, "100%",dimensions.height/2-9, 18, 18, "res/milestone.png", {transform:"translate(-9)"})
     }
 
     //task label
-    svg.text(taskSvg, "100%", 18, task.name, {class:"taskLabelSVG", transform:"translate(8,-8)"});
+    svg.text(taskSvg, "100%", 18, task.name, {class:"taskLabelSVG", transform:"translate(20,-5)"});
 
     //link tool
-    svg.circle(taskSvg, "0", 12, 4, {class:"taskLinkStartSVG linkHandleSVG", transform:"translate(0)"});
-    svg.circle(taskSvg, "100%", 12, 4, {class:"taskLinkEndSVG linkHandleSVG", transform:"translate(0)"});
-
+    if (task.level>0){
+      svg.circle(taskSvg, "0",  dimensions.height/2,dimensions.height/3, {class:"taskLinkStartSVG linkHandleSVG", transform:"translate("+(-dimensions.height/3-1)+")"});
+      svg.circle(taskSvg, "100%",dimensions.height/2,dimensions.height/3, {class:"taskLinkEndSVG linkHandleSVG", transform:"translate("+(dimensions.height/3+1)+")"});
+    }
     return taskSvg
   }
 
@@ -831,8 +834,9 @@ Ganttalendar.prototype.fitGantt = function () {
 };
 
 Ganttalendar.prototype.synchHighlight = function () {
-  if (this.master.currentTask && this.master.currentTask.ganttElement)
-    this.highlightBar.css("top", this.master.currentTask.ganttElement.attr("y") + "px");
+  if (this.master.currentTask && this.master.currentTask.ganttElement){
+    this.highlightBar.css("top", (parseInt(this.master.currentTask.ganttElement.attr("y"))-this.taskVertOffset) + "px");
+  }
 };
 
 
