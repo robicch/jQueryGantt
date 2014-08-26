@@ -306,12 +306,6 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
         //creates gradient and definitions
         var defs = svg.defs('myDefs');
 
-        /*svg.linearGradient(defs, 'taskGrad', [
-          [0, '#ddd'],
-          [.5, '#fff'],
-          [1, '#ddd']
-        ], 0, 0, 0, "100%");*/
-
 
         //create backgound
         var extDep = svg.pattern(defs, "extDep", 0, 0, 10, 10, 0, 0, 10, 10, {patternUnits:'userSpaceOnUse'});

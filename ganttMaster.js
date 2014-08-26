@@ -27,6 +27,7 @@ function GanttMaster() {
 
   this.editor; //element for editor
   this.gantt; //element for gantt
+  this.splitter; //element for splitter
 
   this.element;
 
@@ -68,8 +69,7 @@ GanttMaster.prototype.init = function (place) {
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
 
   //setup splitter
-  var splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
-  self.splitter=splitter;
+  self.splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
   self.splitter.firstBoxMinWidth=30;
 
   //prepend buttons
@@ -333,6 +333,7 @@ GanttMaster.prototype.addTask = function (task, row) {
  * @param project
  */
 GanttMaster.prototype.loadProject = function (project) {
+  //console.debug("loadProject",project)
   this.beginTransaction();
   this.resources = project.resources;
   this.roles = project.roles;
@@ -353,6 +354,15 @@ GanttMaster.prototype.loadProject = function (project) {
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
   
+  //recover saved splitter position
+  if (project.splitterPosition)
+    this.splitter.resize(project.splitterPosition);
+
+  //recover saved zoom level
+  if (project.zoom)
+    this.gantt.zoom=project.zoom;
+
+
   //[expand]
   this.gantt.refreshGantt();
 
@@ -533,6 +543,8 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
     ret.roles = this.roles;
     ret.canWrite = this.canWrite;
     ret.canWriteOnParent = this.canWriteOnParent;
+    ret.splitterPosition=this.splitter.perc;
+    ret.zoom=this.gantt.zoom;
   }
 
   //prof.stop();

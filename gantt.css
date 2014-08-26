@@ -1,3 +1,4 @@
+
 /* -------------------------------------- GRIDIFY -----------------------------------*/
 .gdfTable {
   table-layout: fixed;
@@ -29,7 +30,7 @@
 
 .gdfCell, .gdfColHeader {
   border-bottom: 1px solid #eee;
-  border-right: 1px solid #eee;
+  border-right: 1px solid #b0b0b0;
 }
 
 
@@ -99,6 +100,7 @@
 
 /* -------------------------------------- GANTT -----------------------------------*/
 
+
 .ganttTable{
   table-layout:fixed;
 }
@@ -113,8 +115,8 @@
   height:20px;
 }
 
-.ganttHead1 th,.ganttHead2 th{
-  border-left:1px solid white;
+.ganttHead1 th, .ganttHead2 th{
+  border-left:1px solid #b0b0b0;
   padding: 0;
   margin: 0;
 }
@@ -177,7 +179,7 @@
 }
 
 .holyH{
-  background-color: #9CB7AA;
+  background-color: #f3dfd5;
 }
 .holy{
   background-color: #FFF5E6;
@@ -267,10 +269,15 @@
   font-size: 14px;
   height: 20px;
   margin: 0;
-  padding: 0 0 0 4px;
+  padding:0;
+  outline: 0;
   width: 100%;
   border-radius: 0;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+.taskEditRow input:focus{
+  font-weight: bold;
 }
 
 .taskEditRow.rowSelected td,.taskEditRow.rowSelected input{
@@ -283,7 +290,7 @@ input[readonly]{
 
 .taskStatusBox{
   position:absolute;
-  width:100px;
+  /*width:100px;*/
   height:26px;
   border:1px solid #a0a0a0;
   background-color:#fff;
@@ -323,11 +330,6 @@ input[readonly]{
   border:#666 2px solid;
 }
 
-.ganttTaskEditor {
-    padding: 10px
-}
-
-
 .unselectable {
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -338,23 +340,18 @@ input[readonly]{
 
 
 .exp-controller{
-
-  display: none;  
+  display:inline-block;
+  width:16px;
+  height:16px;
+  position: relative;
+  top: 2px;
+  margin-left: -18px;
 }
 
 .expcoll{
-  display:inline-block;
   cursor: pointer;
-  margin-left: -10px;
-  margin-right:2px;
-  width:16px;
-  height:16px;
   background-image: url(res/toggle-expand.png);
-  position: relative;
-  top: 2px;
 }
-
-
 
 .expcoll.exp{
   background-image: url(res/toggle_collapse.png);
@@ -432,6 +429,7 @@ input[readonly]{
   fill: #fff;
 }
 
+
 .deSVG.deSVGdrag {
   cursor: move;
 }
@@ -490,7 +488,57 @@ input[readonly]{
   stroke: #4286ff;
 }
 
+
 body{
   overflow: hidden;
 }
 
+
+/*--------------------------------------------------- Media queries  --------------------------------------------------*/
+
+/* Large screens */
+
+@media only screen and (max-width : 1260px) {
+
+  .ganttButtonBar .button span.teamworkIcon {
+    font-size: 130%;
+  }
+
+}
+
+@media only screen and (max-width : 1155px) {
+
+  .ganttButtonBar .button span.teamworkIcon {
+    font-size: 130%;
+  }
+
+  .button {
+    font-size: 100%;
+    padding: 3px 9px 6px;
+    margin-right: 5px;
+    margin-bottom: 5px
+  }
+
+  .userLine {
+    display: none;
+  }
+
+}
+
+/* Ipad */
+
+@media only screen and (max-width: 989px) and (min-width: 768px){
+  .ganttButtonSeparator {
+    margin-left: 2px;
+    padding-right: 6px;
+    font-size: 100%;
+  }
+}
+
+/* Mobile TODO */
+
+@media only screen and (max-width: 767px) {
+  .button {
+    font-size: 50%;
+  }
+}
