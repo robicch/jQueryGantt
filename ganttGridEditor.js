@@ -103,9 +103,9 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
     }
 
   }
-  this.element.find(".taskRowIndex").each(function (i, el) {
-    $(el).html(i + 1);
-  });
+  // this.element.find(".taskRowIndex").each(function (i, el) {
+  //   $(el).html(i + 1);
+  // });
   //prof.stop();
 
 
