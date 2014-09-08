@@ -413,8 +413,6 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
     this.tasks.push(task);  //append task at the end
   }
 
-  //todo non committare
-
   //var prof=new Profiler("gm_loadTasks_addTaskLoop");
   for (var i = 0; i < this.tasks.length; i++) {
     var task = this.tasks[i];
@@ -430,8 +428,6 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
           msg = msg + err.msg + "\n\n";
         }
         alert(msg);
-
-        //alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +GanttMaster.messages.CIRCULAR_REFERENCE );
       }
       this.removeAllLinks(task,false);
     }
