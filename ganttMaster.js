@@ -274,6 +274,28 @@ GanttMaster.prototype.removeLink = function (fromTask,toTask) {
   this.endTransaction();
 };
 
+GanttMaster.prototype.removeAllLinks = function (task,openTrans) {
+  //console.debug("removeLink");
+  if (!this.canWrite || (!task.canWrite && !task.canWrite))
+    return;
+
+  if (openTrans)
+    this.beginTransaction();
+  var found = false;
+  for (var i = 0; i < this.links.length; i++) {
+    if (this.links[i].from == task || this.links[i].to == task) {
+      this.links.splice(i, 1);
+      found = true;
+    }
+  }
+
+  if (found) {
+    this.updateDependsStrings();
+  }
+  if (openTrans)
+    this.endTransaction();
+};
+
 //------------------------------------  ADD TASK --------------------------------------------
 GanttMaster.prototype.addTask = function (task, row) {
   //console.debug("master.addTask",task,row,this);
@@ -388,31 +410,35 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
       task = t;
     }
     task.master = this; // in order to access controller from task
-
-    /*//replace if already exists
-     var pos = -1;
-     for (var i=0;i<this.tasks.length;i++) {
-     if (task.id == this.tasks[i].id) {
-     pos = i;
-     break;
-     }
-     }*/
-
     this.tasks.push(task);  //append task at the end
   }
+
+  //todo non committare
 
   //var prof=new Profiler("gm_loadTasks_addTaskLoop");
   for (var i = 0; i < this.tasks.length; i++) {
     var task = this.tasks[i];
 
+
+    var numOfError=this.__currentTransaction.errors.length;
     //add Link collection in memory
-    var linkLoops = !this.updateLinks(task);
+    while (!this.updateLinks(task)){  // error on update links while loading can be considered as "warning". Can be displayed and removed in order to let transaction commits.
+      if (numOfError!=this.__currentTransaction.errors.length){
+        var msg = "";
+        while (numOfError<this.__currentTransaction.errors.length) {
+          var err = this.__currentTransaction.errors.pop();
+          msg = msg + err.msg + "\n\n";
+        }
+        alert(msg);
 
-    if (linkLoops || !task.setPeriod(task.start, task.end)) {
-      alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +
-        (linkLoops ? GanttMaster.messages.CIRCULAR_REFERENCE : GanttMaster.messages.ERROR_SETTING_DATES));
+        //alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +GanttMaster.messages.CIRCULAR_REFERENCE );
+      }
+      this.removeAllLinks(task,false);
+    }
 
-      //remove task from in-memory collection
+    if (!task.setPeriod(task.start, task.end)) {
+      alert(GanttMaster.messages.GANNT_ERROR_LOADING_DATA_TASK_REMOVED + "\n" + task.name + "\n" +GanttMaster.messages.ERROR_SETTING_DATES);
+        //remove task from in-memory collection
       this.tasks.splice(task.getRow(), 1);
     } else {
       //append task to editor
@@ -659,10 +685,8 @@ GanttMaster.prototype.updateLinks = function (task) {
         }
       }
     }
-    if (todoOk) {
-      task.depends = newDepsString;
 
-    }
+    task.depends = newDepsString;
 
   }
 
