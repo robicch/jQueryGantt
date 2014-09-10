@@ -59,7 +59,7 @@ GanttMaster.prototype.init = function (place) {
   this.element = place;
   var self = this;
   //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();  // TODO: Remove inline jquery, this should be injected
+  $("#gantEditorTemplates").loadTemplates().remove();
 
   //create editor
   this.editor = new GridEditor(this);
