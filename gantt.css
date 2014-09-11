@@ -1,4 +1,8 @@
 
+body{
+  overflow: hidden;
+}
+
 /* -------------------------------------- GRIDIFY -----------------------------------*/
 .gdfTable {
   table-layout: fixed;
@@ -148,8 +152,16 @@
   margin:0px 0 0 10px;
 }
 
+.button span.teamworkIcon {
+  text-indent: -10px;
+}
 
-.ganttButtonBar .button span.teamworkIcon{
+
+.button.textual span.teamworkIcon {
+  font-size: 140%
+}
+
+.ganttButtonBar .button.textual span.teamworkIcon{
   font-size: 150%
 }
 
@@ -488,9 +500,35 @@ input[readonly]{
   stroke: #4286ff;
 }
 
+.userProfile {
+  font-size: 16px;
+  vertical-align: middle;
+  text-align: right;
+  margin: 0 5px 0 0;
+  padding: 5px;
+  float: right;
+  position: relative;
+  z-index: 50;
+  line-height: 40px;
+  vertical-align: middle;
+}
 
-body{
+.userLine {
+  max-width: 150px;
+  display: inline-block;
+  text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
+  margin: 0;padding: 0;
+  vertical-align: middle;
+}
+
+.avatar {
+  vertical-align: middle;
+  padding: 1px;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #dedede
 }
 
 
@@ -498,25 +536,60 @@ body{
 
 /* Large screens */
 
-@media only screen and (max-width : 1260px) {
+@media only screen and (max-width : 1440px) and (min-width : 1260px) {
 
-  .ganttButtonBar .button span.teamworkIcon {
+  .ganttButtonBar .button.textual span.teamworkIcon {
     font-size: 130%;
+  }
+
+  .userLine {
+    display: none;
+}
+
+}
+
+@media only screen and (max-width: 1259px) and (min-width : 1150px) {
+
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 120%;
+  }
+
+  .button.textual span.teamworkIcon {
+    font-size: 120%;
+  }
+
+  .button {
+    font-size: 110%;
+    padding: 3px 9px 6px;
+    margin-right: 5px;
+    margin-bottom: 5px
+  }
+
+  .userLine {
+    display: none;
   }
 
 }
 
-@media only screen and (max-width : 1155px) {
+@media only screen and (max-width: 1149px) and (min-width : 989px) {
 
-  .ganttButtonBar .button span.teamworkIcon {
-    font-size: 130%;
+  .button.textual span.teamworkIcon {
+    font-size: 110%;
+  }
+
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 110%;
   }
 
   .button {
-    font-size: 100%;
+    font-size: 110%;
     padding: 3px 9px 6px;
     margin-right: 5px;
     margin-bottom: 5px
+  }
+
+  .button em {
+    display: none;
   }
 
   .userLine {
@@ -533,12 +606,26 @@ body{
     padding-right: 6px;
     font-size: 100%;
   }
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 100%;
+  }
+  .button em {
+    display: none;
+  }
+  .userLine {
+    display: none;
+  }
 }
 
 /* Mobile TODO */
 
 @media only screen and (max-width: 767px) {
-  .button {
+  .button.textual {
     font-size: 50%;
   }
+
+  .button em {
+    display: none;
+  }
+
 }

@@ -783,7 +783,6 @@ Ganttalendar.prototype.centerOnToday = function() {
 
 
 Ganttalendar.prototype.showCriticalPath = function () {
-  //todo
   console.error("To be implemented");
 };
 
