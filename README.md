@@ -2,7 +2,7 @@ jQueryGantt
 ===========
 jQuery Gantt editor has been written by Roberto Bicchierai and Silvia Chelazzi
 
-<img src="https://rbicchierai.files.wordpress.com/2014/04/image_thumb6.png?w=596" alt="Twproject jQuery Gantt" border="0" />
+<img src="http://twproject.s3.amazonaws.com/resources/gantt_github.jpg" alt="Twproject jQuery Gantt" border="0" />
 
 These are some key features:
 * jquery based
