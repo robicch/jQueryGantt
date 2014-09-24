@@ -418,10 +418,10 @@ GanttMaster.prototype.loadTasks = function (tasks, selectedRow) {
     var task = this.tasks[i];
 
 
-    var numOfError=this.__currentTransaction.errors.length;
+    var numOfError=this.__currentTransaction&&this.__currentTransaction.errors?this.__currentTransaction.errors.length:0;
     //add Link collection in memory
     while (!this.updateLinks(task)){  // error on update links while loading can be considered as "warning". Can be displayed and removed in order to let transaction commits.
-      if (numOfError!=this.__currentTransaction.errors.length){
+      if (this.__currentTransaction && numOfError!=this.__currentTransaction.errors.length){
         var msg = "";
         while (numOfError<this.__currentTransaction.errors.length) {
           var err = this.__currentTransaction.errors.pop();
