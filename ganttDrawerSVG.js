@@ -309,7 +309,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
         //create backgound
         var extDep = svg.pattern(defs, "extDep", 0, 0, 10, 10, 0, 0, 10, 10, {patternUnits:'userSpaceOnUse'});
-        var img=svg.image(extDep, 0, 0, 10, 10, "res/hasExternalDeps.png",{opacity:.3});
+        var img=svg.image(extDep, 0, 0, 10, 10, self.master.resourceUrl + "hasExternalDeps.png",{opacity:.3});
 
         self.svg = svg;
         $(svg).addClass("ganttSVGBox");
@@ -568,11 +568,11 @@ Ganttalendar.prototype.drawTask = function (task) {
       svg.rect(taskSvg, 0, 0, "100%", 3, {fill:"#000"});
 
     if (task.startIsMilestone) {
-      svg.image(taskSvg, -9, dimensions.height/2-9, 18, 18, "res/milestone.png")
+      svg.image(taskSvg, -9, dimensions.height/2-9, 18, 18, self.master.resourceUrl + "milestone.png")
     }
 
     if (task.endIsMilestone) {
-      svg.image(taskSvg, "100%",dimensions.height/2-9, 18, 18, "res/milestone.png", {transform:"translate(-9)"})
+      svg.image(taskSvg, "100%",dimensions.height/2-9, 18, 18, self.master.resourceUrl + "milestone.png", {transform:"translate(-9)"})
     }
 
     //task label
@@ -689,7 +689,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     var p = svg.createPath();
 
     //add the arrow
-    svg.image(group, 0, 0, 5, 10, "res/linkArrow.png");
+    svg.image(group, 0, 0, 5, 10, self.master.resourceUrl + "linkArrow.png");
     //create empty path
     svg.path(group, p, {class:"taskLinkPathSVG"});
 
