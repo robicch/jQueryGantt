@@ -723,9 +723,16 @@ Task.prototype.getInferiorTasks = function() {
 };
 
   Task.prototype.deleteTask = function() {
+  
   //delete both dom elements
-  this.rowElement.remove();
-  this.ganttElement.remove();
+  if (this.rowElement) {
+    this.rowElement.remove();
+  }
+
+  //delete both dom elements
+  if (this.ganttElement) {
+    this.ganttElement.remove();
+  }
 
   //remove children
   var chd = this.getChildren();
