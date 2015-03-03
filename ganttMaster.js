@@ -387,7 +387,8 @@ GanttMaster.prototype.loadProject = function (project) {
 
 
   //[expand]
-  this.gantt.refreshGantt();
+  //this.gantt.refreshGantt();
+
 
   this.endTransaction();
   var self = this;
