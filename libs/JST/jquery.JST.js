@@ -10,27 +10,35 @@ $.JST = {
   loadTemplates: function(elems) {
     elems.each(function() {
       $(this).find(".__template__").each(function() {
-          var tmpl = $(this);
-          var type = tmpl.attr("type");
+        var tmpl = $(this);
+        var type = tmpl.attr("type");
 
-          //template may be inside <!-- ... --> or not in case of ajax loaded templates
-          if (tmpl.get(0).firstChild.nodeType == 8) // 8==comment
-            var templateBody = tmpl.get(0).firstChild.nodeValue; // this is inside the comment
-          else
-            var templateBody = tmpl.html(); // this is the whole template
+        //template may be inside <!-- ... --> or not in case of ajax loaded templates
+        var found=false;
+        var el=tmpl.get(0).firstChild;
+        while (el && !found) {
+          if (el.nodeType == 8) { // 8==comment
+            var templateBody = el.nodeValue; // this is inside the comment
+            found=true;
+            break;
+          }
+          el=el.nextSibling;
+        }
+        if (!found)
+          var templateBody = tmpl.html(); // this is the whole template
 
-          if (!templateBody.match(/##\w+##/)) { // is Resig' style? e.g. (#=id#) or (# ...some javascript code 'obj' is the alias for the object #)
-            var strFunc =
-                    "var p=[],print=function(){p.push.apply(p,arguments);};" +
-                    "with(obj){p.push('" +
-                    templateBody.replace(/[\r\t\n]/g, " ")
-                            .replace(/'(?=[^#]*#\))/g, "\t")
-                            .split("'").join("\\'")
-                            .split("\t").join("'")
-                            .replace(/\(#=(.+?)#\)/g, "',$1,'")
-                            .split("(#").join("');")
-                            .split("#)").join("p.push('")
-                            + "');}return p.join('');";
+        if (!templateBody.match(/##\w+##/)) { // is Resig' style? e.g. (#=id#) or (# ...some javascript code 'obj' is the alias for the object #)
+          var strFunc =
+            "var p=[],print=function(){p.push.apply(p,arguments);};" +
+            "with(obj){p.push('" +
+            templateBody.replace(/[\r\t\n]/g, " ")
+              .replace(/'(?=[^#]*#\))/g, "\t")
+              .split("'").join("\\'")
+              .split("\t").join("'")
+              .replace(/\(#=(.+?)#\)/g, "',$1,'")
+              .split("(#").join("');")
+              .split("#)").join("p.push('")
+            + "');}return p.join('');";
 
           try {
             $.JST._templates[type] = new Function("obj", strFunc);
@@ -38,15 +46,15 @@ $.JST = {
             console.error("JST error: "+type, e,strFunc);
           }
 
-          } else { //plain template   e.g. ##id##
+        } else { //plain template   e.g. ##id##
           try {
             $.JST._templates[type] = templateBody;
           } catch (e) {
             console.error("JST error: "+type, e,templateBody);
           }
-          }
+        }
 
-          tmpl.remove();
+        tmpl.remove();
 
       });
     });
