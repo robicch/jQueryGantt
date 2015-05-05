@@ -325,7 +325,7 @@ function loadFromLocalStorage() {
     ret = JSON.parse($("#ta").val());
 
 
-    //actualiza data
+    //actualize data
     var offset=new Date().getTime()-ret.tasks[0].start;
     for (var i=0;i<ret.tasks.length;i++)
       ret.tasks[i].start=ret.tasks[i].start+offset;
