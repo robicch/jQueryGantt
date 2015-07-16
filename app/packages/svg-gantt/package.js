@@ -1,3 +1,4 @@
+//package details
 Package.describe({
     name: 'fac:svg-gantt',
     version: '0.0.1',
@@ -5,7 +6,25 @@ Package.describe({
     git: 'https://github.com/future-analytics/meteor-svg-gantt/',
     documentation: 'README.md'
 });
+//end package details
 
+
+//load npm dependencies
+Npm.depends({
+    //"connect": "2.13.0"                                                       //to use connect in code `var npmConnect = Npm.require('connect')`
+});
+//end load npm dependencies
+
+
+//load cordova dependencies
+Cordova.depends({});
+
+
+//package build / make routine
+//Package.registerBuildPlugin();                                                //for compiling, ie converting coffeescript into javascript etc
+
+
+//package bootloader onUse
 Package.onUse(function(api){
     api.versionsFrom('1.1.0.2');
 
@@ -41,9 +60,20 @@ Package.onUse(function(api){
     api.export("Grindage", 'client');
     api.export("FoodGroups", ['client', 'server']);
 });
+//end package bootloader onUse
 
-Package.onTest(function(api) {
-  api.use('tinytest');
-  api.use('fac:svg-gantt');
-  api.addFiles('svg-gantt-tests.js');
+
+//package unit tests
+Package.onTest(function (api) {
+
+    //load packages for test environment (inc this one)
+    api.use([
+        "tinytest",
+        "themeteorchef:grindage"
+    ], ['client', 'server']);
+
+    //files to run for tests and their destined architecture
+    api.addFiles("tests/client/client-tests.js", "client");
+    api.addFiles("tests/server/server-tests.js", "server");
 });
+//end package unit tests
