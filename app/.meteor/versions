@@ -18,6 +18,14 @@ htmljs@1.0.4
 http@1.1.0
 id-map@1.0.3
 insecure@1.0.3
+iron:controller@1.0.8
+iron:core@1.0.8
+iron:dynamic-template@1.0.8
+iron:layout@1.0.8
+iron:location@1.0.9
+iron:middleware-stack@1.0.9
+iron:router@1.0.9
+iron:url@1.0.9
 jquery@1.11.3_2
 json@1.0.3
 launch-screen@1.0.2
@@ -41,6 +49,8 @@ session@1.1.0
 spacebars@1.0.6
 spacebars-compiler@1.0.6
 templating@1.1.1
+themeteorchef:controller@1.2.0
+tinytest@1.0.5
 tracker@1.0.7
 ui@1.0.6
 underscore@1.0.3

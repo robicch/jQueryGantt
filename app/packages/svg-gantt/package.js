@@ -6,15 +6,12 @@ Package.describe({
     documentation: 'README.md'
 });
 
-Package.on_use(function(api){
+Package.onUse(function(api){
     api.versionsFrom('1.1.0.2');
-    api.addFiles('svg-gantt.js');
 
-    api.use("templating", "client");
-    api.addFiles('aTemplate.html', 'client');
-    api.addFiles('serverFunction.js', 'server');
-
-    api.export('capitalise', 'server');
+    api.use(["templating", "underscore"]);
+    api.use(["iron:router@1.0.7"], 'client', {weak: false, unordered: false});
+    api.use(["themeteorchef:controller@1.2.0"], 'client');
 });
 
 Package.onTest(function(api) {
