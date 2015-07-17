@@ -21,10 +21,10 @@
 
   /*
   -------------------------------------------------------
-  body styles
+  #svg-gantt styles
   -------------------------------------------------------
   */
-BODY, TBODY {
+#svg-gantt, #svg-gantt TBODY {
   font-family: arial;
   font-size: 14px;
   margin: 0;
@@ -32,8 +32,8 @@ BODY, TBODY {
   text-decoration: none;
 }
 
-BODY {
-  background-color: #91B4B7; 
+#svg-gantt {
+  background-color: #91B4B7;
 }
 
 a {

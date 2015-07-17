@@ -29,31 +29,62 @@ Package.onUse(function(api){
     api.versionsFrom('1.1.0.2');
 
     //dependencies
-    api.use(["templating", "underscore"]);
-    api.use(["iron:router@1.0.7"], 'client', {weak: false, unordered: false});
-    api.use(["themeteorchef:controller@1.2.0"], 'client');
+    api.use(["templating", "underscore", "sergeyt:livequery"]);
+    //api.use(["iron:router@1.0.7"], 'client', {weak: false, unordered: false});
+    //api.use(["themeteorchef:controller@1.2.0"], 'client');
 
     //used to export a dependencies symbols to the client/server
     //api.imply()
 
     // Loading files on both the client and the server.
+    /*
     api.addFiles([
         "lib/collections/food-groups.js"                                        //declare collection (declared before use below)
     ], ['client', 'server']);
+    */
 
     // Loading files on the server only.
+    /*
     api.addFiles([
         "lib/publications/food-groups.js",                                      //publish collection
         "lib/startup.js"                                                        //server startup script (insert default data if needed)
     ], ['server']);
+    **/
 
     // Loading files on the client only.
     api.addFiles([
-        "lib/modules/grindage.js",
-        "lib/stylesheets/grindage.css",
-        "lib/templates/grindage.html",
-        "lib/controllers/grindage.js",
-        "lib/routes/routes.js"
+        "lib/stylesheets/gantt.css",                                            // lib/stylesheets
+        "lib/stylesheets/ganttPrint.css",
+        "lib/stylesheets/platform.css",
+        "lib/stylesheets/teamworkFont.css",
+
+        "vendor/jquery.1.8.js",
+        //"vendor/jquery.livequery.min.js",
+        "vendor/dateField/images/next.png",                                     // vendor
+        "vendor/dateField/images/prev.png",
+        "vendor/dateField/jquery.dateField.css",
+        "vendor/dateField/jquery.dateField.js",
+        "vendor/date.js",
+        "vendor/i18nJs.js",
+        "vendor/jquery.svgdom.1.8.js",
+        "vendor/jquery.svgdom.js",
+        "vendor/jquery.svgdom.pack.js",
+        "vendor/jquery.svg.js",
+        "vendor/jquery.svg.min.js",
+        "vendor/jquery.timers.js",
+        "vendor/JST/jquery.JST.js",
+        "vendor/platform.js",
+
+        "lib/ganttDrawer.js",                                                   // scripts
+        "lib/ganttDrawerSVG.js",
+        "lib/ganttGridEditor.js",
+        "lib/ganttMaster.js",
+        "lib/ganttTask.js",
+        "lib/ganttUtilities.js",
+        "lib/startup.js",
+
+        "lib/templates/gantt.html",                                                 // templates
+
     ], ['client']);
 
     //export globals from files above

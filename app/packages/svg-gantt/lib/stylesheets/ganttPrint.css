@@ -2,7 +2,7 @@
   display:none !important;
 }
 
-BODY, TBODY {
+#svg-gantt, T#svg-gantt {
   font-family: arial;
   font-size: 12px;
   margin: 0;
