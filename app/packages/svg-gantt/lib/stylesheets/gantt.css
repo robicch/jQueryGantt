@@ -1,0 +1,631 @@
+
+body{
+  overflow: hidden;
+}
+
+/* -------------------------------------- GRIDIFY -----------------------------------*/
+.gdfTable {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.gdfTable td, .gdfTable th {
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-size: 14px
+}
+
+.gdfCell {
+  overflow: hidden;
+  padding:4px 2px
+}
+
+.gdfCell.noClip{
+  overflow: visible;
+}
+
+.gdfColHeader {
+  min-width: 5px;
+  height: 30px;
+}
+
+.gdfCell, .gdfColHeader {
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #b0b0b0;
+}
+
+
+.gdfCellInput {
+  border: 0 none;
+  font-size: 12px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  background-color: #d4fbe8;
+}
+
+.gdfCellWrap {
+  border: 0 none;
+  font-size: 12px;
+  height: 17px;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+
+  background-color: #ffcccc;
+}
+
+.gdfHResizing {
+  cursor: w-resize;
+}
+
+
+/* -------------------------------------- SPLITTER -----------------------------------*/
+.splitterContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.splitBox1{
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.splitBox2{
+  overflow-x: scroll;
+  overflow-y: auto;
+}
+
+
+.splitElement {
+  outline-style: none;
+  position: absolute;
+  height: 100%;
+}
+
+.vSplitBar {
+  width: 5px;
+  background-color: #aaa;
+  cursor: w-resize;
+  text-align: center;
+  color: white;
+}
+
+.fixHead{
+  position: absolute;
+  z-index: 2000;
+  top:0;
+}
+
+/* -------------------------------------- GANTT -----------------------------------*/
+
+
+.ganttTable{
+  table-layout:fixed;
+}
+
+.ganttTable td,.ganttTable th{
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.ganttHead1,.ganttHead2{
+  height:20px;
+}
+
+.ganttHead1 th, .ganttHead2 th{
+  border-left:1px solid #b0b0b0;
+  padding: 0;
+  margin: 0;
+}
+
+.ganttToday{
+  position:absolute;
+  top:0;
+  width:1px;
+  height:100%;
+  border-left:2px dotted #13AFA5;
+}
+
+.ganttHighLight{
+  position:absolute;
+  width:100%;
+  height:28px;
+  background-color:yellow;
+  opacity:.4;
+}
+
+.ganttButtonBar{
+  position:relative;
+  padding:5px;
+  height:55px;
+}
+
+.ganttButtonBar .buttons, .ganttButtonBar h1 {
+  display:inline-block;
+  margin:0px 0 0 10px;
+}
+
+.button span.teamworkIcon {
+  text-indent: -10px;
+}
+
+
+.button.textual span.teamworkIcon {
+  font-size: 140%
+}
+
+.ganttButtonBar .button.textual span.teamworkIcon{
+  font-size: 150%
+}
+
+.ganttButtonSeparator{
+  border-left:1px solid gray;
+  padding-right:10px;
+  margin-left:10px;
+  font-size: 130%
+}
+
+
+.ganttLines{
+  position:absolute;
+  width:100%;
+  height:1px;
+  border-top:1px solid #eee;
+  z-index:1;
+}
+
+.ganttLinks{
+  z-index:10;
+}
+
+
+.end{
+  border-right:1px dotted #666
+}
+
+.holyH{
+  background-color: #f3dfd5;
+}
+.holy{
+  background-color: #FFF5E6;
+}
+
+
+/* -------------------------------------- TASK -----------------------------------*/
+
+.taskBoxDiv{
+  position:absolute;
+  height:25px;
+  margin-top:3px;
+  z-index:100;
+}
+
+.taskBoxDiv .layout {
+  height:100%;
+  color:#DB2727;
+  border-radius:2px;
+  background: #eee; /* Old browsers */
+  border:1px solid #bbb;
+}
+
+.taskBoxDiv .taskStatus {
+    left:5px;
+    top:10px;
+    position:absolute;
+    width:10px;
+    height:10px;
+}
+
+.taskBoxDiv .layout .milestone{
+  top:0;
+  position:absolute;
+  width:18px;
+  background: url(res/milestone.png) no-repeat;
+  height:18px;
+  display:none;
+}
+.taskBoxDiv .layout .milestone.end{
+  right:0;
+}
+.taskBoxDiv .layout .milestone.active{
+  display:block;
+}
+
+.taskBoxDiv.hasChild .layout{
+  border-top:2px solid black;
+}
+
+.taskBoxDiv .taskProgress{
+  height:5px;
+  position:absolute;
+}
+
+.taskBoxDiv .layout.extDep{
+  background-image:url(res/hasExternalDeps.png);
+}
+
+
+.taskLabel{
+  position:absolute;
+  height:28px;
+  color:black;
+  text-align:right;
+  padding-right:5px;
+  overflow:hidden;
+  left:-200px;
+  width:195px;
+  white-space:nowrap;
+}
+
+
+.taskDepLine {
+  border: 1px solid #9999ff;
+  overflow: hidden;
+  position: absolute;
+}
+
+
+.taskEditRow,.emptyRow {
+  height:30px;
+}
+
+.taskEditRow input{
+  border: 0 none;
+  font-size: 14px;
+  height: 20px;
+  margin: 0;
+  padding:0;
+  outline: 0;
+  width: 100%;
+  border-radius: 0;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+
+.taskEditRow input:focus{
+  font-weight: bold;
+}
+
+.taskEditRow.rowSelected td,.taskEditRow.rowSelected input{
+  background-color:#FFFF99;  
+}
+
+input[readonly]{
+  color: #c0c0c0;
+}
+
+.taskStatusBox{
+  position:absolute;
+  /*width:100px;*/
+  height:26px;
+  border:1px solid #a0a0a0;
+  background-color:#fff;
+  margin-top:-21px;
+  margin-left:-2px;
+  padding: 4px;
+  z-index: 100;
+}
+.taskStatus{
+  width:15px;
+  height:15px;
+  display:inline-block;
+  text-indent: 0;
+  position:relative;
+  box-shadow: none;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.20)
+
+}
+
+.taskStatus[status=STATUS_ACTIVE]{
+ background-color: #3BBF67;
+}
+.taskStatus[status=STATUS_DONE]{
+ background-color: #0099FF;
+}
+.taskStatus[status=STATUS_FAILED]{
+ background-color: #660066;
+}
+.taskStatus[status=STATUS_SUSPENDED]{
+ background-color: #fbb11e;
+}
+.taskStatus[status=STATUS_UNDEFINED]{
+ background-color: #ffffff;
+}
+.taskStatus.selected{
+  border:#666 2px solid;
+}
+
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+
+.exp-controller{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  position: relative;
+  top: 2px;
+  margin-left: -18px;
+}
+
+.expcoll{
+  cursor: pointer;
+  background-image: url(res/toggle-expand.png);
+}
+
+.expcoll.exp{
+  background-image: url(res/toggle_collapse.png);
+}
+
+.ui-resizable-helper { border: 1px dotted #00F;  }
+.ui-resizable-e, .ui-resizable-w {width: 5px;}
+.ui-draggable{
+  cursor:move;
+}
+
+
+/*--------------------------------------------------- SVG --------------------------------------------------*/
+.ganttSVGBox{
+  position: absolute;
+  top:0;
+  left: 0;
+  height: 100%;
+  background-color: transparent;
+  width: 100%;
+}
+
+.taskBoxSVG{
+  overflow: visible;
+}
+
+.taskBoxSVG .taskLayout{
+  stroke-width:0;
+  stroke:#999;
+  /*fill:url('#taskGrad'); do not work on firefox*/
+}
+
+.taskLinkPathSVG{
+  stroke:#9999ff;
+  stroke-width:3px;
+  fill:none;
+  cursor:pointer;
+}
+
+.ganttLinesSVG{
+  stroke:#eee;
+  stroke-width:1;
+}
+
+.ganttTodaySVG{
+  stroke-width:2px;
+  stroke:#13AFA5;
+  stroke-linecap:"round";
+  stroke-dasharray:2,2;
+}
+
+.taskStatusSVG[status=STATUS_ACTIVE]{
+  fill: #3BBF67;
+}
+.taskStatusSVG[status=STATUS_DONE]{
+  fill: #0099FF;
+}
+.taskStatusSVG[status=STATUS_FAILED]{
+  fill: #660066;
+}
+.taskStatusSVG[status=STATUS_SUSPENDED]{
+  fill: #fbb11e;
+}
+.taskStatusSVG[status=STATUS_UNDEFINED]{
+  fill: #f0f0f0;
+}
+.taskStatusSVG[status=STATUS_UNDEFINED] .taskLayout{
+  stroke: #ccc;
+  stroke-width:1;
+}
+
+.taskStatusSVG[status=STATUS_DONE] .textPerc,
+.taskStatusSVG[status=STATUS_ACTIVE] .textPerc,
+.taskStatusSVG[status=STATUS_FAILED] .textPerc{
+  fill: #fff;
+}
+
+
+.deSVG.deSVGdrag {
+  cursor: move;
+}
+.deSVG.deSVGhand {
+  cursor: ew-resize;
+}
+
+
+.linkHandleSVG{
+  display:none;
+  stroke:#888;
+  stroke-width:2px;
+  fill:#eee;
+  cursor: pointer;
+}
+
+.linkLineSVG{
+  stroke-width:5px;
+  stroke: #9999ff;
+  stroke-linecap:"round";
+  opacity: .5;
+    /*stroke-dasharray:5,5;*/
+}
+
+.linkOnProgress .deSVG.taskBoxSVG  {
+  cursor:cell;
+}
+
+.taskBoxSVG.linkOver .taskLayout{
+  stroke-width:1px;
+  stroke:#9999ff;
+  opacity: 1;
+}
+
+.taskLabelSVG {
+  stroke: none;
+  fill:#999;
+  font-size: 12px;
+}
+
+.critical .taskLinkPathSVG{
+  stroke:red;
+}
+
+.taskBoxSVG.critical .taskLayout{
+  stroke:red;
+}
+
+.focused .taskLinkPathSVG{
+  stroke-width:5px;
+  stroke: #4286ff;
+}
+
+.taskBoxSVG.focused .taskLayout{
+  stroke-width:3px;
+  stroke: #4286ff;
+}
+
+.userProfile {
+  font-size: 16px;
+  vertical-align: middle;
+  text-align: right;
+  margin: 0 5px 0 0;
+  padding: 5px;
+  float: right;
+  position: relative;
+  z-index: 50;
+  line-height: 40px;
+  vertical-align: middle;
+}
+
+.userLine {
+  max-width: 150px;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0;padding: 0;
+  vertical-align: middle;
+}
+
+.avatar {
+  vertical-align: middle;
+  padding: 1px;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #dedede
+}
+
+
+/*--------------------------------------------------- Media queries  --------------------------------------------------*/
+
+/* Large screens */
+
+@media only screen and (max-width : 1440px) and (min-width : 1260px) {
+
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 130%;
+  }
+
+  .userLine {
+    display: none;
+}
+
+}
+
+@media only screen and (max-width: 1259px) and (min-width : 1150px) {
+
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 120%;
+  }
+
+  .button.textual span.teamworkIcon {
+    font-size: 120%;
+  }
+
+  .button {
+    font-size: 110%;
+    padding: 3px 9px 6px;
+    margin-right: 5px;
+    margin-bottom: 5px
+  }
+
+  .userLine {
+    display: none;
+  }
+
+}
+
+@media only screen and (max-width: 1149px) and (min-width : 989px) {
+
+  .button.textual span.teamworkIcon {
+    font-size: 110%;
+  }
+
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 110%;
+  }
+
+  .button {
+    font-size: 110%;
+    padding: 3px 9px 6px;
+    margin-right: 5px;
+    margin-bottom: 5px
+  }
+
+  .button em {
+    display: none;
+  }
+
+  .userLine {
+    display: none;
+  }
+
+}
+
+/* Ipad */
+
+@media only screen and (max-width: 989px) and (min-width: 768px){
+  .ganttButtonSeparator {
+    margin-left: 2px;
+    padding-right: 6px;
+    font-size: 100%;
+  }
+  .ganttButtonBar .button.textual span.teamworkIcon {
+    font-size: 100%;
+  }
+  .button em {
+    display: none;
+  }
+  .userLine {
+    display: none;
+  }
+}
+
+/* Mobile TODO */
+
+@media only screen and (max-width: 767px) {
+  .button.textual {
+    font-size: 50%;
+  }
+
+  .button em {
+    display: none;
+  }
+
+}

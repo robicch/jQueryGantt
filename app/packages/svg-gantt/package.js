@@ -2,7 +2,7 @@
 Package.describe({
     name: 'fac:svg-gantt',
     version: '0.0.1',
-    summary: 'A meteor package to provide gantt chart based on SVG technology',
+    summary: 'A meteor package to provide gantt chart based on SVG technology. Original project: https://github.com/robicch/jQueryGantt ',
     git: 'https://github.com/future-analytics/meteor-svg-gantt/',
     documentation: 'README.md'
 });

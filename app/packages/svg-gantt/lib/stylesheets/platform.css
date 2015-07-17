@@ -1,0 +1,347 @@
+@font-face {
+    font-family: 'TeamworkRegular';
+    src: url('teamwork-regular-webfont.eot');
+    src: url('teamwork-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('teamwork-regular-webfont.woff') format('woff'),
+         url('teamwork-regular-webfont.ttf') format('truetype'),
+         url('teamwork-regular-webfont.otf') format('opentype'),
+         url('teamwork-regular-webfont.svg#TeamworkRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+
+*{
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -o-box-sizing:border-box;
+  box-sizing: border-box;
+}
+
+  /*
+  -------------------------------------------------------
+  body styles
+  -------------------------------------------------------
+  */
+BODY, TBODY {
+  font-family: arial;
+  font-size: 14px;
+  margin: 0;
+  color: #000000;
+  text-decoration: none;
+}
+
+BODY {
+  background-color: #91B4B7; 
+}
+
+a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #16ABDD;
+}
+
+a:hover, a.aHover {
+  color: #0C85AD;
+  text-decoration: underline;
+}
+
+h1 {
+  font-size:32px;
+  line-height: 34px;
+  color:#91B4B7;
+  font-weight:normal;
+  margin:0 0 10px 0
+}
+
+h2 {
+  font-size:22px;
+  color:#373737;
+  font-weight:normal;
+  margin:0 0 10px 0
+}
+
+h3 {
+  text-decoration: none;
+  color: #000000;
+  font-size: 16px;
+  margin: 0;
+}
+
+h4 {
+  font-size:16px;
+  padding:5px 0;
+  color:#617777;
+  margin:0
+}
+
+#savingMessage{
+  background-color:#E3EDED;
+  display:none;
+  color:#617777;
+  font-weight:bolder;
+  position:fixed;
+  top:0;
+  left:50%;
+  width:200px;
+  text-align:center;
+  margin-left:-100px;
+  padding:5px 0;
+  z-index:1000000;
+  box-shadow:0 3px 2px rgba(0,0,0,0.4);
+  -moz-box-shadow:0 3px 2px rgba(0,0,0,0.4);
+  -webkit-box-shadow:0 3px 2px rgba(0,0,0,0.4);
+  -o-box-shadow:0 3px 2px rgba(0,0,0,0.4);
+}
+
+.waiting{
+  cursor:progress;
+}
+
+/*
+  -------------------------------------------------------
+  teamwork icon
+  -------------------------------------------------------
+  */
+
+
+.teamworkIcon {
+  font-family: 'TeamworkRegular', arial, sans-serif;
+  color:#617777;
+  font-weight:normal;
+  font-size:120%
+}
+
+.teamworkIcon.withLabel {
+  padding-right:5px;
+}
+
+
+.button:hover .teamworkIcon {
+  opacity: 0.8
+}
+
+.teamworkIcon.alert {
+  color:#B61E2D;
+}
+
+.cvcColorSquare{
+  display:inline-block;
+  text-align:left;
+  border:#fff 0px solid;
+  box-shadow:0px 0px 5px #999;
+  -moz-box-shadow:2px 2px 2px #999;
+  -webkit-box-shadow:0px 0px 5px #999;
+  -o-box-shadow:0px 0px 5px #999;
+  text-indent:10px;
+  border-radius:5px;
+  cursor: pointer;
+}
+
+ .cvcColorSquare:hover{
+  opacity:.7;
+}
+
+
+
+.unselectable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+
+.ui-resizable { position: relative;}
+.ui-resizable-handle { position: absolute;font-size: 0.1px;z-index: 99999; display: block; }
+.ui-resizable-disabled .ui-resizable-handle, .ui-resizable-autohide .ui-resizable-handle { display: none; }
+.ui-resizable-n { cursor: n-resize; height: 7px; width: 100%; top: -5px; left: 0; }
+.ui-resizable-s { cursor: s-resize; height: 7px; width: 100%; bottom: -5px; left: 0; }
+.ui-resizable-e { cursor: e-resize; width: 7px; right: -5px; top: 0; height: 100%; }
+.ui-resizable-w { cursor: w-resize; width: 7px; left: -5px; top: 0; height: 100%; }
+.ui-resizable-se { cursor: se-resize; width: 12px; height: 12px; right: 1px; bottom: 1px; }
+.ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
+.ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
+.ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}
+
+
+  /*
+  -------------------------------------------------------
+  table styles
+  -------------------------------------------------------
+  */
+
+.table {
+  width: 100%;
+}
+
+TH, .tableHeader {
+  font-weight: normal;
+  color: #FFFFFF;
+  border: none;
+  background-color: #91B4B7;
+  padding:2px
+}
+
+TH a {
+  color: #FFFFFF;
+}
+
+
+
+  /*
+  -------------------------------------------------------
+  Buttons
+  -------------------------------------------------------
+  */
+
+.button {
+  display:inline-block;
+  font-size:110%;
+  font-family:Arial, sans-serif;
+  color:#fff;
+  cursor:pointer;
+  background-color:#373737;
+   -moz-box-shadow:2px 2px 2px #999;
+   -webkit-box-shadow:2px 2px 2px #999;
+   -o-box-shadow:2px 2px 2px #999;
+   box-shadow:2px 2px 2px #999;
+   -moz-border-radius:5px;
+   -webkit-border-radius:5px;
+   -o-border-radius:5px;
+   border-radius:5px;
+   border:none;
+   padding:7px 10px;
+   margin-bottom:10px;
+   margin-right:10px;
+  text-align: center
+}
+
+
+.button.first {
+    background-color:#FEA730;
+    font-weight: bold;
+}
+.button.first:hover {
+    background-color:#D98E2A;
+}
+
+
+
+.button[disabled] {
+  cursor: default;
+  opacity:0.4
+}
+
+
+.button:hover[disabled] {
+  background-color:#BABABA
+}
+
+.button.textual, .button.buttonImg {
+  border: none;
+  background-color: transparent;
+  color:#68979B;
+  -moz-box-shadow:0 0 0 #999;
+   -webkit-box-shadow:0 0 0 #999;
+   -o-box-shadow:0 0 0 #999;
+   box-shadow:0 0 0 #999;
+  -moz-border-radius:0;
+   -webkit-border-radius:0;
+   -o-border-radius:0;
+   border-radius:0;
+  padding:0;
+  margin:0;
+  text-align: left
+}
+
+
+
+.button.edit {
+  color:#009E94;
+  padding:0;
+  margin:0
+}
+
+.button.delete {
+  color:#B61E2D;
+  padding:0;
+  margin:0
+}
+
+.button:hover {
+  background-color: #4C4C4C;
+}
+.button.textual:hover, .button.buttonImg:hover {
+  background-color: transparent;
+}
+
+span.separator {
+  display: inline-block;
+}
+
+.button.add {
+  color:#009E94;
+}
+
+.button.add .teamworkIcon {
+  color:#009E94;
+}
+
+
+form {
+  margin: 0;
+  padding: 0;
+}
+
+select {
+  border:1px solid #91B4B7;
+  padding: 4px;
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.formElements {
+  background-color: white;
+  padding: 4px;
+  font-size: 16px;
+  border:1px solid #91B4B7;
+  -moz-border-radius:3px;
+  -webkit-border-radius:3px;
+  -o-border-radius:3px;
+  border-radius:3px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.formElementsError {
+  border: 1px solid #ff0000;
+}
+
+.formElementExclamation {
+  width: 15px;
+  height: 25px;
+  mmmargin-left: -20px;
+  mmmposition: absolute;
+  background: url("res/alert.gif") no-repeat;
+}
+
+
+span#FLD_LOGIN_NAMEerror, span#FLD_PWDerror {
+  margin-left: -23px;
+  margin-top: 2px;
+}
+
+
+input {
+    background-color: white;
+    padding: 4px;
+    font-size: 16px;
+    border:1px solid #91B4B7;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    -o-border-radius:3px;
+    border-radius:3px;
+    font-family: Arial, Helvetica, sans-serif;
+}
