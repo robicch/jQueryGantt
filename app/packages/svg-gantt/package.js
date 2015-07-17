@@ -68,12 +68,12 @@ Package.onTest(function (api) {
 
     //load packages for test environment (inc this one)
     api.use([
-        "tinytest",
-        "themeteorchef:grindage"
+        "tinytest",                                                             //unittest suite
+        "fac:svg-gantt"                                                         //package to test
     ], ['client', 'server']);
 
     //files to run for tests and their destined architecture
-    api.addFiles("tests/client/client-tests.js", "client");
-    api.addFiles("tests/server/server-tests.js", "server");
+    api.addFiles("tests/client/client-tests.js", "client");                     //load test case files (client)
+    api.addFiles("tests/server/server-tests.js", "server");                     //load test case files (server)
 });
 //end package unit tests
