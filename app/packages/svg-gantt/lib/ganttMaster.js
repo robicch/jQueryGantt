@@ -20,7 +20,7 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GanttMaster() {
+GanttMaster = function GanttMaster() {
   this.tasks = [];
   this.deletedTaskIds = [];
   this.links = [];
@@ -376,7 +376,7 @@ GanttMaster.prototype.loadProject = function (project) {
 
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
-  
+
   //recover saved splitter position
   if (project.splitterPosition)
     this.splitter.resize(project.splitterPosition);
@@ -815,7 +815,7 @@ GanttMaster.prototype.deleteCurrentTask=function(){
 
     //redraw
     self.redraw();
-  
+
     //[expand]
     if(par) self.editor.refreshExpandStatus(par);
 
@@ -1091,7 +1091,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
 
   function initials(tasks) {
     var initials = [];
-    for (var i = 0; i < tasks.length; i++) {      
+    for (var i = 0; i < tasks.length; i++) {
       if (!tasks[i].depends || tasks[i].depends == "")
         initials.push(tasks[i]);
     }

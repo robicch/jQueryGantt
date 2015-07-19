@@ -88,7 +88,7 @@ Package.onUse(function(api){
     ], ['client']);
 
     //export globals from files above
-    api.export("Grindage", 'client');
+    api.export("GanttMaster", 'client');
     api.export("FoodGroups", ['client', 'server']);
 });
 //end package bootloader onUse
