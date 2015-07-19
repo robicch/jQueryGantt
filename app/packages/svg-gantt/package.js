@@ -59,7 +59,8 @@ Package.onUse(function(api){
         "lib/stylesheets/teamworkFont.css",
 
         "vendor/jquery.1.8.js",
-        //"vendor/jquery.livequery.min.js",
+        "vendor/JST/jquery.JST.js",
+        "vendor/jquery.livequery.min.js",
         "vendor/dateField/images/next.png",                                     // vendor
         "vendor/dateField/images/prev.png",
         "vendor/dateField/jquery.dateField.css",
@@ -72,7 +73,6 @@ Package.onUse(function(api){
         "vendor/jquery.svg.js",
         "vendor/jquery.svg.min.js",
         "vendor/jquery.timers.js",
-        "vendor/JST/jquery.JST.js",
         "vendor/platform.js",
 
         "lib/ganttDrawer.js",                                                   // scripts
@@ -88,7 +88,10 @@ Package.onUse(function(api){
     ], ['client']);
 
     //export globals from files above
-    api.export("GanttMaster", 'client');
+    api.export([
+        "GanttMaster",
+        "JST"
+        ], 'client');
     api.export("FoodGroups", ['client', 'server']);
 });
 //end package bootloader onUse

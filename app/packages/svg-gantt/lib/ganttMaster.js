@@ -59,8 +59,10 @@ GanttMaster = function GanttMaster() {
 GanttMaster.prototype.init = function (place) {
   this.element = place;
   var self = this;
+
   //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();
+  //$("#gantEditorTemplates").loadTemplates().remove();
+  $.fn.loadTemplates.loadTemplates($("#gantEditorTemplates")); //.remove();
 
   //create editor
   this.editor = new GridEditor(this);

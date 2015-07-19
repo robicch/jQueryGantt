@@ -1,4 +1,4 @@
-$.fn.loadTemplates = function() {
+JST = function JST() {
   $.JST.loadTemplates($(this));
   return this;
 };
