@@ -354,7 +354,7 @@ GanttMaster.prototype.addTask = function (task, row) {
  * @param project
  */
 GanttMaster.prototype.loadProject = function (project) {
-  //console.debug("loadProject",project)
+  console.debug("loadProject",project)
   this.beginTransaction();
   this.resources = project.resources;
   this.roles = project.roles;
@@ -1061,10 +1061,8 @@ GanttMaster.prototype.computeCriticalPath = function () {
     console.debug("Task ", t.name, t.duration, t.earlyStart, t.earlyFinish, t.latestStart, t.latestFinish, t.latestStart - t.earlyStart, t.earlyStart == t.latestStart)
   }*/
 
-  return tasks;
 
-
-  function containsAll(set, targets) {
+  containsAll = function containsAll(set, targets) {
     for (var i = 0; i < targets.length; i++) {
       if (set.indexOf(targets[i]) < 0)
         return false;
@@ -1072,7 +1070,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
     return true;
   }
 
-  function computeMaxCost(tasks) {
+  computeMaxCost = function computeMaxCost(tasks) {
     var max = -1;
     for (var i = 0; i < tasks.length; i++) {
       var t = tasks[i];
@@ -1087,7 +1085,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
     }
   }
 
-  function initials(tasks) {
+  initials = function initials(tasks) {
     var initials = [];
     for (var i = 0; i < tasks.length; i++) {
       if (!tasks[i].depends || tasks[i].depends == "")
@@ -1096,7 +1094,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
     return initials;
   }
 
-  function calculateEarly(initials) {
+  calculateEarly = function calculateEarly(initials) {
     for (var i = 0; i < initials.length; i++) {
       var initial = initials[i];
       initial.earlyStart = 0;
@@ -1105,7 +1103,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
     }
   }
 
-  function setEarly(initial) {
+  setEarly = function setEarly(initial) {
     var completionTime = initial.earlyFinish;
     var inferiorTasks = initial.getInferiorTasks();
     for (var i = 0; i < inferiorTasks.length; i++) {
@@ -1118,12 +1116,13 @@ GanttMaster.prototype.computeCriticalPath = function () {
     }
   }
 
-  function calculateCritical(tasks) {
+  calculateCritical = function calculateCritical(tasks) {
     for (var i = 0; i < tasks.length; i++) {
       var t = tasks[i];
       t.isCritical=(t.earlyStart == t.latestStart)
     }
   }
 
+  return tasks;
 
 };

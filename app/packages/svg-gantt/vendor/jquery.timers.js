@@ -1,4 +1,4 @@
-jQuery.fn.extend({
+timeActions = {
 	everyTime: function(interval, label, fn, times, belay) {
 		return this.each(function() {
 			jQuery.timer.add(this, interval, label, fn, times, belay);
@@ -14,9 +14,9 @@ jQuery.fn.extend({
 			jQuery.timer.remove(this, label, fn);
 		});
 	}
-});
+};
 
-jQuery.extend({
+timer = {
 	timer: {
 		guid: 1,
 		global: {},
@@ -45,14 +45,14 @@ jQuery.extend({
 		},
 		add: function(element, interval, label, fn, times, belay) {
 			var counter = 0;
-			
+
 			if (jQuery.isFunction(label)) {
-				if (!times) 
+				if (!times)
 					times = fn;
 				fn = label;
 				label = interval;
 			}
-			
+
 			interval = jQuery.timer.timeParse(interval);
 
 			if (typeof interval != 'number' || isNaN(interval) || interval <= 0)
@@ -62,42 +62,42 @@ jQuery.extend({
 				belay = !!times;
 				times = 0;
 			}
-			
+
 			times = times || 0;
 			belay = belay || false;
-			
-			if (!element.$timers) 
+
+			if (!element.$timers)
 				element.$timers = {};
-			
+
 			if (!element.$timers[label])
 				element.$timers[label] = {};
-			
+
 			fn.$timerID = fn.$timerID || this.guid++;
-			
+
 			var handler = function() {
-				if (belay && this.inProgress) 
+				if (belay && this.inProgress)
 					return;
 				this.inProgress = true;
 				if ((++counter > times && times !== 0) || fn.call(element, counter) === false)
 					jQuery.timer.remove(element, label, fn);
 				this.inProgress = false;
 			};
-			
+
 			handler.$timerID = fn.$timerID;
-			
-			if (!element.$timers[label][fn.$timerID]) 
+
+			if (!element.$timers[label][fn.$timerID])
 				element.$timers[label][fn.$timerID] = window.setInterval(handler,interval);
-			
+
 			if ( !this.global[label] )
 				this.global[label] = [];
 			this.global[label].push( element );
-			
+
 		},
 		remove: function(element, label, fn) {
 			var timers = element.$timers, ret;
-			
+
 			if ( timers ) {
-				
+
 				if (!label) {
 					for ( label in timers )
 						this.remove(element, label, fn);
@@ -113,21 +113,21 @@ jQuery.extend({
 							delete timers[label][fn];
 						}
 					}
-					
+
 					for ( ret in timers[label] ) break;
 					if ( !ret ) {
 						ret = null;
 						delete timers[label];
 					}
 				}
-				
+
 				for ( ret in timers ) break;
-				if ( !ret ) 
+				if ( !ret )
 					element.$timers = null;
 			}
 		}
 	}
-});
+};
 
 if (jQuery.browser.msie)
 	jQuery(window).one("unload", function() {
@@ -138,5 +138,3 @@ if (jQuery.browser.msie)
 				jQuery.timer.remove(els[i], label);
 		}
 	});
-
-

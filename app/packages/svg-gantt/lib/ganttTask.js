@@ -25,7 +25,7 @@
  * A method to instantiate valid task models from
  * raw data.
 */
-function TaskFactory() {
+TaskFactory = function TaskFactory() {
 
   /**
    * Build a new Task
@@ -40,7 +40,7 @@ function TaskFactory() {
 
 }
 
-function Task(id, name, code, level, start, end, duration, collapsed) {
+Task = function Task(id, name, code, level, start, end, duration, collapsed) {
   this.id = id;
   this.name = name;
   this.progress=0;
@@ -58,7 +58,7 @@ function Task(id, name, code, level, start, end, duration, collapsed) {
   this.endIsMilestone = false;
 
   this.collapsed = collapsed;
-  
+
   this.rowElement; //row editor html element
   this.ganttElement; //gantt html element
   this.master;
@@ -311,7 +311,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
       return false;
     }
 
-    
+
     var panDelta = originalPeriod.start - this.start;
     //console.debug("panDelta",panDelta);
     //loops children to shift them
@@ -322,7 +322,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
         return false;
       }
     }
-  
+
 
     //console.debug("set period: somethingChanged",this);
     if (!updateTree(this)) {
@@ -352,7 +352,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
 };
 
 
-function updateTree(task) {
+updateTree = function updateTree(task) {
   //console.debug("updateTree ",task);
   var error;
 
@@ -723,7 +723,7 @@ Task.prototype.getInferiorTasks = function() {
 };
 
   Task.prototype.deleteTask = function() {
-  
+
   //delete both dom elements
   if (this.rowElement) {
     this.rowElement.remove();
@@ -1000,7 +1000,7 @@ Task.prototype.moveDown = function() {
 
 
 //<%------------------------------------------------------------------------  LINKS OBJECT ---------------------------------------------------------------%>
-function Link(taskFrom, taskTo, lagInWorkingDays) {
+Link = function Link(taskFrom, taskTo, lagInWorkingDays) {
   this.from = taskFrom;
   this.to = taskTo;
   this.lag = lagInWorkingDays;
@@ -1008,7 +1008,7 @@ function Link(taskFrom, taskTo, lagInWorkingDays) {
 
 
 //<%------------------------------------------------------------------------  ASSIGNMENT ---------------------------------------------------------------%>
-function Assignment(id, resourceId, roleId, effort) {
+Assignment = function Assignment(id, resourceId, roleId, effort) {
   this.id = id;
   this.resourceId = resourceId;
   this.roleId = roleId;
@@ -1017,18 +1017,14 @@ function Assignment(id, resourceId, roleId, effort) {
 
 
 //<%------------------------------------------------------------------------  RESOURCE ---------------------------------------------------------------%>
-function Resource(id, name) {
+Resource = function Resource(id, name) {
   this.id = id;
   this.name = name;
 }
 
 
 //<%------------------------------------------------------------------------  ROLE ---------------------------------------------------------------%>
-function Role(id, name) {
+Role = function Role(id, name) {
   this.id = id;
   this.name = name;
 }
-
-
-
-

@@ -226,10 +226,10 @@ Splitify = {
 
 
 //<%------------------------------------------------------------------------  UTILITIES ---------------------------------------------------------------%>
-  function computeStart(start) {
+  computeStart = function computeStart(start) {
     return computeStartDate(start).getTime();
   }
-  function computeStartDate(start) {
+computeStartDate = function computeStartDate(start) {
     var d = new Date(start+3600000*12);
     d.setHours(0, 0, 0, 0);
     //move to next working day
@@ -240,10 +240,10 @@ Splitify = {
     return d;
   }
 
-  function computeEnd(end) {
+computeEnd = function computeEnd(end) {
     return computeEndDate(end).getTime()
   }
-  function computeEndDate(end) {
+computeEndDate = function computeEndDate(end) {
     var d = new Date(end-3600000*12);
     d.setHours(23, 59, 59, 999);
     //move to next working day
@@ -254,7 +254,7 @@ Splitify = {
     return d;
   }
 
-  function computeEndByDuration(start, duration) {
+computeEndByDuration = function computeEndByDuration(start, duration) {
     var d = new Date(start);
     //console.debug("computeEndByDuration start ",d,duration)
     var q = duration - 1;
@@ -267,13 +267,13 @@ Splitify = {
     return d.getTime();
   }
 
-  function incrementDateByWorkingDays(date, days) {
+incrementDateByWorkingDays = function incrementDateByWorkingDays(date, days) {
     var d = new Date(date);
     d.incrementDateByWorkingDays(days);
     return d.getTime();
   }
 
-function recomputeDuration(start, end) {
+recomputeDuration = function recomputeDuration(start, end) {
    //console.debug("recomputeDuration");
    return new Date(start).distanceInWorkingDays(new Date(end));
  }
