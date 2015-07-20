@@ -846,7 +846,7 @@ Ganttalendar.prototype.centerOnToday = function () {
  * @param opt
  * @return {*}
  */
-$.fn.dragExtedSVG = function (svg, opt) {
+dragExtedSVG = function DragExtedSVG(svg, opt) {
 
   //doing this can work with one svg at once only
   var target;

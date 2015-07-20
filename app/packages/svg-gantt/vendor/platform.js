@@ -16,7 +16,7 @@ if(!window.console.debug || !window.console.error|| !window.console.log ) {
 
 
 //----------------------------------positioning-----------------------------------------------
-$.fn.bringToFront=function(selector){
+bringToFront=function BringToFront(selector){
   var zi=10;
   var elements = selector ? $(selector) : $("*");
   elements.each(function() {
@@ -29,7 +29,7 @@ $.fn.bringToFront=function(selector){
   return $(this).css('zIndex',zi+=10);
 };
 
-function nearBestPosition(whereId, theObjId, centerOnEl) {
+nearBestPosition = function nearBestPosition(whereId, theObjId, centerOnEl) {
   var el=whereId;
   var target=theObjId;
 
@@ -162,7 +162,7 @@ Object.size = function(obj) {
 
 
 // transform string values to printable: \n in <br>
-function transformToPrintable(data){
+transformToPrintable = function transformToPrintable(data){
   for (var prop in data) {
     var value = data[prop];
     if (typeof(value)=="string")
@@ -174,40 +174,40 @@ function transformToPrintable(data){
 
 /* Types Function */
 
-function isValidURL(url){
+isValidURL = function isValidURL(url){
   var RegExp = /^(([\w]+:)?\/\/)?(([\d\w]|%[a-fA-f\d]{2,2})+(:([\d\w]|%[a-fA-f\d]{2,2})+)?@)?([\d\w][-\d\w]{0,253}[\d\w]\.)+[\w]{2,4}(:[\d]+)?(\/([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)*(\?(&?([-+_~.\d\w]|%[a-fA-f\d]{2,2})=?)*)?(#([-+_~.\d\w]|%[a-fA-f\d]{2,2})*)?$/;
   return RegExp.test(url);
 }
 
-function isValidEmail(email){
+isValidEmail = function isValidEmail(email){
   var RegExp = /^((([a-z]|[0-9]|!|#|$|%|&|'|\*|\+|\-|\/|=|\?|\^|_|`|\{|\||\}|~)+(\.([a-z]|[0-9]|!|#|$|%|&|'|\*|\+|\-|\/|=|\?|\^|_|`|\{|\||\}|~)+)*)@((((([a-z]|[0-9])([a-z]|[0-9]|\-){0,61}([a-z]|[0-9])\.))*([a-z]|[0-9])([a-z]|[0-9]|\-){0,61}([a-z]|[0-9])\.)[\w]{2,4}|(((([0-9]){1,3}\.){3}([0-9]){1,3}))|(\[((([0-9]){1,3}\.){3}([0-9]){1,3})\])))$/;
   return RegExp.test(email);
 }
 
-function isValidInteger(n) {
+isValidInteger = function isValidInteger(n) {
   reg = new RegExp("^[-+]{0,1}[0-9]*$");
   return reg.test(n);
 }
 
-function isValidDouble(n) {
+isValidDouble = function isValidDouble(n) {
   var sep = Number.decimalSeparator;
   reg = new RegExp("^[-+]{0,1}[0-9]*[" + sep + "]{0,1}[0-9]*$");
   return reg.test(n);
 }
 
-function isValidTime(n) {
+isValidTime = function isValidTime(n) {
   return !isNaN(millisFromHourMinute(n));
 }
 
-function isValidDurationDays(n) {
+isValidDurationDays = function isValidDurationDays(n) {
   return !isNaN(daysFromString(n));
 }
 
-function isValidDurationMillis(n) {
+isValidDurationMillis = function isValidDurationMillis(n) {
   return !isNaN(millisFromString(n));
 }
 
-function isValidDurationMillis(n) {
+isValidDurationMillis = function isValidDurationMillis(n) {
   return !isNaN(millisFromString(n));
 }
 
@@ -215,7 +215,7 @@ function isValidDurationMillis(n) {
 /*
  supports almost all Java currency format e.g.: ###,##0.00EUR   €#,###.00  #,###.00€  -$#,###.00  $-#,###.00
  */
-function isValidCurrency(numStr){
+isValidCurrency= function isValidCurrency(numStr){
   //first try to convert format in a regex
   var regex="";
   var format=Number.currencyFormat+"";
@@ -272,7 +272,7 @@ function isValidCurrency(numStr){
   return rg.test(numStr);
 }
 
-function getCurrencyValue(numStr){
+getCurrencyValue = function getCurrencyValue(numStr){
   if (!isValidCurrency(numStr))
     return NaN;
 
@@ -280,12 +280,12 @@ function getCurrencyValue(numStr){
 }
 
 
-function formatCurrency(numberString) {
+formatCurrency = function formatCurrency(numberString) {
   return formatNumber(numberString, Number.currencyFormat);
 }
 
 
-function formatNumber(numberString, format) {
+formatNumber = function formatNumber(numberString, format) {
   if (!format)
     format="##0.00";
 
@@ -456,7 +456,7 @@ RegExp.quote = function(str) {
  * @param         len         - Numero totale di caratteri, comprensivo degli "zeri"
  * @param         ch          - Carattere usato per riempire
  */
-function pad(str, len, ch){
+ pad = function pad(str, len, ch){
   if ((str+"").length<len){
     return new Array(len-(''+str).length+1).join(ch) + str;
   } else{
@@ -464,14 +464,14 @@ function pad(str, len, ch){
   }
 }
 
-function getMillisInHours(millis) {
+getMillisInHours = function getMillisInHours(millis) {
   if (!millis)
     return "";
   var sgn=millis>=0?1:-1;
   var hour = Math.floor(millis / 3600000);
   return  (sgn>0?"":"-")+pad(hour,2,"0");
 }
-function getMillisInHoursMinutes(millis) {
+getMillisInHoursMinutes = function getMillisInHoursMinutes(millis) {
   if (typeof(millis)!="number" )
     return "";
 
@@ -482,7 +482,7 @@ function getMillisInHoursMinutes(millis) {
   return  (sgn>0?"":"-")+pad(hour,1,"0") + ":" + pad(min,2,"0");
 }
 
-function getMillisInDaysHoursMinutes(millis) {
+getMillisInDaysHoursMinutes = function getMillisInDaysHoursMinutes(millis) {
   if (!millis)
     return "";
   // millisInWorkingDay is set on partHeaderFooter
@@ -494,7 +494,7 @@ function getMillisInDaysHoursMinutes(millis) {
   return (sgn>=0?"":"-")+(days > 0 ? days + "  " : "") + pad(hour,1,"0") + ":" + pad(min,2,"0");
 }
 
-function millisFromHourMinute(stringHourMinutes) { //All this format are valid: "12:58" "13.75"  "63635676000" (this is already in milliseconds)
+millisFromHourMinute = function millisFromHourMinute(stringHourMinutes) { //All this format are valid: "12:58" "13.75"  "63635676000" (this is already in milliseconds)
   var result = 0;
   stringHourMinutes.replace(",",".");
   var semiColSeparator = stringHourMinutes.indexOf(":");
@@ -531,7 +531,7 @@ function millisFromHourMinute(stringHourMinutes) { //All this format are valid: 
  * @param considerWorkingdays if true day lenght is from global.properties CompanyCalendar.MILLIS_IN_WORKING_DAY  otherwise in 24
  * @return milliseconds. 0 if invalid string
  */
-function millisFromString(string,considerWorkingdays) {
+millisFromString = function millisFromString(string,considerWorkingdays) {
   if (!string)
     return 0;
 
@@ -589,7 +589,7 @@ function millisFromString(string,considerWorkingdays) {
  * @param considerWorkingdays if true day lenght is from global.properties CompanyCalendar.MILLIS_IN_WORKING_DAY  otherwise in 24
  * @return milliseconds. 0 if invalid string
  */
-function daysFromString(string,considerWorkingdays) {
+daysFromString = function daysFromString(string,considerWorkingdays) {
   if (!string)
     return undefined;
 
@@ -635,7 +635,7 @@ function daysFromString(string,considerWorkingdays) {
 
 /* Object Functions */
 
-function stopBubble(e) {
+stopBubble = function stopBubble(e) {
   if ($.browser.msie && event){
     event.cancelBubble = true;
     event.returnValue = false;
@@ -648,7 +648,7 @@ function stopBubble(e) {
 }
 
 //validation functions - used by textfield and datefield
-function validateField(ev) {
+validateField = function validateField(ev) {
   var  el = $(this);
   var rett=true;
   el.clearErrorAlert();
@@ -687,7 +687,7 @@ function validateField(ev) {
   return rett;
 }
 
-jQuery.fn.clearErrorAlert= function(){
+clearErrorAlert = function createErrorAlert(){
   this.each(function(){
     var el = $(this);
     el.removeAttr("invalid").removeClass("formElementsError");
@@ -696,7 +696,7 @@ jQuery.fn.clearErrorAlert= function(){
   return this;
 };
 
-jQuery.fn.createErrorAlert = function(errorCode, message) {
+createErrorAlert = function createErrorAlert(errorCode, message) {
   this.each(function() {
     var el = $(this);
     el.attr("invalid", "true").addClass("formElementsError");
@@ -714,7 +714,7 @@ jQuery.fn.createErrorAlert = function(errorCode, message) {
 
 
 //errors =[{ceName:ceErrorCode},...]
-function jsonErrorHandling(response){
+jsonErrorHandling = function jsonErrorHandling(response){
   if (!response.ok){
     if (response.message)
       alert("ERROR:\n"+ response.message);
@@ -729,7 +729,7 @@ function jsonErrorHandling(response){
 
 // ---------------------------------- oldvalues management
 // update all values selected
-jQuery.fn.updateOldValue= function(){
+updateOldValue = function UpdateOldValue(){
   this.each(function(){
     var el = $(this);
     el.data("_oldvalue",el.val());
@@ -738,7 +738,7 @@ jQuery.fn.updateOldValue= function(){
 };
 
 // return true if at least one element has changed
-jQuery.fn.isValueChanged=function (){
+isValueChanged = function isValueChanged(){
   var ret=false;
   this.each(function(){
     var el = $(this);
@@ -751,21 +751,21 @@ jQuery.fn.isValueChanged=function (){
   return ret;
 };
 
-jQuery.fn.getOldValue=function(){
+getOldValue=function getOldValue(){
   return $(this).data("_oldvalue");
 };
 
 
 
 
-$.fn.unselectable=function(){
+unselectable=function unselectable(){
   this.each(function(){
     $(this).addClass("unselectable").attr("unselectable","on");
   });
   return $(this);
 };
 
-$.fn.clearUnselectable=function(){
+clearUnselectable=function clearUnselectable(){
   this.each(function(){
     $(this).removeClass("unselectable").removeAttr("unselectable");
   });
@@ -774,7 +774,7 @@ $.fn.clearUnselectable=function(){
 
 
 // ----------------------------------  PROFILING ------------------------------------------
-var __profiler = {};
+__profiler = {};
 /**
  * usage: instantiate a new Profiler("a name") at the beginning of the code you want to profile  var p= new Profiler("testLoop")
  *        call p.stop() at the end of the code you want test.
@@ -782,7 +782,7 @@ var __profiler = {};
  *        call Profiler.resetAll() or p.reset() to restart profiler.
  * @param name
  */
-function Profiler(name) {
+Profiler = function Profiler(name) {
   this.startTime = new Date().getTime();
   this.name = name;
 
@@ -818,12 +818,8 @@ Profiler.displayAll = function() {
 };
 
 
-$(document).ready(function() {
-  $(":input[oldValue]").livequery(function(){$(this).updateOldValue();});
-  $('.validated').livequery('blur', validateField);
-});
 
-function openBlackPopup(url,width,height,onCloseCallBack,iframeId){
+openBlackPopup = function openBlackPopup(url,width,height,onCloseCallBack,iframeId){
   if(!iframeId)
     iframeId="bwinPopup";
 
@@ -875,7 +871,7 @@ function openBlackPopup(url,width,height,onCloseCallBack,iframeId){
 
 
 //returns a jquery object where to write content
-function createBlackPage(width,height,onCloseCallBack){
+createBlackPage = function createBlackPage(width,height,onCloseCallBack){
   if (!width)
     width='900px';
   if (!height)
@@ -918,7 +914,7 @@ function createBlackPage(width,height,onCloseCallBack){
 }
 
 
-function getBlackPopup(){
+getBlackPopup = function getBlackPopup(){
   var ret=$("#__blackpopup__");
   if (typeof(top)!="undefined"){
     ret= window.parent.$("#__blackpopup__");
@@ -927,14 +923,14 @@ function getBlackPopup(){
 }
 
 
-function closeBlackPopup(){
+closeBlackPopup = function closeBlackPopup(){
   getBlackPopup().trigger("close");
 }
 
 
 
 //------------------------------------------------ TEAMWORK SPECIFIC FUNCTIONS   --------------------------------------------------------
-function openIssueEditorInBlack(issueId,command,params){
+openIssueEditorInBlack = function openIssueEditorInBlack(issueId,command,params){
   if (!command)
     command="ED";
   var editUrl=contextPath+"/applications/teamwork/issue/issueEditor.jsp?CM="+command+"&OBJID="+issueId;
@@ -943,7 +939,7 @@ function openIssueEditorInBlack(issueId,command,params){
   openBlackPopup(editUrl,1020,$(window).height()-50, function(){$("#"+issueId).effect("highlight", { color: "yellow" }, 1500);});
 }
 
-function openBoardInBlack(boardId,command,params,callback){
+openBoardInBlack = function openBoardInBlack(boardId,command,params,callback){
   if (!command)
     command="ED";
   var editUrl=contextPath+"/applications/teamwork/board/boardEditor.jsp?CM="+command+"&OBJID="+boardId;
@@ -951,4 +947,3 @@ function openBoardInBlack(boardId,command,params,callback){
     editUrl=editUrl+params;
   openBlackPopup(editUrl,$(window).width()-100,$(window).height()-50,callback );
 }
-

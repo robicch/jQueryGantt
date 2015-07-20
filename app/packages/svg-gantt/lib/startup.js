@@ -16,6 +16,21 @@ Meteor.startup(function(){
             $.fn.loadTemplates = new JST();
             jQuery.fn.extend(timeActions);
             jQuery.extend(timer);
+
+            // platform.js
+            $.fn.bringToFront = bringToFront;
+            jQuery.fn.updateOldValue = updateOldValue;
+            $.fn.dragExtedSVG = dragExtedSVG;
+            jQuery.fn.clearErrorAlert = clearErrorAlert;
+            jQuery.fn.createErrorAlert = createErrorAlert;
+            jQuery.fn.isValueChanged = isValueChanged;
+            jQuery.fn.getOldValue = getOldValue;
+            $.fn.unselectable = unselectable;
+            $.fn.clearUnselectable =clearUnselectable;
+            $(":input[oldValue]").livequery(function(){$(this).updateOldValue();});
+            $('.validated').livequery('blur', validateField);
+            // end platform.js
+
             $.gridify = Gridify;
             $.splittify = Splitify;
             LoadSVG();
