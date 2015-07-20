@@ -6,7 +6,6 @@ JST = function() {
       _decorators:new Object(),
 
       loadTemplates: function(elems) {
-          console.log(elems);
         elems.each(function() {
           $(this).find(".__template__").each(function() {
             var tmpl = $(this);

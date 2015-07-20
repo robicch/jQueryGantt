@@ -5,9 +5,10 @@ Meteor.startup(function(){
         Template.SvgGantt.rendered = function(){
 
             $.fn.loadTemplates = new JST();
+            $.fn.loadTemplates.loadTemplates($("#gantEditorTemplates")); //.remove();
+            $.gridify = Gridify;
+            $.splittify = Splitify;
             LoadSVG();
-
-            console.log($('#gantEditorTemplates'));
 
             ge = new GanttMaster();
             var workSpace = $("#svg-gantt");
