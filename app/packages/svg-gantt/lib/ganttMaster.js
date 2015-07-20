@@ -68,6 +68,7 @@ GanttMaster.prototype.init = function (place) {
   this.gantt = new Ganttalendar("m", new Date().getTime() - 3600000 * 24 * 2, new Date().getTime() + 3600000 * 24 * 15, this, place.width() * .6);
 
   //setup splitter
+  console.log(place, this.editor.gridified, this.gantt.element, 60);
   self.splitter = $.splittify.init(place, this.editor.gridified, this.gantt.element, 60);
   self.splitter.firstBoxMinWidth=30;
 

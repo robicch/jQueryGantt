@@ -274,6 +274,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
     //set a minimal width
     computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
+    console.log('computedTableWidth: '+computedTableWidth);
 
     var table = $("<table cellspacing=0 cellpadding=0>");
     table.append(tr1).append(tr2).css({width:computedTableWidth});

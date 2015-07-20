@@ -123,7 +123,6 @@ Splitify = {
     var firstBox = $("<div>").addClass("splitElement splitBox1");
     var splitterBar = $("<div>").addClass("splitElement vSplitBar").attr("unselectable", "on").html("|").css("padding-top",where.height()/2+"px");
     var secondBox = $("<div>").addClass("splitElement splitBox2");
-
     var splitter= new Splitter(element,firstBox,secondBox,splitterBar);
     splitter.perc=perc;
 
@@ -138,6 +137,7 @@ Splitify = {
     var w = where.innerWidth();
     var fbw = w *perc/ 100 - splitterBar.width();
     var realW=firstBox.get(0).scrollWidth;
+    console.log(realW, fbw, w, splitterBar);
     fbw=fbw>realW?realW:fbw;
     firstBox.width(fbw).css({left:0});
     splitterBar.css({left:firstBox.width()});
@@ -147,7 +147,7 @@ Splitify = {
     splitterBar.bind("mousedown.gdf", function(e) {
       $.splittify.splitterBar = $(this);
       //bind event for start resizing
-      //console.debug("start splitting");
+      console.debug("start splitting");
       var realW=firstBox.get(0).scrollWidth;
       $("body").unselectable().bind("mousemove.gdf", function(e) {
         //manage resizing

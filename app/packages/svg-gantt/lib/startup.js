@@ -17,10 +17,12 @@ Meteor.startup(function(){
             jQuery.fn.extend(timeActions);
             jQuery.extend(timer);
 
+            // ganttDrawerSVG.js
+            $.fn.dragExtedSVG = dragExtedSVG;
+
             // platform.js
             $.fn.bringToFront = bringToFront;
             jQuery.fn.updateOldValue = updateOldValue;
-            $.fn.dragExtedSVG = dragExtedSVG;
             jQuery.fn.clearErrorAlert = clearErrorAlert;
             jQuery.fn.createErrorAlert = createErrorAlert;
             jQuery.fn.isValueChanged = isValueChanged;
@@ -31,8 +33,11 @@ Meteor.startup(function(){
             $('.validated').livequery('blur', validateField);
             // end platform.js
 
+            // ganttUtilities.js
             $.gridify = Gridify;
             $.splittify = Splitify;
+            // end ganttUtilities.js
+
             LoadSVG();
 
 
@@ -43,7 +48,7 @@ Meteor.startup(function(){
 
             // here starts gantt initialization
             ge = new GanttMaster();
-            workSpace = $("#svg-gantt");
+            workSpace = $("#workSpace");
             workSpace.css({width:$(window).width() - 20,height:$(window).height() - 100});
             ge.init(workSpace);
 
@@ -79,9 +84,8 @@ Meteor.startup(function(){
             });*/
 
             $(window).resize(function(){
-                //console.log(workSpace);
-                //workSpace.css({width:$(window).width() - 1,height:$(window).height() - workSpace.position().top});
-                //workSpace.trigger("resize.gantt");
+                workSpace.css({width:$(window).width() - 1,height:$(window).height() - workSpace.position().top});
+                workSpace.trigger("resize.gantt");
             }).oneTime(150,"resize",function(){$(this).trigger("resize")});
 
 
@@ -341,6 +345,40 @@ Meteor.startup(function(){
                 var ndo = createBlackPage(400, 500).append(resourceEditor);
             }
 
+
+            $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {
+
+              var resEl = assigTr.find("[name=resourceId]");
+              for (var i in taskAssig.task.master.resources) {
+                var res = taskAssig.task.master.resources[i];
+                var opt = $("<option>");
+                opt.val(res.id).html(res.name);
+                if (taskAssig.assig.resourceId == res.id)
+                  opt.attr("selected", "true");
+                resEl.append(opt);
+              }
+
+
+              var roleEl = assigTr.find("[name=roleId]");
+              for (var i in taskAssig.task.master.roles) {
+                var role = taskAssig.task.master.roles[i];
+                var optr = $("<option>");
+                optr.val(role.id).html(role.name);
+                if (taskAssig.assig.roleId == role.id)
+                  optr.attr("selected", "true");
+                roleEl.append(optr);
+              }
+
+              if(taskAssig.task.master.canWrite && taskAssig.task.canWrite){
+                assigTr.find(".delAssig").click(function() {
+                  var tr = $(this).closest("[assigId]").fadeOut(200, function() {
+                    $(this).remove();
+                  });
+                });
+              }
+
+
+            });
         }
     }
 });

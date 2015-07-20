@@ -722,7 +722,7 @@ Task.prototype.getInferiorTasks = function() {
   return ret;
 };
 
-  Task.prototype.deleteTask = function() {
+Task.prototype.deleteTask = function() {
 
   //delete both dom elements
   if (this.rowElement) {
