@@ -20,7 +20,7 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GridEditor(master) {
+GridEditor = function GridEditor(master) {
   this.master = master; // is the a GantEditor instance
   this.gridified = $.gridify($.JST.createFromTemplate({}, "TASKSEDITHEAD"));
   this.element = this.gridified.find(".gdfTable").eq(1);
@@ -116,7 +116,7 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
     var collapsedDescendant = this.master.getCollapsedDescendant();
     if(collapsedDescendant.indexOf(task) >= 0) taskRow.hide();
   }
-          
+
 
   return taskRow;
 };

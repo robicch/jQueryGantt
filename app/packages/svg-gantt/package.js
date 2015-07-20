@@ -89,6 +89,7 @@ Package.onUse(function(api){
 
     //export globals from files above
     api.export([
+        "GridEditor",
         "GanttMaster",
         "JST"
         ], 'client');
