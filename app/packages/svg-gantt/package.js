@@ -89,6 +89,8 @@ Package.onUse(function(api){
 
     //export globals from files above
     api.export([
+        "Ganttalendar",
+        "Splitify",
         "Gridify",
         "GridEditor",
         "GanttMaster",

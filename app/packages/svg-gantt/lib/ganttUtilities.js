@@ -114,7 +114,7 @@ Gridify = function Gridify(table, opt) {
   return box;
 };
 
-$.splittify = {
+Splitify = {
   init: function(where, first, second,perc) {
 
     perc=perc || 50;
