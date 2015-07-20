@@ -101,7 +101,7 @@ Meteor.startup(function(){
                 prof.reset();
 
                 $.getJSON("ganttAjaxController.jsp", {CM:"LOADPROJECT",taskId:taskId}, function(response) {
-                //console.debug(response);
+                console.debug(response);
                 if (response.ok) {
                 prof.stop();
 

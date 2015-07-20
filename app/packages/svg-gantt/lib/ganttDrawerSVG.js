@@ -65,7 +65,7 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
 
 
 Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEndMillis) {
-  //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
+  console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
 
   var self = this;
 
@@ -302,7 +302,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     //create the svg
     box.svg({settings:{class:"ganttSVGBox"},
       onLoad:         function (svg) {
-        //console.debug("svg loaded", svg);
+        console.debug("svg loaded", svg);
 
         //creates gradient and definitions
         var defs = svg.defs('myDefs');
@@ -354,7 +354,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
   //get best dimension fo gantt
   var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
 
-  //console.debug(new Date(period.start) + "   " + new Date(period.end));
+  console.debug(new Date(period.start) + "   " + new Date(period.end));
   self.startMillis = period.start; //real dimension of gantt
   self.endMillis = period.end;
   self.originalStartMillis = originalStartmillis; //minimal dimension required by user or by task duration
@@ -368,7 +368,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
-  //console.debug("drawTask", task.name,new Date(task.start));
+  console.debug("drawTask", task.name,new Date(task.start));
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
   editorRow = task.rowElement;
@@ -438,7 +438,7 @@ Ganttalendar.prototype.drawTask = function (task) {
           self.master.endTransaction();
         },
         startResize:function (e) {
-          //console.debug("startResize");
+          console.debug("startResize");
           $(".ganttSVGBox .focused").removeClass("focused");
           var taskbox = $(this);
           var text = $(self.svg.text(parseInt(taskbox.attr("x")) + parseInt(taskbox.attr("width") + 8), parseInt(taskbox.attr("y")), "", {"font-size":"10px", "fill":"red"}));
@@ -457,7 +457,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         },
         stopResize: function (e) {
           self.resDrop = true; //hack to avoid select
-          //console.debug(ui)
+          console.debug(ui)
           var textBox = taskBox.data("textDur");
           if (textBox)
             textBox.remove();
@@ -509,7 +509,7 @@ Ganttalendar.prototype.drawTask = function (task) {
 
         $(self.svg.root()).unbind("mousemove.linkSVG");
         var targetBox = $(e.target).closest(".taskBoxSVG");
-        //console.debug("create link from " + taskBox.attr("taskid") + " to " + targetBox.attr("taskid"));
+        console.debug("create link from " + taskBox.attr("taskid") + " to " + targetBox.attr("taskid"));
 
         if (targetBox && targetBox.attr("taskid") != taskBox.attr("taskid")) {
           var taskTo;
@@ -601,7 +601,7 @@ Ganttalendar.prototype.addTask = function (task) {
 //'from' and 'to' are tasks already drawn
 Ganttalendar.prototype.drawLink = function (from, to, type) {
   var self = this;
-  //console.debug("drawLink")
+  console.debug("drawLink")
   var peduncolusSize = 10;
 
   /**
@@ -744,7 +744,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 };
 
 Ganttalendar.prototype.redrawLinks = function () {
-  //console.debug("redrawLinks ");
+  console.debug("redrawLinks ");
   var self = this;
   this.element.stopTime("ganttlnksredr");
   this.element.oneTime(60, "ganttlnksredr", function () {
@@ -788,7 +788,7 @@ Ganttalendar.prototype.redrawTasks = function () {
 
 
 Ganttalendar.prototype.refreshGantt = function () {
-  //console.debug("refreshGantt")
+  console.debug("refreshGantt")
 
   if (this.showCriticalPath) {
     this.master.computeCriticalPath();
@@ -813,7 +813,7 @@ Ganttalendar.prototype.refreshGantt = function () {
   this.redrawTasks();
 
   //set old scroll
-  //console.debug("old scroll:",scrollX,scrollY)
+  console.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
 
@@ -837,7 +837,7 @@ Ganttalendar.prototype.synchHighlight = function () {
 
 Ganttalendar.prototype.centerOnToday = function () {
   var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx) - 30;
-  //console.debug("centerOnToday "+x);
+  console.debug("centerOnToday "+x);
   this.element.parent().scrollLeft(x);
 };
 
@@ -957,7 +957,7 @@ dragExtedSVG = function DragExtedSVG(svg, opt) {
           var posx = e.pageX;
 
 
-          //console.debug("mousemove", options.canResize && x2 - posx)
+          console.debug("mousemove", options.canResize && x2 - posx)
           //set cursor handle
           var x = x2 - posx;
           if (options.canResize && (x >= 0 && x <= options.resizeZoneWidth)) {

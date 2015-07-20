@@ -743,7 +743,7 @@ isValueChanged = function isValueChanged(){
   this.each(function(){
     var el = $(this);
     if (el.val()+"" != el.data("_oldvalue") + ""){
-      //console.debug("io sono diverso "+el.attr("id")+ " :"+el.val()+" != "+el.data("_oldvalue"));
+      console.debug("io sono diverso "+el.attr("id")+ " :"+el.val()+" != "+el.data("_oldvalue"));
       ret=true;
       return false;
     }

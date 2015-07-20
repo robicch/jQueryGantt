@@ -97,7 +97,7 @@ Task.prototype.createAssignment = function (id, resourceId, roleId, effort) {
 
 //<%---------- SET PERIOD ---------------------- --%>
 Task.prototype.setPeriod = function (start, end) {
-  //console.debug("setPeriod ",this.name,new Date(start),new Date(end));
+  console.debug("setPeriod ",this.name,new Date(start),new Date(end));
   //var profilerSetPer = new Profiler("gt_setPeriodJS");
 
   if (start instanceof Date) {
@@ -114,7 +114,7 @@ Task.prototype.setPeriod = function (start, end) {
     duration: this.duration
   };
 
-  //console.debug("setStart",date,date instanceof Date);
+  console.debug("setStart",date,date instanceof Date);
   var wantedStartMillis = start;
 
   //cannot start after end
@@ -188,7 +188,7 @@ Task.prototype.setPeriod = function (start, end) {
   var restrictingStart = restricting && (originalPeriod.start < this.start);
   var restrictingEnd = restricting && (originalPeriod.end > this.end);
 
-  //console.debug( " originalPeriod.duration "+ originalPeriod.duration +" deltaPeriod "+deltaPeriod+" "+"restricting "+restricting);
+  console.debug( " originalPeriod.duration "+ originalPeriod.duration +" deltaPeriod "+deltaPeriod+" "+"restricting "+restricting);
 
   if (restricting) {
     //loops children to get boundaries
@@ -198,7 +198,7 @@ Task.prototype.setPeriod = function (start, end) {
     for (var i=0;i<children.length;i++) {
 
       ch = children[i];
-      //console.debug("restricting: test child "+ch.name+" "+ch.end)
+      console.debug("restricting: test child "+ch.name+" "+ch.end)
       if (restrictingEnd) {
         be = Math.max(be, ch.end);
       } else {
@@ -207,10 +207,10 @@ Task.prototype.setPeriod = function (start, end) {
     }
 
     if (restrictingEnd) {
-      //console.debug("restricting end ",be, this.end);
+      console.debug("restricting end ",be, this.end);
       this.end = Math.max(be, this.end);
     } else {
-      //console.debug("restricting start");
+      console.debug("restricting start");
       this.start = Math.min(bs, this.start);
     }
 
@@ -223,7 +223,7 @@ Task.prototype.setPeriod = function (start, end) {
       todoOk = false;
     }
 
-    //console.debug("set period: somethingChanged",this);
+    console.debug("set period: somethingChanged",this);
     if (todoOk && !updateTree(this)) {
       todoOk = false;
     }
@@ -252,7 +252,7 @@ Task.prototype.setPeriod = function (start, end) {
 
 //<%---------- MOVE TO ---------------------- --%>
 Task.prototype.moveTo = function (start, ignoreMilestones) {
-  //console.debug("moveTo ",this,start,ignoreMilestones);
+  console.debug("moveTo ",this,start,ignoreMilestones);
   //var profiler = new Profiler("gt_task_moveTo");
 
   if (start instanceof Date) {
@@ -313,7 +313,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
 
 
     var panDelta = originalPeriod.start - this.start;
-    //console.debug("panDelta",panDelta);
+    console.debug("panDelta",panDelta);
     //loops children to shift them
     var children = this.getChildren();
     for (var i=0;i<children.length;i++) {
@@ -324,7 +324,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
     }
 
 
-    //console.debug("set period: somethingChanged",this);
+    console.debug("set period: somethingChanged",this);
     if (!updateTree(this)) {
       return false;
     }
@@ -353,7 +353,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
 
 
 updateTree = function updateTree(task) {
-  //console.debug("updateTree ",task);
+  console.debug("updateTree ",task);
   var error;
 
   //try to enlarge parent
@@ -411,19 +411,19 @@ updateTree = function updateTree(task) {
 
 //<%---------- CHANGE STATUS ---------------------- --%>
 Task.prototype.changeStatus = function(newStatus) {
-  //console.debug("changeStatus: "+this.name+" from "+this.status+" -> "+newStatus);
+  console.debug("changeStatus: "+this.name+" from "+this.status+" -> "+newStatus);
   //compute descendant for identify a cone where status changes propagate
   var cone = this.getDescendant();
 
   function propagateStatus(task, newStatus, manuallyChanged, propagateFromParent, propagateFromChildren) {
-    //console.debug("propagateStatus",task.name, task.status,newStatus)
+    console.debug("propagateStatus",task.name, task.status,newStatus)
     var oldStatus = task.status;
 
     //no changes exit
     if(newStatus == oldStatus){
       return true;
     }
-    //console.debug("propagateStatus: "+task.name + " from " + task.status + " to " + newStatus + " " + (manuallyChanged?" a manella":"")+(propagateFromParent?" da parent":"")+(propagateFromChildren?" da children":""));
+    console.debug("propagateStatus: "+task.name + " from " + task.status + " to " + newStatus + " " + (manuallyChanged?" a manella":"")+(propagateFromParent?" da parent":"")+(propagateFromChildren?" da children":""));
 
     var todoOk = true;
     task.status = newStatus;
@@ -551,7 +551,7 @@ Task.prototype.changeStatus = function(newStatus) {
     }
     if (!todoOk){
       task.status = oldStatus;
-      //console.debug("status rolled back: "+task.name + " to " + oldStatus);
+      console.debug("status rolled back: "+task.name + " to " + oldStatus);
     }
 
     return todoOk;
@@ -763,7 +763,7 @@ Task.prototype.isNew=function(){
 };
 
 Task.prototype.isDependent=function(t) {
-  //console.debug("isDependent",this.name, t.name)
+  console.debug("isDependent",this.name, t.name)
   var task=this;
   var dep= this.master.links.filter(function(link) {
     return link.from == task ;
@@ -791,7 +791,7 @@ Task.prototype.setLatest=function(maxCost) {
 
 //<%------------------------------------------  INDENT/OUTDENT --------------------------------%>
 Task.prototype.indent = function() {
-  //console.debug("indent", this);
+  console.debug("indent", this);
   //a row above must exist
   var row = this.getRow();
 
@@ -845,7 +845,7 @@ Task.prototype.indent = function() {
 
 
 Task.prototype.outdent = function() {
-  //console.debug("outdent", this);
+  console.debug("outdent", this);
 
   //a level must be >1 -> cannot escape from root
   if (this.level <= 1)
@@ -893,7 +893,7 @@ Task.prototype.outdent = function() {
 
 //<%------------------------------------------  MOVE UP / MOVE DOWN --------------------------------%>
 Task.prototype.moveUp = function() {
-  //console.debug("moveUp", this);
+  console.debug("moveUp", this);
   var ret = false;
 
   //a row above must exist
@@ -943,7 +943,7 @@ Task.prototype.moveUp = function() {
 
 
 Task.prototype.moveDown = function() {
-  //console.debug("moveDown", this);
+  console.debug("moveDown", this);
 
   //a row below must exist, and cannot move root task
   var row = this.getRow();

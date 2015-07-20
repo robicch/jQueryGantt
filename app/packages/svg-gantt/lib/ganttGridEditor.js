@@ -30,7 +30,7 @@ GridEditor = function GridEditor(master) {
 GridEditor.prototype.fillEmptyLines = function () {
   var factory = new TaskFactory();
 
-  //console.debug("GridEditor.fillEmptyLines");
+  console.debug("GridEditor.fillEmptyLines");
   var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
 
   //fill with empty lines
@@ -76,7 +76,7 @@ GridEditor.prototype.fillEmptyLines = function () {
 
 
 GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
-  //console.debug("GridEditor.addTask",task,row);
+  console.debug("GridEditor.addTask",task,row);
   //var prof = new Profiler("editorAddTaskHtml");
 
   //remove extisting row
@@ -143,7 +143,7 @@ GridEditor.prototype.refreshExpandStatus = function(task){
 }
 
 GridEditor.prototype.refreshTaskRow = function (task) {
-  //console.debug("refreshTaskRow")
+  console.debug("refreshTaskRow")
   //var profiler = new Profiler("editorRefreshTaskRow");
   var row = task.rowElement;
 
@@ -175,7 +175,7 @@ GridEditor.prototype.reset = function () {
 
 GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   var self = this;
-  //console.debug("bindRowEvents",this,this.master,this.master.canWrite, task.canWrite);
+  console.debug("bindRowEvents",this,this.master,this.master.canWrite, task.canWrite);
   if (this.master.canWrite && task.canWrite ) {
     self.bindRowInputEvents(task, taskRow);
 
@@ -455,7 +455,7 @@ GridEditor.prototype.openFullEditor = function (task, taskRow) {
 
   //task editor in popup
   var taskId = taskRow.attr("taskId");
-  //console.debug(task);
+  console.debug(task);
 
   //make task editor
   var taskEditor = $.JST.createFromTemplate({}, "TASK_EDITOR");
