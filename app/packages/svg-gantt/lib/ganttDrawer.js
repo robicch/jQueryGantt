@@ -20,7 +20,7 @@
   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
+Ganttalendar = function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.master = master; // is the a GantEditor instance
   this.element; // is the jquery element containing gantt
   this.highlightBar;
@@ -641,7 +641,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
       }
     } else {
       //L1
-      
+
       var l1 = new HLine(peduncolusSize, currentY, currentX - peduncolusSize);
       currentX = currentX - peduncolusSize;
       ndo.append(l1);
@@ -701,10 +701,10 @@ Ganttalendar.prototype.redrawLinks = function() {
     self.element.find(".ganttLinks").empty();
 
     //[expand]
-    var collapsedDescendant = self.master.getCollapsedDescendant();        
+    var collapsedDescendant = self.master.getCollapsedDescendant();
     for (var i=0;i<self.master.links.length;i++) {
       var link = self.master.links[i];
-      if(collapsedDescendant.indexOf(link.from) >= 0 || collapsedDescendant.indexOf(link.to) >= 0) continue;      
+      if(collapsedDescendant.indexOf(link.from) >= 0 || collapsedDescendant.indexOf(link.to) >= 0) continue;
       self.drawLink(link.from, link.to);
     }
     //prof.stop();
@@ -718,12 +718,12 @@ Ganttalendar.prototype.reset = function() {
 };
 
 
-Ganttalendar.prototype.redrawTasks = function() {  
+Ganttalendar.prototype.redrawTasks = function() {
   //[expand]
-  var collapsedDescendant = this.master.getCollapsedDescendant();  
+  var collapsedDescendant = this.master.getCollapsedDescendant();
   for (var i=0;i<this.master.tasks.length;i++) {
     var task = this.master.tasks[i];
-    if(collapsedDescendant.indexOf(task) >= 0) continue;    
+    if(collapsedDescendant.indexOf(task) >= 0) continue;
     this.drawTask(task);
   }
 };
@@ -751,7 +751,7 @@ Ganttalendar.prototype.refreshGantt = function() {
   //set current task
   this.synchHighlight();
 
-  //set old scroll  
+  //set old scroll
   //console.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
@@ -785,4 +785,3 @@ Ganttalendar.prototype.centerOnToday = function() {
 Ganttalendar.prototype.showCriticalPath = function () {
   console.error("To be implemented");
 };
-

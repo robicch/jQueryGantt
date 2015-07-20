@@ -76,7 +76,7 @@
   }
 
   //override date format i18n
-  
+
   Date.monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   // Month abbreviations. Change this for local month names
   Date.monthAbbreviations = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -102,7 +102,7 @@
   var millisInWorkingDay =36000000;
   var workingDaysPerWeek =5;
 
-  function isHoliday(date) {
+  isHoliday = function isHoliday(date) {
     var friIsHoly =false;
     var satIsHoly =true;
     var sunIsHoly =true;
@@ -122,7 +122,7 @@
   }
 
 
-  
+
   var i18n = {
     FORM_IS_CHANGED:"You have some unsaved data on the page!",
     YES:"yes",
@@ -136,5 +136,3 @@
 
     DO_YOU_CONFIRM:"Do you confirm?"
   };
-
-  
