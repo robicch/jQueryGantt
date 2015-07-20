@@ -31,6 +31,7 @@ mobile-status-bar@1.0.3
 mongo@1.1.0
 observe-sequence@1.0.6
 ordered-dict@1.0.3
+pba:jquery-svg-class@0.0.0
 random@1.0.3
 reactive-dict@1.1.0
 reactive-var@1.0.5

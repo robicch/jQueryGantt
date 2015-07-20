@@ -29,7 +29,7 @@ Package.onUse(function(api){
     api.versionsFrom('1.1.0.2');
 
     //dependencies
-    api.use(["templating", "underscore", "sergeyt:livequery"]);
+    api.use(["templating", "underscore", "sergeyt:livequery", "pba:jquery-svg-class"]);
     //api.use(["iron:router@1.0.7"], 'client', {weak: false, unordered: false});
     //api.use(["themeteorchef:controller@1.2.0"], 'client');
 
@@ -61,6 +61,8 @@ Package.onUse(function(api){
         "vendor/jquery.1.8.js",
         "vendor/JST/jquery.JST.js",
         "vendor/jquery.livequery.min.js",
+        "vendor/jquery.svg.js",
+        //"vendor/jquery.svg.min.js",
         "vendor/dateField/images/next.png",                                     // vendor
         "vendor/dateField/images/prev.png",
         "vendor/dateField/jquery.dateField.css",
@@ -70,8 +72,6 @@ Package.onUse(function(api){
         "vendor/jquery.svgdom.1.8.js",
         "vendor/jquery.svgdom.js",
         "vendor/jquery.svgdom.pack.js",
-        "vendor/jquery.svg.js",
-        "vendor/jquery.svg.min.js",
         "vendor/jquery.timers.js",
         "vendor/platform.js",
 
@@ -89,6 +89,7 @@ Package.onUse(function(api){
 
     //export globals from files above
     api.export([
+        "LoadSVG",
         "Ganttalendar",
         "Splitify",
         "Gridify",

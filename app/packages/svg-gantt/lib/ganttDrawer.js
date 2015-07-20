@@ -273,7 +273,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
     table.height(self.master.editor.element.height());
 
-    var box = $("<div>");
+    box = $("<div>");
     box.addClass("gantt unselectable").attr("unselectable","true").css({position:"relative",width:computedTableWidth});
     box.append(table);
 

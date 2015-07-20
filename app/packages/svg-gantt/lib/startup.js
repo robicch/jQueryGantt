@@ -5,6 +5,7 @@ Meteor.startup(function(){
         Template.SvgGantt.rendered = function(){
 
             $.fn.loadTemplates = new JST();
+            LoadSVG();
 
             console.log($('#gantEditorTemplates'));
 
