@@ -20,7 +20,7 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
+ Ganttalendar = function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.master = master; // is the a GantEditor instance
   this.element; // is the jquery element containing gantt
   this.highlightBar;
@@ -811,7 +811,7 @@ Ganttalendar.prototype.refreshGantt = function () {
   par.append(domEl);
   this.redrawTasks();
 
-  //set old scroll  
+  //set old scroll
   //console.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
