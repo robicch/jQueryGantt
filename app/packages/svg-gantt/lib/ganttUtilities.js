@@ -21,7 +21,7 @@
   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-$.gridify = function (table, opt) {
+Gridify = function Gridify(table, opt) {
   var options = {
     resizeZoneWidth:10
   };
@@ -235,7 +235,7 @@ $.splittify = {
     //move to next working day
     while (isHoliday(d)) {
       d.setDate(d.getDate() + 1);
-    } 
+    }
     d.setHours(0, 0, 0, 0);
     return d;
   }

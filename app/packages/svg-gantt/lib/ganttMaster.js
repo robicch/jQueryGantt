@@ -63,6 +63,7 @@ GanttMaster.prototype.init = function (place) {
   //load templates
   //$("#gantEditorTemplates").loadTemplates().remove();
   $.fn.loadTemplates.loadTemplates($("#gantEditorTemplates")); //.remove();
+  $.gridify = Gridify;
 
   //create editor
   this.editor = new GridEditor(this);
