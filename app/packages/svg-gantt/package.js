@@ -53,10 +53,17 @@ Package.onUse(function(api){
 
     // Loading files on the client only.
     api.addFiles([
+
+        "lib/fonts/teamwork-regular-webfont.eot",                                     //lib/fonts/fonts
+        "lib/fonts/teamwork-regular-webfont.otf",
+        "lib/fonts/teamwork-regular-webfont.svg",
+        "lib/fonts/teamwork-regular-webfont.ttf",
+        "lib/fonts/teamwork-regular-webfont.woff",
+        "lib/fonts/teamworkFont.css",
+
         "lib/stylesheets/gantt.css",                                            // lib/stylesheets
         "lib/stylesheets/ganttPrint.css",
         "lib/stylesheets/platform.css",
-        "lib/stylesheets/teamworkFont.css",
 
         "vendor/jquery.1.8.js",
         "vendor/JST/jquery.JST.js",
