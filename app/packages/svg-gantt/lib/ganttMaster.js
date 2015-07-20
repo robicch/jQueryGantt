@@ -118,12 +118,12 @@ GanttMaster.prototype.init = function (place) {
 
     //keyboard management bindings
   $("body").bind("keydown.body", function (e) {
-    console.debug(e.keyCode+ " "+e.target.nodeName)
+    //console.debug(e.keyCode+ " "+e.target.nodeName)
 
     //manage only events for body -> not from inputs
     if (e.target.nodeName.toLowerCase() == "body" || e.target.nodeName.toLowerCase() == "svg") { // chrome,ff receive "body" ie "svg"
       //something focused?
-      console.debug(e.keyCode, e.ctrlKey)
+      //console.debug(e.keyCode, e.ctrlKey)
       var eventManaged=true;
       switch (e.keyCode) {
         case 46: //del
@@ -252,7 +252,7 @@ GanttMaster.prototype.updateDependsStrings = function () {
 };
 
 GanttMaster.prototype.removeLink = function (fromTask,toTask) {
-  console.debug("removeLink");
+  //console.debug("removeLink");
   if (!this.canWrite || (!fromTask.canWrite && !toTask.canWrite))
     return;
 
@@ -275,7 +275,7 @@ GanttMaster.prototype.removeLink = function (fromTask,toTask) {
 };
 
 GanttMaster.prototype.removeAllLinks = function (task,openTrans) {
-  console.debug("removeLink");
+  //console.debug("removeLink");
   if (!this.canWrite || (!task.canWrite && !task.canWrite))
     return;
 
@@ -298,7 +298,7 @@ GanttMaster.prototype.removeAllLinks = function (task,openTrans) {
 
 //------------------------------------  ADD TASK --------------------------------------------
 GanttMaster.prototype.addTask = function (task, row) {
-  console.debug("master.addTask",task,row,this);
+  //console.debug("master.addTask",task,row,this);
   task.master = this; // in order to access controller from task
 
   //replace if already exists
@@ -337,7 +337,7 @@ GanttMaster.prototype.addTask = function (task, row) {
   var ret = task;
   if (linkLoops || !task.setPeriod(task.start, task.end)) {
     //remove task from in-memory collection
-    console.debug("removing task from memory",task);
+    //console.debug("removing task from memory",task);
     this.tasks.splice(task.getRow(), 1);
     ret = undefined;
   } else {
@@ -355,7 +355,7 @@ GanttMaster.prototype.addTask = function (task, row) {
  * @param project
  */
 GanttMaster.prototype.loadProject = function (project) {
-  console.debug("loadProject",project)
+  //console.debug("loadProject",project)
   this.beginTransaction();
   this.resources = project.resources;
   this.roles = project.roles;
@@ -493,14 +493,14 @@ GanttMaster.prototype.moveTask = function (task, newStart) {
 
 
 GanttMaster.prototype.taskIsChanged = function () {
-  console.debug("taskIsChanged");
+  //console.debug("taskIsChanged");
   var master = this;
 
   //refresh is executed only once every 50ms
   this.element.stopTime("gnnttaskIsChanged");
   //var profilerext = new Profiler("gm_taskIsChangedRequest");
   this.element.oneTime(50, "gnnttaskIsChanged", function () {
-    console.debug("task Is Changed real call to redraw");
+    //console.debug("task Is Changed real call to redraw");
     //var profiler = new Profiler("gm_taskIsChangedReal");
     master.editor.redraw();
     master.gantt.refreshGantt();
@@ -576,13 +576,13 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
 
 
 GanttMaster.prototype.updateLinks = function (task) {
-  console.debug("updateLinks",task);
+  //console.debug("updateLinks",task);
   //var prof= new Profiler("gm_updateLinks");
 
   // defines isLoop function
   function isLoop(task, target, visited) {
     //var prof= new Profiler("gm_isLoop");
-    console.debug("isLoop :"+task.name+" - "+target.name);
+    //console.debug("isLoop :"+task.name+" - "+target.name);
     if (target == task) {
       return true;
     }
@@ -695,7 +695,7 @@ GanttMaster.prototype.updateLinks = function (task) {
 
 GanttMaster.prototype.moveUpCurrentTask=function(){
   var self=this;
-  console.debug("moveUpCurrentTask",self.currentTask)
+  //console.debug("moveUpCurrentTask",self.currentTask)
   if(!self.canWrite )
     return;
 
@@ -708,7 +708,7 @@ GanttMaster.prototype.moveUpCurrentTask=function(){
 
 GanttMaster.prototype.moveDownCurrentTask=function(){
   var self=this;
-  console.debug("moveDownCurrentTask",self.currentTask)
+  //console.debug("moveDownCurrentTask",self.currentTask)
   if(!self.canWrite)
     return;
 
@@ -856,7 +856,7 @@ GanttMaster.prototype.endTransaction = function () {
 
   //no error -> commit
   if (this.__currentTransaction.errors.length <= 0) {
-    console.debug("committing transaction");
+    //console.debug("committing transaction");
 
     //put snapshot in undo
     this.__undoStack.push(this.__currentTransaction.snapshot);
@@ -880,7 +880,7 @@ GanttMaster.prototype.endTransaction = function () {
     //error -> rollback
   } else {
     ret = false;
-    console.debug("rolling-back transaction");
+    //console.debug("rolling-back transaction");
     //try to restore changed tasks
     var oldTasks = JSON.parse(this.__currentTransaction.snapshot);
     this.deletedTaskIds = oldTasks.deletedTaskIds;
@@ -922,7 +922,7 @@ GanttMaster.prototype.checkpoint = function () {
 //----------------------------- UNDO/REDO MANAGEMENT ---------------------------------%>
 
 GanttMaster.prototype.undo = function () {
-  console.debug("undo before:",this.__undoStack,this.__redoStack);
+  //console.debug("undo before:",this.__undoStack,this.__redoStack);
   if (this.__undoStack.length > 0) {
     var his = this.__undoStack.pop();
     this.__redoStack.push(JSON.stringify(this.saveGantt()));
@@ -930,14 +930,14 @@ GanttMaster.prototype.undo = function () {
     this.deletedTaskIds = oldTasks.deletedTaskIds;
     this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
-    console.debug(oldTasks,oldTasks.deletedTaskIds)
+    //console.debug(oldTasks,oldTasks.deletedTaskIds)
     this.redraw();
-    console.debug("undo after:",this.__undoStack,this.__redoStack);
+    //console.debug("undo after:",this.__undoStack,this.__redoStack);
   }
 };
 
 GanttMaster.prototype.redo = function () {
-  console.debug("redo before:",undoStack,redoStack);
+  //console.debug("redo before:",undoStack,redoStack);
   if (this.__redoStack.length > 0) {
     var his = this.__redoStack.pop();
     this.__undoStack.push(JSON.stringify(this.saveGantt()));
@@ -946,13 +946,13 @@ GanttMaster.prototype.redo = function () {
     this.__inUndoRedo = true; // avoid Undo/Redo stacks reset
     this.loadTasks(oldTasks.tasks, oldTasks.selectedRow);
     this.redraw();
-    console.debug("redo after:",undoStack,redoStack);
+    //console.debug("redo after:",undoStack,redoStack);
   }
 };
 
 
 GanttMaster.prototype.resize = function () {
-  console.debug("GanttMaster.resize")
+  //console.debug("GanttMaster.resize")
   this.splitter.resize();
 };
 
@@ -1059,7 +1059,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
 /*
   for (var i = 0; i < tasks.length; i++) {
     var t = tasks[i];
-    console.debug("Task ", t.name, t.duration, t.earlyStart, t.earlyFinish, t.latestStart, t.latestFinish, t.latestStart - t.earlyStart, t.earlyStart == t.latestStart)
+    //console.debug("Task ", t.name, t.duration, t.earlyStart, t.earlyFinish, t.latestStart, t.latestFinish, t.latestStart - t.earlyStart, t.earlyStart == t.latestStart)
   }*/
 
 
@@ -1079,7 +1079,7 @@ GanttMaster.prototype.computeCriticalPath = function () {
       if (t.criticalCost > max)
         max = t.criticalCost;
     }
-    console.debug("Critical path length (cost): " + max);
+    //console.debug("Critical path length (cost): " + max);
     for (var i = 0; i < tasks.length; i++) {
       var t = tasks[i];
       t.setLatest(max);

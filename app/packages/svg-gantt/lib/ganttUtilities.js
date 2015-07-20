@@ -79,7 +79,7 @@ Gridify = function Gridify(table, opt) {
         $("body").unselectable();
         $.gridify.columInResize = $(this);
         //bind event for start resizing
-        console.debug("start resizing");
+        //console.debug("start resizing");
         $(document).bind("mousemove.gdf",function (e) {
           //manage resizing
           var w = e.pageX - $.gridify.columInResize.offset().left;
@@ -88,7 +88,7 @@ Gridify = function Gridify(table, opt) {
 
           //bind mouse up on body to stop resizing
         }).bind("mouseup.gdf", function () {
-            console.debug("stop resizing");
+            //console.debug("stop resizing");
             $(this).unbind("mousemove.gdf").unbind("mouseup.gdf").clearUnselectable();
             $("body").removeClass("gdfHResizing");
             delete $.gridify.columInResize;
@@ -147,11 +147,11 @@ Splitify = {
     splitterBar.bind("mousedown.gdf", function(e) {
       $.splittify.splitterBar = $(this);
       //bind event for start resizing
-      console.debug("start splitting");
+      //console.debug("start splitting");
       var realW=firstBox.get(0).scrollWidth;
       $("body").unselectable().bind("mousemove.gdf", function(e) {
         //manage resizing
-        console.debug(e.pageX - $.gridify.columInResize.offset().left)
+        ////console.debug(e.pageX - $.gridify.columInResize.offset().left)
         var sb = $.splittify.splitterBar;
         var pos = e.pageX - sb.parent().offset().left;
         var w = sb.parent().width();
@@ -166,7 +166,7 @@ Splitify = {
 
         //bind mouse up on body to stop resizing
       }).bind("mouseup.gdf", function() {
-        console.debug("stop splitting");
+        //console.debug("stop splitting");
         $(this).unbind("mousemove.gdf").unbind("mouseup.gdf").clearUnselectable();
         delete $.splittify.splitterBar;
 
@@ -204,7 +204,7 @@ Splitify = {
       this.firstBoxMinWidth=0;
 
       this.resize=function(newPerc){
-        console.debug("resize",newPerc)
+        //console.debug("resize",newPerc)
         this.perc=newPerc?newPerc:this.perc;
         var totW=this.element.width();
         var realW=this.firstBox.get(0).scrollWidth;
@@ -256,7 +256,7 @@ computeEndDate = function computeEndDate(end) {
 
 computeEndByDuration = function computeEndByDuration(start, duration) {
     var d = new Date(start);
-    console.debug("computeEndByDuration start ",d,duration)
+    //console.debug("computeEndByDuration start ",d,duration)
     var q = duration - 1;
     while (q > 0) {
       d.setDate(d.getDate() + 1);
@@ -274,7 +274,7 @@ incrementDateByWorkingDays = function incrementDateByWorkingDays(date, days) {
   }
 
 recomputeDuration = function recomputeDuration(start, end) {
-   console.debug("recomputeDuration");
+   //console.debug("recomputeDuration");
    return new Date(start).distanceInWorkingDays(new Date(end));
  }
 

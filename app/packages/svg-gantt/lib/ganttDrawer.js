@@ -54,7 +54,7 @@ Ganttalendar.prototype.zoomGantt = function(isPlus) {
 
 
 Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndMillis) {
-  console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
+  //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
 
   var self = this;
 
@@ -313,7 +313,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
   //get best dimension fo gantt
   var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
 
-  console.debug(new Date(period.start) + "   " + new Date(period.end));
+  //console.debug(new Date(period.start) + "   " + new Date(period.end));
   self.startMillis = period.start; //real dimension of gantt
   self.endMillis = period.end;
   self.originalStartMillis = originalStartmillis; //minimal dimension required by user or by task duration
@@ -328,7 +328,7 @@ Ganttalendar.prototype.create = function(zoom, originalStartmillis, originalEndM
 
 //<%-------------------------------------- GANT TASK GRAPHIC ELEMENT --------------------------------------%>
 Ganttalendar.prototype.drawTask = function (task) {
-  console.debug("drawTask", task.name,new Date(task.start));
+  //console.debug("drawTask", task.name,new Date(task.start));
 
   //var prof = new Profiler("ganttDrawTask");
   var self = this;
@@ -357,13 +357,13 @@ Ganttalendar.prototype.drawTask = function (task) {
       //grid:[oneDaySize,oneDaySize],
 
       resize:function(event, ui) {
-        console.debug(ui)
+        //console.debug(ui)
         $(".taskLabel[taskId=" + ui.helper.attr("taskId") + "]").css("width", ui.position.left);
         event.stopImmediatePropagation();
         event.stopPropagation();
       },
       stop:function(event, ui) {
-        console.debug(ui)
+        //console.debug(ui)
         var task = self.master.getTask(ui.element.attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
         var e = Math.round(((ui.position.left + ui.size.width) / self.fx) + self.startMillis);
@@ -395,7 +395,7 @@ Ganttalendar.prototype.drawTask = function (task) {
         $(".taskLabel[taskId=" + $(this).attr("taskId") + "]").css("width", ui.position.left);
       },
       stop:function(event, ui) {
-        console.debug(ui,$(this))
+        //console.debug(ui,$(this))
         var task = self.master.getTask($(this).attr("taskId"));
         var s = Math.round((ui.position.left / self.fx) + self.startMillis);
 
@@ -693,7 +693,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
 };
 
 Ganttalendar.prototype.redrawLinks = function() {
-  console.debug("redrawLinks ");
+  //console.debug("redrawLinks ");
   var self = this;
   this.element.stopTime("ganttlnksredr");
   this.element.oneTime(60, "ganttlnksredr", function() {
@@ -730,7 +730,7 @@ Ganttalendar.prototype.redrawTasks = function() {
 
 
 Ganttalendar.prototype.refreshGantt = function() {
-  console.debug("refreshGantt")
+  //console.debug("refreshGantt")
   var par = this.element.parent();
 
   //try to maintain last scroll
@@ -752,7 +752,7 @@ Ganttalendar.prototype.refreshGantt = function() {
   this.synchHighlight();
 
   //set old scroll
-  console.debug("old scroll:",scrollX,scrollY)
+  //console.debug("old scroll:",scrollX,scrollY)
   par.scrollTop(scrollY);
   par.scrollLeft(scrollX);
 
@@ -777,7 +777,7 @@ Ganttalendar.prototype.synchHighlight = function() {
 
 Ganttalendar.prototype.centerOnToday = function() {
   var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx)-30;
-  console.debug("centerOnToday "+x);
+  //console.debug("centerOnToday "+x);
   this.element.parent().scrollLeft(x);
 };
 

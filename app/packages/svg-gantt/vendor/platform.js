@@ -743,7 +743,7 @@ isValueChanged = function isValueChanged(){
   this.each(function(){
     var el = $(this);
     if (el.val()+"" != el.data("_oldvalue") + ""){
-      console.debug("io sono diverso "+el.attr("id")+ " :"+el.val()+" != "+el.data("_oldvalue"));
+      //console.debug("io sono diverso "+el.attr("id")+ " :"+el.val()+" != "+el.data("_oldvalue"));
       ret=true;
       return false;
     }
@@ -793,7 +793,7 @@ Profiler = function Profiler(name) {
     __profiler[this.name].count++;
   };
   this.display = function() {
-    console.debug(__profiler[this.name]);
+    //console.debug(__profiler[this.name]);
   };
 
   this.reset = function() {
@@ -814,7 +814,7 @@ Profiler.displayAll = function() {
     ret += key + extraspace+ "\t millis:" + p.millis+"\t count:" + p.count  + "\n";
     totMillis += p.millis;
   }
-  console.debug(ret);
+  //console.debug(ret);
 };
 
 
