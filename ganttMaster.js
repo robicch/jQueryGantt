@@ -20,7 +20,8 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GanttMaster(){
+
+    function GanttMaster(){
     this.tasks = [];
     this.deletedTaskIds=[];
     this.links = [];
@@ -655,3 +656,4 @@ GanttMaster.prototype.redo = function() {
         //console.debug("redo after:",undoStack,redoStack);
     }
 };
+
