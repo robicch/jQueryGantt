@@ -52,6 +52,7 @@ function GanttMaster() {
   this.__inUndoRedo = false; // a control flag to avoid Undo/Redo stacks reset when needed
 
   var self = this;
+  this.dateFormat = 'dd/MM/yyyy';
 }
 
 
@@ -373,6 +374,10 @@ GanttMaster.prototype.loadProject = function (project) {
     this.maxEditableDate = computeEnd(project.maxEditableDate);
   else
     this.maxEditableDate = Infinity;
+
+  if ('dateFormat' in project) {//checking isset or not
+	this.dateFormat = project.dateFormat;
+  }
 
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
