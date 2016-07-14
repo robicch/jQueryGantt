@@ -52,6 +52,7 @@ function GanttMaster() {
   this.__inUndoRedo = false; // a control flag to avoid Undo/Redo stacks reset when needed
 
   var self = this;
+  this.libPath = '';//URL to library path 
 }
 
 
@@ -373,6 +374,11 @@ GanttMaster.prototype.loadProject = function (project) {
     this.maxEditableDate = computeEnd(project.maxEditableDate);
   else
     this.maxEditableDate = Infinity;
+
+  if ('libPath' in project) {//isset in the project or not
+	this.libPath = project.libPath;
+	this.resourceUrl = this.libPath+this.resourceUrl;
+  }
 
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
