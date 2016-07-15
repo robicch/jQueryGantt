@@ -161,7 +161,9 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   if(duration == 0) {
       duration = duration+1;
   } else if(duration < 0) { // if end date is null or less than start date
-      duration = 0; 
+      duration = 0;
+  } else if (duration && task.isMileStone) {
+	  duration = 0;
   }
 
   var dateFormat = this.master.dateFormat;
