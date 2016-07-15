@@ -146,6 +146,8 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   //console.debug("refreshTaskRow")
   //var profiler = new Profiler("editorRefreshTaskRow");
   var row = task.rowElement;
+  task.oldstart = row.find("[name=start]").text();//setting start old value
+  task.oldend = row.find("[name=end]").text();//setting end old value
 
   row.find(".taskRowIndex").html(task.getRow() + 1);
   row.find(".indentCell").css("padding-left", task.level * 10 +18 );
@@ -153,9 +155,24 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   row.find("[name=code]").val(task.code);
   row.find("[status]").attr("status", task.status);
 
+  var difference = task.end - task.start;
+  var duration = Math.floor(difference/(3600*24*1000)+1);
+  // if the start date and end date are same
+  if(duration == 0) {
+      duration = duration+1;
+  } else if(duration < 0) { // if end date is null or less than start date
+      duration = 0;
+  } else if (duration && task.isMileStone) {
+	  duration = 0;
+  }
+
+  var dateFormat = this.master.dateFormat;
+  var startDate = new Date(task.start).format(dateFormat);
+  var endDate = new Date(task.end).format(dateFormat);
+
+  row.find("[name=start]").val(startDate).updateOldValue(); // called on dates only because for other field is called on focus event
+  row.find("[name=end]").val(endDate).updateOldValue();
   row.find("[name=duration]").val(task.duration);
-  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue(); // called on dates only because for other field is called on focus event
-  row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
   row.find("[name=depends]").val(task.depends);
   row.find(".taskAssigs").html(task.getAssigsString());
 

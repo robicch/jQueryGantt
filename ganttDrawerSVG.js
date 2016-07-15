@@ -539,6 +539,13 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   function _createTaskSVG(task, dimensions) {
     var svg = self.svg;
+
+	if (task.isMileStone) {
+		var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, dimensions.height, {class: 'taskBox', status: task.status, taskid: task.id});
+		svg.image(taskSvg, '100%', dimensions.height/2-9, 18, 18, self.master.resourceUrl+'milestone.png', {transform: 'translate(-20)'})
+		return taskSvg;
+	}
+
     var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, dimensions.height, {class:"taskBox taskBoxSVG taskStatusSVG", status:task.status, taskid:task.id });
 
     //svg.title(taskSvg, task.name);
