@@ -166,7 +166,7 @@ jQuery.fn.dateField = function(options) {
 
   theDiv.click(function(ev) {
     var el = $(ev.target).closest(".calElement");
-    if (el.size() > 0) {
+    if (el.length > 0) {
       var date = new Date(parseInt(el.attr("millis")));
       if (el.hasClass("day")) {
         theDiv.remove();

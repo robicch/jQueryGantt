@@ -129,7 +129,7 @@ jQuery.extend({
 	}
 });
 
-if (jQuery.browser.msie)
+if (jQuery.browser && jQuery.browser.msie)
 	jQuery(window).one("unload", function() {
 		var global = jQuery.timer.global;
 		for ( var label in global ) {

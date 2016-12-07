@@ -31,7 +31,7 @@ GridEditor.prototype.fillEmptyLines = function () {
   var factory = new TaskFactory();
 
   //console.debug("GridEditor.fillEmptyLines");
-  var rowsToAdd = 30 - this.element.find(".taskEditRow").size();
+  var rowsToAdd = 30 - this.element.find(".taskEditRow").length;
 
   //fill with empty lines
   for (var i = 0; i < rowsToAdd; i++) {
@@ -41,7 +41,7 @@ GridEditor.prototype.fillEmptyLines = function () {
     emptyRow.click(function (ev) {
       var emptyRow = $(this);
       //add on the first empty row only
-      if (!master.canWrite || emptyRow.prevAll(".emptyRow").size() > 0)
+      if (!master.canWrite || emptyRow.prevAll(".emptyRow").length > 0)
         return
 
       master.beginTransaction();
@@ -54,7 +54,7 @@ GridEditor.prototype.fillEmptyLines = function () {
       }
 
       //fill all empty previouses
-      emptyRow.prevAll(".emptyRow").andSelf().each(function () {
+      emptyRow.prevAll(".emptyRow").addBack().each(function () {
         var ch = factory.build("tmp_fk" + new Date().getTime(), "", "", level, start, 1);
         var task = master.addTask(ch);
         lastTask = ch;
@@ -90,13 +90,13 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
 
   if (typeof(row) != "number") {
     var emptyRow = this.element.find(".emptyRow:first"); //tries to fill an empty row
-    if (emptyRow.size() > 0)
+    if (emptyRow.length > 0)
       emptyRow.replaceWith(taskRow);
     else
       this.element.append(taskRow);
   } else {
     var tr = this.element.find("tr.taskEditRow").eq(row);
-    if (tr.size() > 0) {
+    if (tr.length > 0) {
       tr.before(taskRow);
     } else {
       this.element.append(taskRow);
@@ -351,7 +351,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     var theCell = $(this);
     var theTd = theCell.parent();
     var theRow = theTd.parent();
-    var col = theTd.prevAll("td").size();
+    var col = theTd.prevAll("td").length;
 
     var ret = true;
     switch (event.keyCode) {
@@ -370,14 +370,14 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
         var td = prevRow.find("td").eq(col);
         var inp = td.find("input");
 
-        if (inp.size()>0)
+        if (inp.length>0)
           inp.focus();
         break;
       case 40: //down arrow
         var nextRow = theRow.next();
         var td = nextRow.find("td").eq(col);
         var inp = td.find("input");
-        if (inp.size()>0)
+        if (inp.length>0)
           inp.focus();
         else
           nextRow.click(); //create a new row
@@ -427,6 +427,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   //bind row selection
   taskRow.click(function () {
     var row = $(this);
+
     //var isSel = row.hasClass("rowSelected");
     row.closest("table").find(".rowSelected").removeClass("rowSelected");
     row.addClass("rowSelected");

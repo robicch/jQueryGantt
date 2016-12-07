@@ -771,8 +771,11 @@ Ganttalendar.prototype.fitGantt = function() {
 };
 
 Ganttalendar.prototype.synchHighlight = function() {
-  if (this.master.currentTask && this.master.currentTask.ganttElement)
+
+  if (this.master.currentTask && this.master.currentTask.ganttElement){
     this.highlightBar.css("top", this.master.currentTask.ganttElement.css("top"));
+    
+  }
 };
 
 Ganttalendar.prototype.centerOnToday = function() {

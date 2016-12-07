@@ -62,8 +62,8 @@ function nearBestPosition(whereId, theObjId, centerOnEl) {
 
     var left = trueX;
     var top = trueY;
-    var barHeight = ($.browser.msie) ? 45 : 35;
-    var barWidth = ($.browser.msie) ? 20 : 0;
+    var barHeight = ($.browser&& $.browser.msie) ? 45 : 35;
+    var barWidth = ($.browser&& $.browser.msie) ? 20 : 0;
 
     if (trueX && trueY) {
       target.css("left", left);

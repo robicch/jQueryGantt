@@ -416,8 +416,8 @@ Ganttalendar.prototype.drawTask = function (task) {
       }).mouseup(function (e) {
         $(":focus").blur(); // in order to save grid field when moving task
       }).mousedown(function () {
-        var task = self.master.getTask($(this).attr("taskId"));
-        task.rowElement.click();
+        var task = self.master.getTask($(this).attr("taskid"));
+         task.rowElement.click();
       }).dragExtedSVG($(self.svg.root()), {
         canResize:  this.master.canWrite && task.canWrite,
         canDrag:    !task.depends && this.master.canWrite && task.canWrite,
