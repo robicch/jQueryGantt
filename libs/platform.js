@@ -884,7 +884,7 @@ function createBlackPage(width,height,onCloseCallBack){
   $("#__blackpopup__").remove();
 
   var bg=$("<div>").attr("id","__blackpopup__");
-  bg.css({position:'fixed',top:"0px",paddingTop:"50px", left:0,width:'100%',height:'100%',  backgroundImage:"url('res/img/black_70.png')"});
+  bg.css({position:'fixed',top:"0px",paddingTop:"50px", left:0,width:'100%',height:'100%',  backgroundImage:"url('res/black_70.png')"});
   bg.append("<div id='bwinPopupd' name='bwinPopupd'></div>");
   bg.bringToFront();
 
