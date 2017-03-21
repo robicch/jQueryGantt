@@ -159,6 +159,8 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   row.find("[name=depends]").val(task.depends);
   row.find(".taskAssigs").html(task.getAssigsString());
 
+  //Enhancing the function to perform own operations
+  this.master.element.trigger('gantt.task.afterupdate.event', task);
   //profiler.stop();
 };
 
