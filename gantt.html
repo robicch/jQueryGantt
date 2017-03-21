@@ -1,55 +1,46 @@
 <!DOCTYPE HTML>
 <html>
-<head>
-  <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE"/>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <title>Teamwork</title>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=9; IE=8; IE=7; IE=EDGE"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>Teamwork</title>
+        <link rel=stylesheet href="platform.css" type="text/css">
+        <link rel=stylesheet href="libs/dateField/jquery.dateField.css" type="text/css">
+        <link rel=stylesheet href="gantt.css" type="text/css">
+        <link rel=stylesheet href="ganttPrint.css" type="text/css" media="print">
+        <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+        <script src="http://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="libs/jquery.livequery.min.js"></script>
+        <script src="libs/jquery.timers.js"></script>
+        <script src="libs/platform.js"></script>
+        <script src="libs/date.js"></script>
+        <script src="libs/i18nJs.js"></script>
+        <script src="libs/dateField/jquery.dateField.js"></script>
+        <script src="libs/JST/jquery.JST.js"></script>
+        <link rel="stylesheet" type="text/css" href="libs/jquery.svg.css">
+        <script type="text/javascript" src="libs/jquery.svg.min.js"></script>
+        <!--In case of jquery 1.7-->
+        <!--<script type="text/javascript" src="libs/jquery.svgdom.pack.js"></script>-->
+        <!--In case of jquery 1.8-->
+        <script type="text/javascript" src="libs/jquery.svgdom.1.8.js"></script>
+        <script src="ganttUtilities.js"></script>
+        <script src="ganttTask.js"></script>
+        <script src="ganttDrawerSVG.js"></script>
+        <!--<script src="ganttDrawer.js"></script>-->
+        <script src="ganttGridEditor.js"></script>
+        <script src="ganttMaster.js"></script>
+    </head>
+    <body style="background-color: #fff;">
+        <div id="ndo" style="position:absolute;right:5px;top:5px;width:378px;padding:5px;background-color: #FFF5E6; border:1px solid #F9A22F; font-size:12px" class="noprint">
+            This Gantt editor is free thanks to <a href="http://twproject.com" target="_blank">Twproject</a>
+            where it can be used on a complete and flexible project management solution.<br>
+            Get your projects done! Give <a href="http://twproject.com" target="_blank">Twproject a try now</a>
+            .
 
-  <link rel=stylesheet href="platform.css" type="text/css">
-  <link rel=stylesheet href="libs/dateField/jquery.dateField.css" type="text/css">
-
-  <link rel=stylesheet href="gantt.css" type="text/css">
-  <link rel=stylesheet href="ganttPrint.css" type="text/css" media="print">
-
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-
-  <script src="libs/jquery.livequery.min.js"></script>
-  <script src="libs/jquery.timers.js"></script>
-  <script src="libs/platform.js"></script>
-  <script src="libs/date.js"></script>
-  <script src="libs/i18nJs.js"></script>
-  <script src="libs/dateField/jquery.dateField.js"></script>
-  <script src="libs/JST/jquery.JST.js"></script>
-
-  <link rel="stylesheet" type="text/css" href="libs/jquery.svg.css">
-  <script type="text/javascript" src="libs/jquery.svg.min.js"></script>
-
-  <!--In case of jquery 1.7-->
-  <!--<script type="text/javascript" src="libs/jquery.svgdom.pack.js"></script>-->
-
-  <!--In case of jquery 1.8-->
-  <script type="text/javascript" src="libs/jquery.svgdom.1.8.js"></script>
-
-
-  <script src="ganttUtilities.js"></script>
-  <script src="ganttTask.js"></script>
-  <script src="ganttDrawerSVG.js"></script>
-  <!--<script src="ganttDrawer.js"></script>-->
-  <script src="ganttGridEditor.js"></script>
-  <script src="ganttMaster.js"></script>  
-</head>
-<body style="background-color: #fff;">
-
-
-<div id="ndo" style="position:absolute;right:5px;top:5px;width:378px;padding:5px;background-color: #FFF5E6; border:1px solid #F9A22F; font-size:12px" class="noprint">
-  This Gantt editor is free thanks to <a href="http://twproject.com" target="_blank">Twproject</a> where it can be used on a complete and flexible project management solution.<br> Get your projects done! Give <a href="http://twproject.com" target="_blank">Twproject a try now</a>.
-</div>
-<div id="workSpace" style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
-
-<div id="taZone" style="display:none;" class="noprint">
-   <textarea rows="8" cols="150" id="ta">
-     {"tasks":[
+        </div>
+        <div id="workSpace" style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px"></div>
+        <div id="taZone" style="display:none;" class="noprint">
+            <textarea rows="8" cols="150" id="ta">{"tasks":[
      {"id":-1,"name":"Gantt editor","code":"","level":0,"status":"STATUS_ACTIVE","canWrite":true,"start":1396994400000,"duration":21,"end":1399672799999,"startIsMilestone":true,"endIsMilestone":false,"collapsed":false,"assigs":[],"hasChild":true}
      ,{"id":-2,"name":"coding","code":"","level":1,"status":"STATUS_ACTIVE","canWrite":true,"start":1396994400000,"duration":10,"end":1398203999999,"startIsMilestone":false,"endIsMilestone":false,"collapsed":false,"assigs":[],"description":"","progress":0,"hasChild":true}
      ,{"id":-3,"name":"gantt part","code":"","level":2,"status":"STATUS_ACTIVE","canWrite":true,"start":1396994400000,"duration":2,"end":1397167199999,"startIsMilestone":false,"endIsMilestone":false,"collapsed":false,"assigs":[],"depends":"","hasChild":false}
@@ -60,38 +51,36 @@
      ,{"id":-8,"name":"test on chrome","code":"","level":2,"status":"STATUS_SUSPENDED","canWrite":true,"start":1399327200000,"duration":2,"end":1399499999999,"startIsMilestone":false,"endIsMilestone":false,"collapsed":false,"assigs":[],"depends":"6","hasChild":false}
      ],"selectedRow":0,"canWrite":true,"canWriteOnParent":true}
    </textarea>
+            <button onclick="loadGanttFromServer();">load</button>
+        </div>
+        <style>
+            .resEdit {
+                padding: 15px;
+            }
 
-  <button onclick="loadGanttFromServer();">load</button>
-</div>
+            .resLine {
+                width: 95%;
+                padding: 3px;
+                margin: 5px;
+                border: 1px solid #d0d0d0;
+            }
 
-<style>
-  .resEdit {
-    padding: 15px;
-  }
+            body {
+                overflow: hidden;
+            }
 
-  .resLine {
-    width: 95%;
-    padding: 3px;
-    margin: 5px;
-    border: 1px solid #d0d0d0;
-  }
-
-  body {
-    overflow: hidden;
-  }
-
-  .ganttButtonBar h1{
-    color: #000000;
-    font-weight: bold;
-    font-size: 28px;
-    margin-left: 10px;
-  }
-
-</style>
-
-<form id="gimmeBack" style="display:none;" action="../gimmeBack.jsp" method="post" target="_blank"><input type="hidden" name="prj" id="gimBaPrj"></form>
-
-<script type="text/javascript">
+            .ganttButtonBar h1 {
+                color: #000000;
+                font-weight: bold;
+                font-size: 28px;
+                margin-left: 10px;
+            }
+        </style>
+        <form id="gimmeBack" style="display:none;" action="../gimmeBack.jsp" method="post" target="_blank">
+            <input type="hidden" name="prj" id="gimBaPrj">
+        </form>
+        <script type="text/javascript">
+            
 
 var ge;  //this is the hugly but very friendly global var for the gantt editor
 $(function() {
@@ -101,6 +90,13 @@ $(function() {
 
   // here starts gantt initialization
   ge = new GanttMaster();
+
+  //TODO:是否自动显示bar
+//          ge.isBrowserTaskBar = true;
+//TODO:设置code是否自动编码
+          ge.isLevelCode = true;
+
+
   var workSpace = $("#workSpace");
   workSpace.css({width:$(window).width() - 20,height:$(window).height() - 100});
   ge.init(workSpace);
@@ -333,6 +329,7 @@ function loadFromLocalStorage() {
 
   }
   ge.loadProject(ret);
+  ge.levelCode();
   ge.checkpoint(); //empty the undo stack
 }
 
@@ -413,11 +410,11 @@ function editResources(){
 }
 
 
-</script>
 
-
-<div id="gantEditorTemplates" style="display:none;">
-  <div class="__template__" type="GANTBUTTONS"><!--
+        </script>
+        <div id="gantEditorTemplates" style="display:none;">
+            <div class="__template__" type="GANTBUTTONS">
+            <!--
   <div class="ganttButtonBar noprint">
     <h1 style="float:left">task tree/gantt</h1>
     <div class="buttons">
@@ -446,9 +443,10 @@ function editResources(){
       &nbsp; &nbsp; &nbsp; &nbsp;
       <button onclick="saveGanttOnServer();" class="button first big" title="save">save</button>
     </div></div>
-  --></div>
-
-  <div class="__template__" type="TASKSEDITHEAD"><!--
+  -->
+            </div>
+            <div class="__template__" type="TASKSEDITHEAD">
+            <!--
   <table class="gdfTable" cellspacing="0" cellpadding="0">
     <thead>
     <tr style="height:40px">
@@ -465,9 +463,10 @@ function editResources(){
     </tr>
     </thead>
   </table>
-  --></div>
-
-  <div class="__template__" type="TASKROW"><!--
+  -->
+            </div>
+            <div class="__template__" type="TASKROW">
+            <!--
   <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)">
     <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
     <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
@@ -483,9 +482,10 @@ function editResources(){
     <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
     <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
   </tr>
-  --></div>
-
-  <div class="__template__" type="TASKEMPTYROW"><!--
+  -->
+            </div>
+            <div class="__template__" type="TASKEMPTYROW">
+            <!--
   <tr class="taskEditRow emptyRow" >
     <th class="gdfCell" align="right"></th>
     <td class="gdfCell noClip" align="center"></td>
@@ -497,9 +497,10 @@ function editResources(){
     <td class="gdfCell"></td>
     <td class="gdfCell"></td>
   </tr>
-  --></div>
-
-  <div class="__template__" type="TASKBAR"><!--
+  -->
+            </div>
+            <div class="__template__" type="TASKBAR">
+            <!--
   <div class="taskBox taskBoxDiv" taskId="(#=obj.id#)" >
     <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
       <div class="taskStatus" status="(#=obj.status#)"></div>
@@ -510,9 +511,10 @@ function editResources(){
       <div class="milestone end (#=obj.endIsMilestone?'active':''#)" ></div>
     </div>
   </div>
-  --></div>
-
-  <div class="__template__" type="CHANGE_STATUS"><!--
+  -->
+            </div>
+            <div class="__template__" type="CHANGE_STATUS">
+            <!--
     <div class="taskStatusBox">
       <div class="taskStatus cvcColorSquare" status="STATUS_ACTIVE" title="active"></div>
       <div class="taskStatus cvcColorSquare" status="STATUS_DONE" title="completed"></div>
@@ -520,10 +522,10 @@ function editResources(){
       <div class="taskStatus cvcColorSquare" status="STATUS_SUSPENDED" title="suspended"></div>
       <div class="taskStatus cvcColorSquare" status="STATUS_UNDEFINED" title="undefined"></div>
     </div>
-  --></div>
-
-
-  <div class="__template__" type="TASK_EDITOR"><!--
+  -->
+            </div>
+            <div class="__template__" type="TASK_EDITOR">
+            <!--
   <div class="ganttTaskEditor">
   <table width="100%">
     <tr>
@@ -571,20 +573,20 @@ function editResources(){
 
   <div style="text-align: right; padding-top: 20px"><button id="saveButton" class="button big">save</button></div>
   </div>
-  --></div>
-
-
-  <div class="__template__" type="ASSIGNMENT_ROW"><!--
+  -->
+            </div>
+            <div class="__template__" type="ASSIGNMENT_ROW">
+            <!--
   <tr taskId="(#=obj.task.id#)" assigId="(#=obj.assig.id#)" class="assigEditRow" >
     <td ><select name="resourceId"  class="formElements" (#=obj.assig.id.indexOf("tmp_")==0?"":"disabled"#) ></select></td>
     <td ><select type="select" name="roleId"  class="formElements"></select></td>
     <td ><input type="text" name="effort" value="(#=getMillisInHoursMinutes(obj.assig.effort)#)" size="5" class="formElements"></td>
     <td align="center"><span class="teamworkIcon delAssig" style="cursor: pointer">d</span></td>
   </tr>
-  --></div>
-
-
-  <div class="__template__" type="RESOURCE_EDITOR"><!--
+  -->
+            </div>
+            <div class="__template__" type="RESOURCE_EDITOR">
+            <!--
   <div class="resourceEditor" style="padding: 5px;">
 
     <h2>Project team</h2>
@@ -597,19 +599,19 @@ function editResources(){
 
     <div style="text-align: right; padding-top: 20px"><button id="resSaveButton" class="button big">save</button></div>
   </div>
-  --></div>
-
-
-  <div class="__template__" type="RESOURCE_ROW"><!--
+  -->
+            </div>
+            <div class="__template__" type="RESOURCE_ROW">
+            <!--
   <tr resId="(#=obj.id#)" class="resRow" >
     <td ><input type="text" name="name" value="(#=obj.name#)" style="width:100%;" class="formElements"></td>
     <td align="center"><span class="teamworkIcon delRes" style="cursor: pointer">d</span></td>
   </tr>
-  --></div>
-
-
-</div>
-<script type="text/javascript">
+  -->
+            </div>
+        </div>
+        <script type="text/javascript">
+            
   $.JST.loadDecorator("ASSIGNMENT_ROW", function(assigTr, taskAssig) {
 
     var resEl = assigTr.find("[name=resourceId]");
@@ -643,6 +645,7 @@ function editResources(){
 
 
   });
-</script>
-</body>
+
+        </script>
+    </body>
 </html>
