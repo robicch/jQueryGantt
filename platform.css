@@ -24,7 +24,7 @@
   body styles
   -------------------------------------------------------
   */
-BODY, TBODY {
+#workSpace{
   font-family: arial;
   font-size: 14px;
   margin: 0;
@@ -32,22 +32,22 @@ BODY, TBODY {
   text-decoration: none;
 }
 
-BODY {
+#workSpace BODY {
   background-color: #91B4B7; 
 }
 
-a {
+#workSpace a {
   text-decoration: none;
   font-weight: bold;
   color: #16ABDD;
 }
 
-a:hover, a.aHover {
+#workSpace a:hover, a.aHover {
   color: #0C85AD;
   text-decoration: underline;
 }
 
-h1 {
+#workSpace h1 {
   font-size:32px;
   line-height: 34px;
   color:#91B4B7;
@@ -55,21 +55,21 @@ h1 {
   margin:0 0 10px 0
 }
 
-h2 {
+#workSpace h2 {
   font-size:22px;
   color:#373737;
   font-weight:normal;
   margin:0 0 10px 0
 }
 
-h3 {
+#workSpace h3 {
   text-decoration: none;
   color: #000000;
   font-size: 16px;
   margin: 0;
 }
 
-h4 {
+#workSpace h4 {
   font-size:16px;
   padding:5px 0;
   color:#617777;
@@ -177,19 +177,15 @@ h4 {
   width: 100%;
 }
 
-TH, .tableHeader {
+#workSpace TH, #workSpace .tableHeader {
   font-weight: normal;
   color: #FFFFFF;
   border: none;
   background-color: #91B4B7;
-  padding:2px
+  padding:2px;
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
 }
-
-TH a {
-  color: #FFFFFF;
-}
-
-
 
   /*
   -------------------------------------------------------
@@ -291,12 +287,12 @@ span.separator {
 }
 
 
-form {
+#workSpace form {
   margin: 0;
   padding: 0;
 }
 
-select {
+#workSpace select {
   border:1px solid #91B4B7;
   padding: 4px;
   font-size: 16px;
@@ -334,14 +330,9 @@ span#FLD_LOGIN_NAMEerror, span#FLD_PWDerror {
 }
 
 
-input {
-    background-color: white;
-    padding: 4px;
-    font-size: 16px;
-    border:1px solid #91B4B7;
+#workSpace input {
     -moz-border-radius:3px;
     -webkit-border-radius:3px;
     -o-border-radius:3px;
-    border-radius:3px;
     font-family: Arial, Helvetica, sans-serif;
 }
