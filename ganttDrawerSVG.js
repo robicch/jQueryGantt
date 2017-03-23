@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014 Open Lab
+ Copyright (c) 2012-2017 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -19,11 +19,14 @@
  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+ todo For compatibility with IE and SVGElements.getElementsByClassName not implemented changed every find starting from SVGElement (the other works fine)
+ .find(".classname"))  -> .find("[class*=classname])
  */
 function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.master = master; // is the a GantEditor instance
   this.element; // is the jquery element containing gantt
-  this.highlightBar;
 
   this.svg; // instance of svg object containing gantt
   this.tasksGroup; //instance of svg group containing tasks
@@ -34,7 +37,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
   this.includeToday = true; //when true today is always visible. If false boundaries comes from tasks periods
   this.showCriticalPath = false; //when true critical path is highlighted
 
-  this.zoomLevels = ["d", "w", "m", "q", "s", "y"];
+  this.zoomLevels = [ "d", "w","w2","w3", "m","m2", "q", "q2", "s", "y"];
 
   this.element = this.create(zoom, startmillis, endMillis);
 
@@ -42,7 +45,7 @@ function Ganttalendar(zoom, startmillis, endMillis, master, minGanttSize) {
 
   this.rowHeight = 30; // todo get it from css?
   this.taskHeight=20;
-  this.taskVertOffset=(this.rowHeight-this.taskHeight)/2
+  this.taskVertOffset=(this.rowHeight-this.taskHeight)/2;
 
 }
 
@@ -50,6 +53,7 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
   var curLevel = this.zoom;
   var pos = this.zoomLevels.indexOf(curLevel + "");
 
+  var centerMillis=this.getCenterMillis();
   var newPos = pos;
   if (isPlus) {
     newPos = pos <= 0 ? 0 : pos - 1;
@@ -60,80 +64,94 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
     curLevel = this.zoomLevels[newPos];
     this.zoom = curLevel;
     this.refreshGantt();
+    this.goToMillis(centerMillis);
   }
 };
 
 
 Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEndMillis) {
   //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
-
   var self = this;
 
   function getPeriod(zoomLevel, stMil, endMillis) {
     var start = new Date(stMil);
     var end = new Date(endMillis);
 
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
     //reset hours
     if (zoomLevel == "d") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
       start.setFirstDayOfThisWeek();
       end.setFirstDayOfThisWeek();
       end.setDate(end.getDate() + 6);
-
 
       //reset day of week
-    } else if (zoomLevel == "w") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
+    } else if (zoomLevel == "w" ) {
       start.setFirstDayOfThisWeek();
+      start.setDate(start.getDate()-7);
       end.setFirstDayOfThisWeek();
-      end.setDate(end.getDate() + 6);
+      end.setDate(end.getDate() + 13);
+
+    } else if (zoomLevel == "w2" ) {
+      start.setFirstDayOfThisWeek();
+      start.setDate(start.getDate()-7);
+      end.setFirstDayOfThisWeek();
+      end.setDate(end.getDate() + 20);
+
+    } else if (zoomLevel == "w3" ) {
+      start.setFirstDayOfThisWeek();
+      start.setDate(start.getDate()-7);
+      end.setFirstDayOfThisWeek();
+      end.setDate(end.getDate() + 27);
 
       //reset day of month
     } else if (zoomLevel == "m") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
       start.setDate(1);
+      start.setMonth(start.getMonth()-1);
       end.setDate(1);
-      end.setMonth(end.getMonth() + 1);
+      end.setMonth(end.getMonth() + 2);
       end.setDate(end.getDate() - 1);
 
-      //reset to quarter
+    } else if (zoomLevel == "m2") {
+      start.setDate(1);
+      start.setMonth(start.getMonth()-1);
+      end.setDate(1);
+      end.setMonth(end.getMonth() + 3);
+      end.setDate(end.getDate() - 1);
+
+      //reset to day of week
     } else if (zoomLevel == "q") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
+      start.setFirstDayOfThisWeek();
+      start.setDate(start.getDate()-7);
+      end.setFirstDayOfThisWeek();
+      end.setDate(end.getDate() + 13);
+
+      //reset to quarter
+    } else if (zoomLevel == "q2") {
       start.setDate(1);
       start.setMonth(Math.floor(start.getMonth() / 3) * 3);
+      start.setMonth(start.getMonth()-3);
       end.setDate(1);
-      end.setMonth(Math.floor(end.getMonth() / 3) * 3 + 3);
+      end.setMonth(Math.floor(end.getMonth() / 3) * 3 + 6);
       end.setDate(end.getDate() - 1);
 
       //reset to semester
     } else if (zoomLevel == "s") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
       start.setDate(1);
-
       start.setMonth(Math.floor(start.getMonth() / 6) * 6);
+      start.setMonth(start.getMonth()-6);
       end.setDate(1);
-      end.setMonth(Math.floor(end.getMonth() / 6) * 6 + 6);
+      end.setMonth(Math.floor(end.getMonth() / 6) * 6 + 12);
       end.setDate(end.getDate() - 1);
 
       //reset to year - > gen
     } else if (zoomLevel == "y") {
-      start.setHours(0, 0, 0, 0);
-      end.setHours(23, 59, 59, 999);
-
       start.setDate(1);
       start.setMonth(0);
-
+      start.setFullYear(start.getFullYear()-1);
       end.setDate(1);
-      end.setMonth(12);
+      end.setMonth(24);
       end.setDate(end.getDate() - 1);
     }
     return {start:start.getTime(), end:end.getTime()};
@@ -178,62 +196,113 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
     //this is computed by hand in order to optimize cell size
     var computedTableWidth;
-
+    var computedScaleX;
     // year
     if (zoom == "y") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 180)) * 100); //180gg = 1 sem = 100px
+      computedScaleX=100/(3600000 * 24*180); //1 sem= 100px
       iterate(function (date) {
         tr1.append(createHeadCell(date.format("yyyy"), 2));
         date.setFullYear(date.getFullYear() + 1);
       }, function (date) {
+        var end = new Date(date.getTime());
+        end.setMonth(end.getMonth() + 6);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
         var sem = (Math.floor(date.getMonth() / 6) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANTT_SEMESTER_SHORT"] + sem, 1, null, 100));
+        tr2.append(createHeadCell(GanttMaster.messages["GANTT_SEMESTER_SHORT"] + sem, 1, null, periodWidth));
         trBody.append(createBodyCell(1, sem == 2));
         date.setMonth(date.getMonth() + 6);
       });
 
       //semester
     } else if (zoom == "s") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 90)) * 100); //90gg = 1 quarter = 100px
+      computedScaleX=200/(3600000 * 24*90); //1 quarter= 200px
       iterate(function (date) {
         var end = new Date(date.getTime());
         end.setMonth(end.getMonth() + 6);
         end.setDate(end.getDate() - 1);
-        tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 2));
+        tr1.append(createHeadCell(date.format("MMMM") + " - " + end.format("MMMM yyyy"), 6));
         date.setMonth(date.getMonth() + 6);
       }, function (date) {
-        var quarter = ( Math.floor(date.getMonth() / 3) + 1);
-        tr2.append(createHeadCell(GanttMaster.messages["GANTT_QUARTER_SHORT"] + quarter, 1, null, 100));
-        trBody.append(createBodyCell(1, quarter % 2 == 0));
-        date.setMonth(date.getMonth() + 3);
+        var end = new Date(date.getTime());
+        end.setMonth(end.getMonth() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+        tr2.append(createHeadCell(date.format("MMM"), 1, null, periodWidth));
+        trBody.append(createBodyCell(1, (date.getMonth()+1) % 6 == 0));
+        date.setMonth(date.getMonth() + 1);
       });
 
+
       //quarter
-    } else if (zoom == "q") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 30)) * 300); //1 month= 300px
+     } else if (zoom == "q2") {
+      computedScaleX=150/(3600000 * 24*30); //1 month= 150px
       iterate(function (date) {
         var end = new Date(date.getTime());
         end.setMonth(end.getMonth() + 3);
         end.setDate(end.getDate() - 1);
-        tr1.append(createHeadCell(date.format("MMM") + " - " + end.format("MMM yyyy"), 3));
+        tr1.append(createHeadCell(date.format("MMMM") + " - " + end.format("MMMM yyyy"), 3));
         date.setMonth(date.getMonth() + 3);
       }, function (date) {
-        var lbl = date.format("MMM");
-        tr2.append(createHeadCell(lbl, 1, null, 300));
+        var end = new Date(date.getTime());
+        end.setMonth(end.getMonth() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+
+        var lbl = date.format("MMMM");
+        tr2.append(createHeadCell(lbl, 1, null, periodWidth));
         trBody.append(createBodyCell(1, date.getMonth() % 3 == 2));
         date.setMonth(date.getMonth() + 1);
       });
 
+      // quarter / week of year
+    } else if (zoom == "q") {
+      computedScaleX=300/(3600000 * 24*30); //1 month= 300px
+      iterate(function (date) {
+        var end = new Date(date.getTime());
+        end.setMonth(end.getMonth() + 3);
+        end.setDate(end.getDate() - 1);
+        tr1.append(createHeadCell(date.format("MMMM") + " - " + end.format("MMMM yyyy"), Math.round((end.getTime()-date.getTime())/(3600000*24))));
+        date.setMonth(date.getMonth() + 3);
+      }, function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 7);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+        var lbl ="<small>"+i18n["WEEK_SHORT"].toLowerCase()+"</small> "+ date.format("w");
+        tr2.append(createHeadCell(lbl, 7, null, periodWidth));
+        trBody.append(createBodyCell(7,false));
+        date.setDate(date.getDate() + 7);
+      });
+
       //month
-    } else if (zoom == "m") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24 * 1)) * 25); //1 day= 20px
+    } else if (zoom == "m2") {
+      computedScaleX=15/(3600000 * 24); //1 day= 15px
       iterate(function (date) {
         var sm = date.getTime();
         date.setMonth(date.getMonth() + 1);
         var daysInMonth = Math.round((date.getTime() - sm) / (3600000 * 24));
         tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
       }, function (date) {
-        tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null, 25));
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+        tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH headSmall" : "headSmall", periodWidth));
+        var nd = new Date(date.getTime());
+        nd.setDate(date.getDate() + 1);
+        trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
+        date.setDate(date.getDate() + 1);
+      });
+
+    } else if (zoom == "m") {
+      computedScaleX=25/(3600000 * 24); //1 day= 25px
+
+      iterate(function (date) {
+        var sm = date.getTime();
+        date.setMonth(date.getMonth() + 1);
+        var daysInMonth = Math.round((date.getTime() - sm) / (3600000 * 24));
+        tr1.append(createHeadCell(new Date(sm).format("MMMM yyyy"), daysInMonth)); //spans mumber of dayn in the month
+      }, function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+        tr2.append(createHeadCell(date.format("d"), 1, isHoliday(date) ? "holyH" : null, periodWidth));
         var nd = new Date(date.getTime());
         nd.setDate(date.getDate() + 1);
         trBody.append(createBodyCell(1, nd.getDate() == 1, isHoliday(date) ? "holy" : null));
@@ -241,29 +310,71 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
       });
 
       //week
-    } else if (zoom == "w") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 40); //1 day= 40px
+    } else if (zoom == "w3") {
+      computedScaleX=30/(3600000 * 24); //1 day= 30px
+
       iterate(function (date) {
         var end = new Date(date.getTime());
         end.setDate(end.getDate() + 6);
-        tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d'yy"), 7));
+        tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d 'yy"), 7));
         date.setDate(date.getDate() + 7);
       }, function (date) {
-        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, 40));
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, periodWidth));
+        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
+        date.setDate(date.getDate() + 1);
+      });
+
+    } else if (zoom == "w2") {
+      computedScaleX=40/(3600000 * 24); //1 day= 40px
+      iterate(function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 6);
+        tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d 'yy"), 7));
+        date.setDate(date.getDate() + 7);
+      }, function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, periodWidth));
+        trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
+        date.setDate(date.getDate() + 1);
+      });
+
+    } else if (zoom == "w") {
+      computedScaleX=50/(3600000 * 24);//1 day= 50px
+      iterate(function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 6);
+        tr1.append(createHeadCell(date.format("MMM d") + " - " + end.format("MMM d 'yy"), 7));
+        date.setDate(date.getDate() + 7);
+      }, function (date) {
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+        tr2.append(createHeadCell(date.format("EEEE").substr(0, 1), 1, isHoliday(date) ? "holyH" : null, periodWidth));
         trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
 
       //days
     } else if (zoom == "d") {
-      computedTableWidth = Math.floor(((endPeriod - startPeriod) / (3600000 * 24)) * 100); //1 day= 100px
+      computedScaleX=100/(3600000 * 24);//1 day= 100px
       iterate(function (date) {
         var end = new Date(date.getTime());
         end.setDate(end.getDate() + 6);
         tr1.append(createHeadCell(date.format("MMMM d") + " - " + end.format("MMMM d yyyy"), 7));
         date.setDate(date.getDate() + 7);
       }, function (date) {
-        tr2.append(createHeadCell(date.format("EEE d"), 1, isHoliday(date) ? "holyH" : null, 100));
+        var end = new Date(date.getTime());
+        end.setDate(end.getDate() + 1);
+        var periodWidth=(end.getTime()-date.getTime())*computedScaleX;
+
+        tr2.append(createHeadCell(date.format("EEE d"), 1, isHoliday(date) ? "holyH" : null, periodWidth));
         trBody.append(createBodyCell(1, date.getDay() % 7 == (self.master.firstDayOfWeek + 6) % 7, isHoliday(date) ? "holy" : null));
         date.setDate(date.getDate() + 1);
       });
@@ -272,13 +383,16 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
       console.error("Wrong level " + zoom);
     }
 
+    computedTableWidth = (endPeriod - startPeriod)*computedScaleX;
+
+
     //set a minimal width
     computedTableWidth = Math.max(computedTableWidth, self.minGanttSize);
 
     var table = $("<table cellspacing=0 cellpadding=0>");
-    table.append(tr1).append(tr2).css({width:computedTableWidth});
+    table.append(tr1).append(tr2);   // removed as on FF there are rounging issues  //.css({width:computedTableWidth});
 
-    var head = table.clone().addClass("fixHead");
+    var head = table.clone().addClass("ganttFixHead");
 
     table.append(trBody).addClass("ganttTable");
 
@@ -289,14 +403,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     var box = $("<div>");
     box.addClass("gantt unselectable").attr("unselectable", "true").css({position:"relative", width:computedTableWidth});
     box.append(table);
-
     box.append(head);
-
-
-    //highlightBar
-    var hlb = $("<div>").addClass("ganttHighLight");
-    box.append(hlb);
-    self.highlightBar = hlb;
 
     //create the svg
     box.svg({settings:{class:"ganttSVGBox"},
@@ -309,7 +416,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
         //create backgound
         var extDep = svg.pattern(defs, "extDep", 0, 0, 10, 10, 0, 0, 10, 10, {patternUnits:'userSpaceOnUse'});
-        var img=svg.image(extDep, 0, 0, 10, 10, self.master.resourceUrl + "hasExternalDeps.png",{opacity:.3});
+        var img=svg.image(extDep, 0, 0, 10, 10, self.master.resourceUrl +"hasExternalDeps.png",{opacity:.3});
 
         self.svg = svg;
         $(svg).addClass("ganttSVGBox");
@@ -319,7 +426,8 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
         //creates rows grid
         for (var i = 40; i <= height; i += self.rowHeight)
-          svg.line(gridGroup, 0, i, "100%", i, {class:"ganttLinesSVG"});
+          //svg.line(gridGroup, 0, i, "100%", i, {class:"ganttLinesSVG"});
+          svg.rect(gridGroup, 0, i, "100%",self.rowHeight, {class:"ganttLinesSVG"});
 
         //creates links group
         self.linksGroup = svg.group("linksGroup");
@@ -328,7 +436,8 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
         self.tasksGroup = svg.group("tasksGroup");
 
         //compute scalefactor fx
-        self.fx = computedTableWidth / (endPeriod - startPeriod);
+        //self.fx = computedTableWidth / (endPeriod - startPeriod);
+        self.fx = computedScaleX;
 
         // drawTodayLine
         if (new Date().getTime() > self.startMillis && new Date().getTime() < self.endMillis) {
@@ -348,7 +457,6 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
     originalStartmillis = originalStartmillis > today ? today : originalStartmillis;
     originalEndMillis = originalEndMillis < today ? today : originalEndMillis;
   }
-
 
   //get best dimension fo gantt
   var period = getPeriod(zoom, originalStartmillis, originalEndMillis); //this is enlarged to match complete periods basing on zoom level
@@ -371,9 +479,16 @@ Ganttalendar.prototype.drawTask = function (task) {
   var self = this;
   //var prof = new Profiler("ganttDrawTask");
   editorRow = task.rowElement;
-  //var top = editorRow.position().top + self.master.editor.element.parent().scrollTop();
   var top = editorRow.position().top + editorRow.offsetParent().scrollTop();
+
+  //var normStart=Math.round(task.start/(3600000*24))*(3600000*24)
+  //var normX = Math.round((normStart - self.startMillis) * self.fx);
+
   var x = Math.round((task.start - self.startMillis) * self.fx);
+
+  //console.debug(x,normX)
+
+
   task.hasChild = task.isParent();
 
   var taskBox = $(_createTaskSVG(task, {x:x, y:top+self.taskVertOffset, width:Math.round((task.end - task.start) * self.fx),height:self.taskHeight}));
@@ -381,13 +496,13 @@ Ganttalendar.prototype.drawTask = function (task) {
   if (self.showCriticalPath && task.isCritical)
     taskBox.addClass("critical");
 
-  if (this.master.canWrite && task.canWrite) {
+  if (this.master.permissions.canWrite && task.canWrite) {
 
     //bind all events on taskBox
     taskBox
       .click(function (e) { // manages selection
         e.stopPropagation();// to avoid body remove focused
-        self.element.find(".focused").removeClass("focused");
+        self.element.find("[class*=focused]").removeClass("focused");
         $(".ganttSVGBox .focused").removeClass("focused");
         var el = $(this);
         if (!self.resDrop)
@@ -404,23 +519,22 @@ Ganttalendar.prototype.drawTask = function (task) {
         //bring to top
         var el = $(this);
         if (!self.linkOnProgress) {
-          el.find(".linkHandleSVG").show();
+          el.find("[class*=linkHandleSVG]").show();
         } else {
           el.addClass("linkOver");
-          //el.find(".linkHandleSVG"+(self.linkFromEnd?".taskLinkStartSVG ":".taskLinkEndSVG")).show()
         }
       }).mouseleave(function () {
         var el = $(this);
-        el.removeClass("linkOver").find(".linkHandleSVG").hide();
+        el.removeClass("linkOver").find("[class*=linkHandleSVG]").hide();
 
       }).mouseup(function (e) {
         $(":focus").blur(); // in order to save grid field when moving task
       }).mousedown(function () {
-        var task = self.master.getTask($(this).attr("taskId"));
+        var task = self.master.getTask($(this).attr("taskid"));
         task.rowElement.click();
       }).dragExtedSVG($(self.svg.root()), {
-        canResize:  this.master.canWrite && task.canWrite,
-        canDrag:    !task.depends && this.master.canWrite && task.canWrite,
+        canResize:  this.master.permissions.canWrite && task.canWrite,
+        canDrag:    !task.depends && this.master.permissions.canWrite && task.canWrite,
         startDrag:  function (e) {
           $(".ganttSVGBox .focused").removeClass("focused");
         },
@@ -448,7 +562,7 @@ Ganttalendar.prototype.drawTask = function (task) {
           var taskbox = $(this);
           var st = Math.round((parseFloat(taskbox.attr("x")) / self.fx) + self.startMillis);
           var en = Math.round(((parseFloat(taskbox.attr("x")) + parseFloat(taskbox.attr("width"))) / self.fx) + self.startMillis);
-          var d = computeStartDate(st).distanceInWorkingDays(computeEndDate(en));
+          var d = computeStartDate(st).distanceInWorkingDays(computeEndDate(en))+1;
           var text = taskBox.data("textDur");
           text.attr("x", parseInt(taskbox.attr("x")) + parseInt(taskbox.attr("width")) + 8).html(d);
 
@@ -471,7 +585,7 @@ Ganttalendar.prototype.drawTask = function (task) {
       });
 
     //binding for creating link
-    taskBox.find(".linkHandleSVG").mousedown(function (e) {
+    taskBox.find("[class*=linkHandleSVG]").mousedown(function (e) {
       e.preventDefault();
       e.stopPropagation();
       var taskBox = $(this).closest(".taskBoxSVG");
@@ -545,7 +659,7 @@ Ganttalendar.prototype.drawTask = function (task) {
     //external box
     var layout = svg.rect(taskSvg, 0, 0, "100%", "100%", {class:"taskLayout", rx:"2", ry:"2"});
 
-    svg.rect(taskSvg, 0, 0, "100%", "100%", {fill:"rgba(255,255,255,.3)"});
+    //svg.rect(taskSvg, 0, 0, "100%", "100%", {fill:"rgba(255,255,255,.3)"});
 
     //external dep
     if (task.hasExternalDep)
@@ -553,7 +667,7 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     //progress
     if (task.progress > 0) {
-      var progress = svg.rect(taskSvg, 0, 0, (task.progress > 100 ? 100 : task.progress) + "%", "100%", {rx:"2", ry:"2"});
+      var progress = svg.rect(taskSvg, 0, "20%", (task.progress > 100 ? 100 : task.progress) + "%", "60%", {rx:"2", ry:"2",fill:"rgba(0,0,0,.4)"});
       if (dimensions.width > 50) {
         var textStyle = {fill:"#888", "font-size":"10px",class:"textPerc teamworkIcons",transform:"translate(5)"};
         if (task.progress > 100)
@@ -568,11 +682,11 @@ Ganttalendar.prototype.drawTask = function (task) {
       svg.rect(taskSvg, 0, 0, "100%", 3, {fill:"#000"});
 
     if (task.startIsMilestone) {
-      svg.image(taskSvg, -9, dimensions.height/2-9, 18, 18, self.master.resourceUrl + "milestone.png")
+      svg.image(taskSvg, -9, dimensions.height/2-9, 18, 18, self.master.resourceUrl +"milestone.png")
     }
 
     if (task.endIsMilestone) {
-      svg.image(taskSvg, "100%",dimensions.height/2-9, 18, 18, self.master.resourceUrl + "milestone.png", {transform:"translate(-9)"})
+      svg.image(taskSvg, "100%",dimensions.height/2-9, 18, 18, self.master.resourceUrl +"milestone.png", {transform:"translate(-9)"})
     }
 
     //task label
@@ -580,8 +694,8 @@ Ganttalendar.prototype.drawTask = function (task) {
 
     //link tool
     if (task.level>0){
-      svg.circle(taskSvg, "0",  dimensions.height/2,dimensions.height/3, {class:"taskLinkStartSVG linkHandleSVG", transform:"translate("+(-dimensions.height/3-1)+")"});
-      svg.circle(taskSvg, "100%",dimensions.height/2,dimensions.height/3, {class:"taskLinkEndSVG linkHandleSVG", transform:"translate("+(dimensions.height/3+1)+")"});
+      svg.circle(taskSvg, "0",  dimensions.height/2,dimensions.height/3, {class:"taskLinkStartSVG linkHandleSVG", transform:"translate("+(-dimensions.height/3+1)+")"});
+      svg.circle(taskSvg, "100%",dimensions.height/2,dimensions.height/3, {class:"taskLinkEndSVG linkHandleSVG", transform:"translate("+(dimensions.height/3-1)+")"});
     }
     return taskSvg
   }
@@ -689,7 +803,7 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     var p = svg.createPath();
 
     //add the arrow
-    svg.image(group, 0, 0, 5, 10, self.master.resourceUrl + "linkArrow.png");
+    svg.image(group, 0, 0, 5, 10, self.master.resourceUrl +"linkArrow.png");
     //create empty path
     svg.path(group, p, {class:"taskLinkPathSVG"});
 
@@ -721,11 +835,11 @@ Ganttalendar.prototype.drawLink = function (from, to, type) {
     link = drawStartToEnd(from, to, peduncolusSize);
   }
 
-  if (this.master.canWrite && (from.canWrite || to.canWrite)) {
+  if (this.master.permissions.canWrite && (from.canWrite || to.canWrite)) {
     link.click(function (e) {
       var el = $(this);
       e.stopPropagation();// to avoid body remove focused
-      self.element.find(".focused").removeClass("focused");
+      self.element.find("[class*=focused]").removeClass("focused");
       $(".ganttSVGBox .focused").removeClass("focused");
       var el = $(this);
       if (!self.resDrop)
@@ -770,7 +884,7 @@ Ganttalendar.prototype.redrawLinks = function () {
 
 
 Ganttalendar.prototype.reset = function () {
-  this.element.find(".linkGroup").remove();
+  this.element.find("[class*=linkGroup]").remove();
   this.element.find("[taskid]").remove();
 };
 
@@ -804,7 +918,8 @@ Ganttalendar.prototype.refreshGantt = function () {
   //guess the zoom level in base of period
   if (!this.zoom) {
     var days = Math.round((this.originalEndMillis - this.originalStartMillis) / (3600000 * 24));
-    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 60 ? 2 : (days < 150 ? 3 : 4  ) ) )];
+    //"d", "w","w2","w3", "m","m2", "q", "s", "y"
+    this.zoom = this.zoomLevels[days < 2 ? 0 : (days < 15 ? 1 : (days < 30 ? 2 : (days < 45 ? 3 : (days < 60 ? 4 : (days < 90 ? 5 : (days < 180 ? 6 : (days < 600 ? 7 : 8  )  )  )  ) ) ) )];
   }
   var domEl = this.create(this.zoom, this.originalStartMillis, this.originalEndMillis);
   this.element = domEl;
@@ -828,16 +943,28 @@ Ganttalendar.prototype.fitGantt = function () {
 };
 
 Ganttalendar.prototype.synchHighlight = function () {
-  if (this.master.currentTask && this.master.currentTask.ganttElement){
-    this.highlightBar.css("top", (parseInt(this.master.currentTask.ganttElement.attr("y"))-this.taskVertOffset) + "px");
+  //console.debug("synchHighlight",this.master.currentTask);
+  if (this.master.currentTask ){
+    // take care of collapsed rows
+    var ganttHighLighterPosition=this.master.editor.element.find(".taskEditRow:visible").index(this.master.currentTask.rowElement);
+    this.master.gantt.element.find(".ganttLinesSVG").removeClass("rowSelected").eq(ganttHighLighterPosition).addClass("rowSelected");
+  } else {
+    $(".rowSelected").removeClass("rowSelected"); // todo non c'era
   }
 };
 
 
-Ganttalendar.prototype.centerOnToday = function () {
-  var x = Math.round(((new Date().getTime()) - this.startMillis) * this.fx) - 30;
-  //console.debug("centerOnToday "+x);
+Ganttalendar.prototype.getCenterMillis= function () {
+  return parseInt((this.element.parent().scrollLeft()+this.element.parent().width()/2)/this.fx+this.startMillis);
+};
+
+Ganttalendar.prototype.goToMillis= function (millis) {
+  var x = Math.round(((millis) - this.startMillis) * this.fx) -this.element.parent().width()/2;
   this.element.parent().scrollLeft(x);
+};
+
+Ganttalendar.prototype.centerOnToday = function () {
+  this.goToMillis(new Date().getTime());
 };
 
 
@@ -851,12 +978,12 @@ $.fn.dragExtedSVG = function (svg, opt) {
   //doing this can work with one svg at once only
   var target;
   var svgX;
-  var rectMouseDx;
+  var offsetMouseRect;
 
   var options = {
     canDrag:        true,
     canResize:      true,
-    resizeZoneWidth:15,
+    resizeZoneWidth:10,
     minSize:        10,
     startDrag:      function (e) {},
     drag:           function (e) {},
@@ -875,26 +1002,23 @@ $.fn.dragExtedSVG = function (svg, opt) {
       el.addClass("deSVGdrag");
 
     if (options.canResize || options.canDrag) {
-      el.bind("mousedown.deSVG",
-        function (e) {
+      el.bind("mousedown.deSVG",function (e) {
+          //console.debug("mousedown.deSVG");
           if ($(e.target).is("image")) {
             e.preventDefault();
           }
 
           target = $(this);
-          var x1 = parseFloat(el.offset().left);
-
-          //var x1 = parseFloat(el.attr("x"));
+          var x1 = parseFloat(el.find("[class*=taskLayout]").offset().left);
           var x2 = x1 + parseFloat(el.attr("width"));
           var posx = e.pageX;
 
           $("body").unselectable();
 
-          //start resize
-          var x = x2 - posx;
-          if (options.canResize && (x >= 0 && x <= options.resizeZoneWidth)) {
-            //store offset mouse x1
-            rectMouseDx = x2 - e.pageX;
+          //start resize end
+          if (options.canResize && (x2-x1)>3*options.resizeZoneWidth && (posx<=x2 &&  posx >= x2- options.resizeZoneWidth)) {
+            //store offset mouse x2
+            offsetMouseRect = x2 - e.pageX;
             target.attr("oldw", target.attr("width"));
 
             var one = true;
@@ -909,8 +1033,7 @@ $.fn.dragExtedSVG = function (svg, opt) {
               }
 
               //manage resizing
-              var posx = e.pageX;
-              var nW = posx - x1 + rectMouseDx;
+              var nW =  e.pageX - x1 + offsetMouseRect;
 
               target.attr("width", nW < options.minSize ? options.minSize : nW);
               //callback
@@ -920,10 +1043,43 @@ $.fn.dragExtedSVG = function (svg, opt) {
             //bind mouse up on body to stop resizing
             $("body").one("mouseup.deSVG", stopResize);
 
+
+          //start resize start
+          } else  if (options.canResize && (x2-x1)>3*options.resizeZoneWidth && (posx>=x1 && posx<=x1+options.resizeZoneWidth)) {
+            //store offset mouse x1
+            offsetMouseRect = parseFloat(target.attr("x"));
+            target.attr("oldw", target.attr("width")); //todo controllare se è ancora usato oldw
+
+            var one = true;
+
+            //bind event for start resizing
+            $(svg).bind("mousemove.deSVG", function (e) {
+
+              if (one) {
+                //trigger startResize
+                options.startResize.call(target.get(0), e);
+                one = false;
+              }
+
+              //manage resizing
+              var nx1= offsetMouseRect-(posx-e.pageX);
+              var nW = (x2-x1) + (posx-e.pageX);
+              nW=nW < options.minSize ? options.minSize : nW;
+              target.attr("x",nx1);
+              target.attr("width", nW);
+              //callback
+              options.resize.call(target.get(0), e);
+            });
+
+            //bind mouse up on body to stop resizing
+            $("body").one("mouseup.deSVG", stopResize);
+
+
+
             // start drag
           } else if (options.canDrag) {
             //store offset mouse x1
-            rectMouseDx = parseFloat(target.attr("x")) - e.pageX;
+            offsetMouseRect = parseFloat(target.attr("x")) - e.pageX;
             target.attr("oldx", target.attr("x"));
 
             var one = true;
@@ -936,7 +1092,7 @@ $.fn.dragExtedSVG = function (svg, opt) {
               }
 
               //manage resizing
-              target.attr("x", rectMouseDx + e.pageX);
+              target.attr("x", offsetMouseRect + e.pageX);
               //callback
               options.drag.call(target.get(0), e);
 
@@ -951,15 +1107,12 @@ $.fn.dragExtedSVG = function (svg, opt) {
       ).bind("mousemove.deSVG",
         function (e) {
           var el = $(this);
-          var x1 = el.offset().left;
+          var x1 = el.find("[class*=taskLayout]").offset().left;
           var x2 = x1 + parseFloat(el.attr("width"));
           var posx = e.pageX;
 
-
-          //console.debug("mousemove", options.canResize && x2 - posx)
           //set cursor handle
-          var x = x2 - posx;
-          if (options.canResize && (x >= 0 && x <= options.resizeZoneWidth)) {
+          if (options.canResize && (x2-x1)>3*options.resizeZoneWidth &&((posx<=x2 &&  posx >= x2- options.resizeZoneWidth) || (posx>=x1 && posx<=x1+options.resizeZoneWidth))) {
             el.addClass("deSVGhand");
           } else {
             el.removeClass("deSVGhand");
@@ -974,8 +1127,7 @@ $.fn.dragExtedSVG = function (svg, opt) {
 
   function stopResize(e) {
     $(svg).unbind("mousemove.deSVG").unbind("mouseup.deSVG").unbind("mouseleave.deSVG");
-    //if (target && target.attr("oldw")!=target.attr("width"))
-    if (target)
+    if (target && target.attr("oldw")!=target.attr("width"))
       options.stopResize.call(target.get(0), e); //callback
     target = undefined;
     $("body").clearUnselectable();

@@ -53,6 +53,7 @@ BODY, TBODY {
   page-break-before: always !important;
 }
 
-.fixHead{
+
+.ganttFixHead{
   display: none !important;
 }
