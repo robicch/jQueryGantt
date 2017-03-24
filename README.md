@@ -5,13 +5,13 @@ jQuery Gantt editor has been written by Roberto Bicchierai and Silvia Chelazzi
 <img src="http://twproject.s3.amazonaws.com/resources/gantt_github.jpg" alt="Twproject jQuery Gantt" border="0" />
 
 These are some key features:
-* jquery based
+* jQuery based
 * MIT licensed: you can reuse everywhere
-* json import-export
+* JSON import-export
 * internationalizable
 * manage task status –> project workflow
-* manage dependecies
-* manage assignements (resources, roles efforts)
+* manage dependencies
+* manage assignments (resources, roles efforts)
 * server synchronization ready
 * full undo-redo support
 * cross browser (at least for recent versions)
