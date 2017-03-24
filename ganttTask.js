@@ -687,9 +687,11 @@ Task.prototype.getSuperiors = function() {
   var ret = [];
   var task = this;
   if (this.master) {
-    ret = this.master.links.filter(function(link) {
-      return link.to == task;
-    });
+	if (this.master.followHierarchy) {
+	  ret = this.master.links.filter(function(link) {
+        return link.to == task;
+	  });
+    }
   }
   return ret;
 };

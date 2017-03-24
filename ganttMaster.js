@@ -52,6 +52,7 @@ function GanttMaster() {
   this.__inUndoRedo = false; // a control flag to avoid Undo/Redo stacks reset when needed
 
   var self = this;
+  this.followHierarchy = true;
 }
 
 
@@ -373,6 +374,10 @@ GanttMaster.prototype.loadProject = function (project) {
     this.maxEditableDate = computeEnd(project.maxEditableDate);
   else
     this.maxEditableDate = Infinity;
+
+  if ('followHierarchy' in project) {//isset in project or not. Not checking as true / false
+	this.followHierarchy = project.followHierarchy;
+  }
 
   this.loadTasks(project.tasks, project.selectedRow);
   this.deletedTaskIds = [];
