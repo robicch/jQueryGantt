@@ -390,6 +390,11 @@ body{
   border-radius: 0;
   vertical-align: text-bottom;
 }
+
+.taskEditRow input[type=checkbox]{
+  width:15px;
+}
+
 .columnWidthTest{
   width: auto;
 }
@@ -699,6 +704,37 @@ select.taskStatus{
   margin-left: -35px
 }
 
+
+.userProfile {
+  font-size: 16px;
+  vertical-align: middle;
+  text-align: right;
+  margin: 0 5px 0 0;
+  padding: 5px;
+  float: right;
+  position: relative;
+  z-index: 50;
+  line-height: 40px;
+  vertical-align: middle;
+}
+
+.userLine {
+  max-width: 150px;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0;padding: 0;
+  vertical-align: middle;
+}
+
+.avatar {
+  vertical-align: middle;
+  padding: 1px;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #dedede
+}
 
 /*--------------------------------------------------- Media queries  --------------------------------------------------*/
 
