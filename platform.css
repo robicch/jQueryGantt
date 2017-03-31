@@ -486,11 +486,15 @@ Buttons
   padding: 5px 12px 8px;
   margin-bottom: 10px;
   margin-right: 10px;
-  text-align: center
+  text-align: center;
+  -webkit-transition: background-color 500ms ease-out 1s;
+  -moz-transition: background-color 500ms ease-out 1s;
+  -o-transition: background-color 500ms ease-out 1s;
+  transition: background-color 500ms ease-out 1s;
 }
 
 .button.first {
-  background-color: #FEA730;
+  background-color: #75a800;
   font-weight: bold;
 }
 
@@ -510,7 +514,7 @@ Buttons
 
 
 .button.first:hover {
-  background-color: #fec54c;
+  background-color: #2F2F2F;
 }
 
 .button[disabled] {

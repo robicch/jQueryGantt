@@ -217,11 +217,16 @@ body{
   border-left:2px dotted #13AFA5;
 }
 
+.ganttTitle img {
+  max-width: 150px;
+}
+
 .ganttButtonBar{
   position:relative;
   z-index: 2;
   /*background-color: #fff;*/
   border-bottom: 1px solid #959595;
+  padding: 5px 0 5px 10px;
 }
 
 .dataTable .ganttButtonBar{
@@ -716,6 +721,8 @@ select.taskStatus{
   z-index: 50;
   line-height: 40px;
   vertical-align: middle;
+  position: absolute;
+  right: 0;
 }
 
 .userLine {

@@ -63,7 +63,7 @@
 }
 
 .calElement.next {
-  background: transparent url(images/next.png) no-repeat 5px center;
+  background: transparent url(img/next.png) no-repeat 5px center;
   float:right;
 }
 
