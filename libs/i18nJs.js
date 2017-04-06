@@ -183,7 +183,6 @@ var i18n = {
   SAVE: "Save",
   DELETE: "Delete",
   HINT_SKIP: "Got it, close this hint.",
-  HINT_SKIP: "Got it, close this hint.",
 
   COMBO_NO_VALUES: "no values available...?",
 
