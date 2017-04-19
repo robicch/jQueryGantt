@@ -123,7 +123,7 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
 
   //[expand]
   if (hideIfParentCollapsed) {
-    if (task.collapsed) taskRow.find(".exp-controller").removeClass('exp');
+    if (task.collapsed) taskRow.addClass('collapsed');
     var collapsedDescendant = this.master.getCollapsedDescendant();
     if (collapsedDescendant.indexOf(task) >= 0) taskRow.hide();
   }
@@ -132,19 +132,17 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
 };
 
 GridEditor.prototype.refreshExpandStatus = function (task) {
+  //console.debug("refreshExpandStatus",task);
   if (!task) return;
-  //[expand]
-  var child = task.getChildren();
-  if (child.length > 0 && task.rowElement.has(".expcoll").length == 0) {
-    task.rowElement.find(".exp-controller").addClass('expcoll exp');
-  }
-  else if (child.length == 0 && task.rowElement.has(".expcoll").length > 0) {
-    task.rowElement.find(".exp-controller").removeClass('expcoll exp');
+  if (task.isParent()) {
+    task.rowElement.addClass("isParent");
+  } else {
+    task.rowElement.removeClass("isParent");
   }
 
   var par = task.getParent();
-  if (par && par.rowElement.has(".expcoll").length == 0) {
-    par.rowElement.find(".exp-controller").addClass('expcoll exp');
+  if (par && !par.rowElement.is("isParent")) {
+    par.rowElement.addClass("isParent");
   }
 
 };
@@ -168,6 +166,13 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
   row.find("[name=depends]").val(task.depends);
   row.find(".taskAssigs").html(task.getAssigsString());
+
+  //manage collapsed
+  if (task.collapsed)
+    row.addClass("collapsed");
+  else
+    row.removeClass("collapsed");
+
 
   //Enhancing the function to perform own operations
   this.master.element.trigger('gantt.task.afterupdate.event', task);
@@ -216,30 +221,14 @@ GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
   var self = this;
   //expand collapse
   taskRow.find(".exp-controller").click(function () {
-    //expand?
     var el = $(this);
     var taskId = el.closest("[taskid]").attr("taskid");
     var task = self.master.getTask(taskId);
-    var descs = task.getDescendant();
-    el.toggleClass('exp');
-    task.collapsed = !el.is(".exp");
-    var collapsedDescendant = self.master.getCollapsedDescendant();
-
-    if (el.is(".exp")) {
-      for (var i = 0; i < descs.length; i++) {
-        var childTask = descs[i];
-        if (collapsedDescendant.indexOf(childTask) >= 0) continue;
-        childTask.rowElement.show();
-      }
-
+    if (task.collapsed) {
+      self.master.expand(task,false);
     } else {
-      for (var i = 0; i < descs.length; i++)
-        descs[i].rowElement.hide();
+      self.master.collapse(task,false);
     }
-    self.master.gantt.refreshGantt();
-
-    //store collapse statuses
-    self.master.storeCollapsedTasks();
   });
 };
 

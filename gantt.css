@@ -249,7 +249,7 @@ body{
 .ganttButtonBar .buttons button{
   vertical-align: middle;
   margin:0;
-
+  outline: none;
 }
 
 .ganttButtonBar .buttons .button.textual.icon {
@@ -505,12 +505,13 @@ select.taskStatus{
   margin-left: -18px;
 }
 
-.expcoll{
+.isParent .exp-controller{
+  background-image: url(res/toggle_collapse.png);
+}
+
+.isParent.collapsed .exp-controller{
   cursor: pointer;
   background-image: url(res/toggle-expand.png);
-}
-.expcoll.exp{
-  background-image: url(res/toggle_collapse.png);
 }
 
 .ui-resizable-helper { border: 1px dotted #00F;  }

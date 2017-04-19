@@ -388,9 +388,10 @@ Date.prototype.equalsIgnoreTime = function(date2) {
  * Get week number in the year.
  */
 Date.prototype.getWeekNumber = function() {
-  var januaryFirst = new Date(this.getFullYear(), 0, 1);
-  //return Math.floor(( ((this - januaryFirst) / 86400000) + januaryFirst.getDay() - Date.firstDayOfWeek) / 7);
-  return Math.floor(( Math.round((this - januaryFirst) / 86400000) + januaryFirst.getDay() - Date.firstDayOfWeek) / 7);
+  var d = new Date(+this);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+4-(d.getDay()||7));
+  return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
 };
 
 // Format a date into a string using a given format string

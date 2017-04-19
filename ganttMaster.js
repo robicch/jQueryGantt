@@ -136,6 +136,12 @@ GanttMaster.prototype.init = function (place) {
     self.moveUpCurrentTask();
   }).bind("moveDownCurrentTask.gantt", function () {
     self.moveDownCurrentTask();
+  }).bind("collapseAll.gantt", function () {
+    self.collapseAll();
+  }).bind("expandAll.gantt", function () {
+    self.expandAll();
+
+
 
   }).bind("zoomPlus.gantt", function () {
     self.gantt.zoomGantt(true);
@@ -1013,6 +1019,100 @@ GanttMaster.prototype.deleteCurrentTask = function () {
 };
 
 
+
+
+GanttMaster.prototype.collapseAll = function () {
+  //console.debug("collapseAll");
+  if (this.currentTask){
+    this.currentTask.collapsed=true;
+    var desc = this.currentTask.getDescendant();
+    for (var i=0; i<desc.length; i++) {
+      if (desc[i].isParent()) // set collapsed only if is a parent
+        desc[i].collapsed = true;
+      desc[i].rowElement.hide();
+    }
+
+    this.redraw();
+
+    //store collapse statuses
+    this.storeCollapsedTasks();
+  }
+};
+
+GanttMaster.prototype.expandAll = function () {
+  //console.debug("expandAll");
+  if (this.currentTask){
+    this.currentTask.collapsed=false;
+    var desc = this.currentTask.getDescendant();
+    for (var i=0; i<desc.length; i++) {
+      desc[i].collapsed = false;
+      desc[i].rowElement.show();
+    }
+
+    this.redraw();
+
+    //store collapse statuses
+    this.storeCollapsedTasks();
+
+  }
+};
+
+
+
+GanttMaster.prototype.collapse = function (task, all) {
+  console.debug("collapse",task)
+
+  task.collapsed=true;
+  task.rowElement.addClass("collapsed");
+
+  var descs = task.getDescendant();
+  for (var i = 0; i < descs.length; i++)
+    descs[i].rowElement.hide();
+
+
+  this.gantt.refreshGantt();
+
+  //store collapse statuses
+  this.storeCollapsedTasks();
+
+};
+
+
+GanttMaster.prototype.expand = function (task,all) {
+  console.debug("expand",task)
+  task.collapsed=false;
+  task.rowElement.removeClass("collapsed");
+
+  var collapsedDescendant = this.getCollapsedDescendant();
+  var descs = task.getDescendant();
+  for (var i = 0; i < descs.length; i++) {
+    var childTask = descs[i];
+    if (collapsedDescendant.indexOf(childTask) >= 0) continue;
+    childTask.rowElement.show();
+  }
+
+  this.gantt.refreshGantt();
+
+  //store collapse statuses
+  this.storeCollapsedTasks();
+
+};
+
+
+GanttMaster.prototype.getCollapsedDescendant = function () {
+  var allTasks = this.tasks;
+  var collapsedDescendant = [];
+  for (var i = 0; i < allTasks.length; i++) {
+    var task = allTasks[i];
+    if (collapsedDescendant.indexOf(task) >= 0) continue;
+    if (task.collapsed) collapsedDescendant = collapsedDescendant.concat(task.getDescendant());
+  }
+  return collapsedDescendant;
+}
+
+
+
+
 GanttMaster.prototype.addIssue = function () {
   var self = this;
   if (self.currentTask.isNew()){
@@ -1190,17 +1290,6 @@ GanttMaster.prototype.resize = function () {
   this.splitter.resize();
 };
 
-
-GanttMaster.prototype.getCollapsedDescendant = function () {
-  var allTasks = this.tasks;
-  var collapsedDescendant = [];
-  for (var i = 0; i < allTasks.length; i++) {
-    var task = allTasks[i];
-    if (collapsedDescendant.indexOf(task) >= 0) continue;
-    if (task.collapsed) collapsedDescendant = collapsedDescendant.concat(task.getDescendant());
-  }
-  return collapsedDescendant;
-}
 
 
 /**
