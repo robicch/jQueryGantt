@@ -122,7 +122,7 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
       //reset to day of week
     } else if (zoomLevel == "q") {
-      start.setFirstDayOfThisWeek();
+      start.setDate(start.getDate()-start.getDay()+1); //ISO 8601 counts week of year starting on Moday
       start.setDate(start.getDate()-7);
       end.setFirstDayOfThisWeek();
       end.setDate(end.getDate() + 13);
