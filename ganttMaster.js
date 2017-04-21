@@ -94,26 +94,8 @@ GanttMaster.prototype.init = function (place) {
 
   //prepend buttons
   var ganttButtons = $.JST.createFromTemplate({}, "GANTBUTTONS");
-  //hide buttons basing on permissions
-  if (!self.permissions.canWrite)
-    ganttButtons.find(".requireCanWrite").hide();
-
-  if (!self.permissions.canAdd)
-    ganttButtons.find(".requireCanAdd").hide();
-
-  if (!self.permissions.canInOutdent)
-    ganttButtons.find(".requireCanInOutdent").hide();
-
-  if (!self.permissions.canMoveUpDown)
-    ganttButtons.find(".requireCanMoveUpDown").hide();
-
-  if (!self.permissions.canSeeCriticalPath)
-    ganttButtons.find(".requireCanSeeCriticalPath").hide();
-
-  if (!self.permissions.canAddIssue)
-    ganttButtons.find(".requireCanAddIssue").hide();
-
   place.before(ganttButtons);
+  this.checkButtonPermissions();
 
 
   //bindings
@@ -404,9 +386,16 @@ GanttMaster.prototype.loadProject = function (project) {
   this.serverClientTimeOffset = typeof project.serverTimeOffset !="undefined"? (parseInt(project.serverTimeOffset) + new Date().getTimezoneOffset() * 60000) : 0;
   this.resources = project.resources;
   this.roles = project.roles;
+
+  //permissions from loaded project
   this.permissions.canWrite = project.canWrite;
   this.permissions.canWriteOnParent = project.canWriteOnParent;
   this.permissions.cannotCloseTaskIfIssueOpen = project.cannotCloseTaskIfIssueOpen;
+  this.permissions.canAddIssue = project.canAddIssue;
+  //repaint button bar basing on permissions
+  this.checkButtonPermissions();
+
+
 
   if (project.minEditableDate)
     this.minEditableDate = computeStart(project.minEditableDate);
@@ -566,6 +555,30 @@ GanttMaster.prototype.taskIsChanged = function () {
     //profiler.stop();
   });
   //profilerext.stop();
+};
+
+
+GanttMaster.prototype.checkButtonPermissions = function () {
+  var ganttButtons=this.element.find(".ganttButtonBar");
+  //hide buttons basing on permissions
+  if (!this.permissions.canWrite)
+    ganttButtons.find(".requireCanWrite").hide();
+
+  if (!this.permissions.canAdd)
+    ganttButtons.find(".requireCanAdd").hide();
+
+  if (!this.permissions.canInOutdent)
+    ganttButtons.find(".requireCanInOutdent").hide();
+
+  if (!this.permissions.canMoveUpDown)
+    ganttButtons.find(".requireCanMoveUpDown").hide();
+
+  if (!this.permissions.canSeeCriticalPath)
+    ganttButtons.find(".requireCanSeeCriticalPath").hide();
+
+  if (!this.permissions.canAddIssue)
+    ganttButtons.find(".requireCanAddIssue").hide();
+
 };
 
 
