@@ -293,7 +293,7 @@ $.splittify = {
       firstBox.find(".ganttFixHead").css('top', top);
       secondBox.find(".ganttFixHead").css('top', top);
 
-      where.stopTime("reset").oneTime(100, "reset", function () {stopScroll = "";})
+      where.stopTime("reset").oneTime(300, "reset", function () {stopScroll = "";})
     });
 
 
