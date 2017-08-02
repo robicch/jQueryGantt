@@ -311,7 +311,7 @@ $.splittify = {
     });
 
 
-    firstBox.on('mousewheel MozMousePixelScroll', function (event) {
+    firstBox.on('wheel MozMousePixelScroll', function (event) {
 
       event.preventDefault();
 
@@ -337,6 +337,31 @@ $.splittify = {
       return false;
     });
 
+    secondBox.on('wheel MozMousePixelScroll', function (event) {
+
+      event.preventDefault();
+
+      var deltaY = event.originalEvent.wheelDeltaY;
+      var deltaX = event.originalEvent.wheelDeltaX;
+
+      if (event.originalEvent.axis) {
+        deltaY = event.originalEvent.axis == 2 ? -event.originalEvent.detail : null;
+        deltaX = event.originalEvent.axis == 1 ? -event.originalEvent.detail : null;
+      }
+
+      deltaY = Math.abs(deltaY) < 40 ? 40 * (Math.abs(deltaY) / deltaY) : deltaY;
+      deltaX = Math.abs(deltaX) < 40 ? 40 * (Math.abs(deltaX) / deltaX) : deltaX;
+
+      var scrollToY = secondBox.scrollTop() - deltaY;
+      var scrollToX = firstBox.scrollLeft() - deltaX;
+
+//			console.debug( firstBox.scrollLeft(), Math.abs(deltaX), Math.abs(deltaY));
+
+      if (deltaY) secondBox.scrollTop(scrollToY);
+      if (deltaX) firstBox.scrollLeft(scrollToX);
+
+      return false;
+    });
 
     function Splitter(element, firstBox, secondBox, splitterBar) {
       this.element = element;
