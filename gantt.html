@@ -80,11 +80,9 @@ $(function() {
 
   // here starts gantt initialization
   ge = new GanttMaster();
-  var workSpace = $("#workSpace");
+  ge.set100OnClose=true;
 
-  workSpace.css({width:$(window).width(),height:$(window).height()});
-
-  ge.init(workSpace);
+  ge.init($("#workSpace"));
   loadI18n(); //overwrite with localized ones
 
   //in order to force compute the best-fitting zoom level
@@ -101,12 +99,6 @@ $(function() {
   ge.checkpoint(); //empty the undo stack
 
   ge.editor.element.oneTime(100, "cl", function () {$(this).find("tr.emptyRow:first").click()});
-
-  $(window).resize(function(){
-    workSpace.css({width:$(window).width() - 1,height:$(window).height() - workSpace.position().top});
-    workSpace.trigger("resize.gantt");
-  }).oneTime(150,"resize",function(){$(this).trigger("resize")});
-
 });
 
 
@@ -303,7 +295,7 @@ function loadFromLocalStorage() {
       {"id": "tmp_2", "name": "Worker"},
       {"id": "tmp_3", "name": "Stakeholder"},
       {"id": "tmp_4", "name": "Customer"}
-    ], "canWrite":    true, "canWriteOnParent": true, "zoom": "w3"}
+    ], "canWrite":    true, "canDelete":true, "canWriteOnParent": true, "zoom": "w3"}
 
 
     //actualize data
@@ -398,10 +390,8 @@ function editResources(){
 <div id="gantEditorTemplates" style="display:none;">
 <div class="__template__" type="GANTBUTTONS"><!--
   <div class="ganttButtonBar noprint">
-    <h1 class="ganttTitle" title="gantt"><img src="res/twGanttLogo.png" alt="gantt" align="absmiddle"><img src="res/twproject-badge.png" style="max-width: 120px" />
-</h1>
     <div class="buttons">
-
+      <a href="https://gantt.twproject.com/"><img src="res/twGanttLogo.png" alt="Twproject" align="absmiddle" style="max-width: 136px; padding-right: 15px"></a>
 
       <button onclick="$('#workSpace').trigger('undo.gantt');return false;" class="button textual icon requireCanWrite" title="undo"><span class="teamworkIcon">&#39;</span></button>
       <button onclick="$('#workSpace').trigger('redo.gantt');return false;" class="button textual icon requireCanWrite" title="redo"><span class="teamworkIcon">&middot;</span></button>
@@ -414,14 +404,8 @@ function editResources(){
       <span class="ganttButtonSeparator requireCanWrite requireCanMoveUpDown"></span>
       <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move up"><span class="teamworkIcon">k</span></button>
       <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move down"><span class="teamworkIcon">j</span></button>
-
-      <span class="ganttButtonSeparator requireCanWrite"></span>
-      <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');return false;" class="button textual icon delete requireCanWrite" title="Delete"><span class="teamworkIcon">&cent;</span></button>
-
-      <span class="ganttButtonSeparator requireCanAddIssue"></span>
-      <button onclick="$('#workSpace').trigger('addIssue.gantt');return false;" class="button textual icon requireCanAddIssue" title="add issue / todo"><span class="teamworkIcon">i</span></button>
-
-
+      <span class="ganttButtonSeparator requireCanDelete"></span>
+      <button onclick="$('#workSpace').trigger('deleteFocused.gantt');return false;" class="button textual icon delete requireCanWrite" title="Delete"><span class="teamworkIcon">&cent;</span></button>
       <span class="ganttButtonSeparator"></span>
       <button onclick="$('#workSpace').trigger('expandAll.gantt');return false;" class="button textual icon " title="EXPAND_ALL"><span class="teamworkIcon">6</span></button>
       <button onclick="$('#workSpace').trigger('collapseAll.gantt'); return false;" class="button textual icon " title="COLLAPSE_ALL"><span class="teamworkIcon">5</span></button>
@@ -437,6 +421,9 @@ function editResources(){
       <button onclick="ge.splitter.resize(.1);return false;" class="button textual icon" ><span class="teamworkIcon">F</span></button>
       <button onclick="ge.splitter.resize(50);return false;" class="button textual icon" ><span class="teamworkIcon">O</span></button>
       <button onclick="ge.splitter.resize(100);return false;" class="button textual icon"><span class="teamworkIcon">R</span></button>
+      <span class="ganttButtonSeparator"></span>
+      <button onclick="$('#workSpace').trigger('fullScreen.gantt');return false;" class="button textual icon" title="FULLSCREEN" id="fullscrbtn"><span class="teamworkIcon">@</span></button>
+      <button onclick="ge.element.toggleClass('colorByStatus' );return false;" class="button textual icon"><span class="teamworkIcon">&sect;</span></button>
 
     <button onclick="editResources();" class="button textual requireWrite" title="edit resources"><span class="teamworkIcon">M</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
@@ -455,9 +442,9 @@ function editResources(){
       <th class="gdfColHeader" style="width:25px;"></th>
       <th class="gdfColHeader gdfResizable" style="width:100px;">code/short name</th>
       <th class="gdfColHeader gdfResizable" style="width:300px;">name</th>
-      <th class="gdfColHeader"  align="center" style="width:20px;" title="Start date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>
+      <th class="gdfColHeader"  align="center" style="width:17px;" title="Start date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>
       <th class="gdfColHeader gdfResizable" style="width:80px;">start</th>
-      <th class="gdfColHeader"  align="center" style="width:20px;" title="End date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>
+      <th class="gdfColHeader"  align="center" style="width:17px;" title="End date is a milestone."><span class="teamworkIcon" style="font-size: 8px;">^</span></th>
       <th class="gdfColHeader gdfResizable" style="width:80px;">End</th>
       <th class="gdfColHeader gdfResizable" style="width:50px;">dur.</th>
       <th class="gdfColHeader gdfResizable" style="width:20px;">%</th>

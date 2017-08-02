@@ -71,6 +71,7 @@ Ganttalendar.prototype.zoomGantt = function (isPlus) {
 
 Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEndMillis) {
   //console.debug("Gantt.create " + new Date(originalStartmillis) + " - " + new Date(originalEndMillis));
+  //var prof = new Profiler("ganttDrawer.create");
   var self = this;
 
   function getPeriod(zoomLevel, stMil, endMillis) {
@@ -469,6 +470,8 @@ Ganttalendar.prototype.create = function (zoom, originalStartmillis, originalEnd
 
   var table = createGantt(zoom, period.start, period.end);
 
+
+  //prof.stop();
   return table;
 };
 
@@ -653,7 +656,7 @@ Ganttalendar.prototype.drawTask = function (task) {
 
   function _createTaskSVG(task, dimensions) {
     var svg = self.svg;
-    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, dimensions.height, {class:"taskBox taskBoxSVG taskStatusSVG", status:task.status, taskid:task.id });
+    var taskSvg = svg.svg(self.tasksGroup, dimensions.x, dimensions.y, dimensions.width, dimensions.height, {class:"taskBox taskBoxSVG taskStatusSVG", status:task.status, taskid:task.id,fill:task.color||"#eee" });
 
     //svg.title(taskSvg, task.name);
     //external box
@@ -891,12 +894,14 @@ Ganttalendar.prototype.reset = function () {
 
 Ganttalendar.prototype.redrawTasks = function () {
   //[expand]
+  //var prof = new Profiler("ganttRedrawTasks");
   var collapsedDescendant = this.master.getCollapsedDescendant();
   for (var i = 0; i < this.master.tasks.length; i++) {
     var task = this.master.tasks[i];
     if (collapsedDescendant.indexOf(task) >= 0) continue;
     this.drawTask(task);
   }
+  //prof.stop();
 };
 
 

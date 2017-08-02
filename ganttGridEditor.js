@@ -150,6 +150,9 @@ GridEditor.prototype.refreshExpandStatus = function (task) {
 GridEditor.prototype.refreshTaskRow = function (task) {
   //console.debug("refreshTaskRow")
   //var profiler = new Profiler("editorRefreshTaskRow");
+
+  var canWrite=this.master.permissions.canWrite && task.canWrite;
+
   var row = task.rowElement;
 
   row.find(".taskRowIndex").html(task.getRow() + 1);
@@ -159,9 +162,9 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   row.find("[status]").attr("status", task.status);
 
   row.find("[name=duration]").val(task.duration);
-  row.find("[name=progress]").val(task.progress).prop("readonly",task.progressByWorklog==true);
+  row.find("[name=progress]").val(task.progress).prop("readonly",!canWrite || task.progressByWorklog==true);
   row.find("[name=startIsMilestone]").prop("checked", task.startIsMilestone);
-  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue().prop("readonly",task.depends || !task.canWrite  && !this.master.permissions.canWrite ); // called on dates only because for other field is called on focus event
+  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue().prop("readonly",!canWrite || task.depends || !task.canWrite  && !this.master.permissions.canWrite ); // called on dates only because for other field is called on focus event
   row.find("[name=endIsMilestone]").prop("checked", task.endIsMilestone);
   row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
   row.find("[name=depends]").val(task.depends);
@@ -181,12 +184,15 @@ GridEditor.prototype.refreshTaskRow = function (task) {
 
 GridEditor.prototype.redraw = function () {
   //console.debug("GridEditor.prototype.redraw")
+  //var prof = new Profiler("ganttGridEditorRedraw");
   for (var i = 0; i < this.master.tasks.length; i++) {
     this.refreshTaskRow(this.master.tasks[i]);
   }
-  // check if new emty rows are needed
+  // check if new empty rows are needed
   if (this.master.fillWithEmptyLines)
     this.fillEmptyLines();
+
+  //prof.stop()
 
 };
 
@@ -198,6 +204,31 @@ GridEditor.prototype.reset = function () {
 GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   var self = this;
   //console.debug("bindRowEvents",this,this.master,this.master.permissions.canWrite, task.canWrite);
+
+  //bind row selection
+  taskRow.click(function (event) {
+    var row = $(this);
+    //console.debug("taskRow.click",row.attr("taskid"),event.target)
+    //var isSel = row.hasClass("rowSelected");
+    row.closest("table").find(".rowSelected").removeClass("rowSelected");
+    row.addClass("rowSelected");
+
+    //set current task
+    self.master.currentTask = self.master.getTask(row.attr("taskId"));
+
+    //move highlighter
+    self.master.gantt.synchHighlight();
+
+    //if offscreen scroll to element
+    var top = row.position().top;
+    if (top > self.element.parent().height()) {
+      row.offsetParent().scrollTop(top - self.element.parent().height() + 100);
+    } else if (top <= 40) {
+      row.offsetParent().scrollTop(row.offsetParent().scrollTop() - 40 + top);
+    }
+  });
+
+
   if (this.master.permissions.canWrite && task.canWrite) {
     self.bindRowInputEvents(task, taskRow);
 
@@ -211,8 +242,8 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
 
   self.bindRowExpandEvents(task, taskRow);
   if (this.master.permissions.canSeePopEdit) {
-    taskRow.find(".edit").click(function () {self.openFullEditor(task, taskRow, false)});
-    taskRow.find(".taskAssigs").dblclick(function () {self.openFullEditor(task, taskRow, true)});
+    taskRow.find(".edit").click(function () {self.openFullEditor(task, false)});
+    taskRow.find(".taskAssigs").dblclick(function () {self.openFullEditor(task, true)});
   }
 };
 
@@ -364,7 +395,11 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
         self.master.changeTaskDates(task, dates.start, dates.end);
 
       } else if (field == "name" && el.val() == "") { // remove unfilled task
+        var par = task.getParent();
         task.deleteTask();
+        self.fillEmptyLines();
+
+        if (par) self.refreshExpandStatus(par);
         self.master.gantt.synchHighlight();
 
 
@@ -379,7 +414,10 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
     } else if (field == "name" && el.val() == "") { // remove unfilled task even if not changed
       if (task.getRow()!=0) {
+        var par = task.getParent();
         task.deleteTask();
+        self.fillEmptyLines();
+        if (par) self.refreshExpandStatus(par);
         self.master.gantt.synchHighlight();
       }else {
         el.oneTime(1,"foc",function(){$(this).focus()}); //
@@ -470,38 +508,16 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     el.after(changer);
   });
 
-
-  //bind row selection
-  taskRow.click(function (event) {
-    var row = $(this);
-    //console.debug("taskRow.click",row.attr("taskid"),event.target)
-    //var isSel = row.hasClass("rowSelected");
-    row.closest("table").find(".rowSelected").removeClass("rowSelected");
-    row.addClass("rowSelected");
-
-    //set current task
-    self.master.currentTask = self.master.getTask(row.attr("taskId"));
-
-    //move highlighter
-    self.master.gantt.synchHighlight();
-
-    //if offscreen scroll to element
-    var top = row.position().top;
-    if (top > self.element.parent().height()) {
-      row.offsetParent().scrollTop(top - self.element.parent().height() + 100);
-    } else if (top <= 40) {
-      row.offsetParent().scrollTop(row.offsetParent().scrollTop() - 40 + top);
-    }
-  });
-
 };
 
 
-GridEditor.prototype.openFullEditor = function (task, taskRow, editOnlyAssig) {
+GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
   var self = this;
 
   if (!self.master.permissions.canSeePopEdit)
     return;
+
+  var taskRow=task.rowElement;
 
   //task editor in popup
   var taskId = taskRow.attr("taskId");

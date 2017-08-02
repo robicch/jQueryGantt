@@ -283,6 +283,10 @@ $.splittify = {
     fs.scroll(function (e) {
       var el = $(this);
       var top = el.scrollTop();
+
+      var firstBoxHeader = firstBox.find(".ganttFixHead");
+      var secondBoxHeader = secondBox.find(".ganttFixHead");
+
       if (el.is(".splitBox1") && stopScroll != "splitBox2") {
         stopScroll = "splitBox1";
         secondBox.scrollTop(top);
@@ -290,10 +294,20 @@ $.splittify = {
         stopScroll = "splitBox2";
         firstBox.scrollTop(top);
       }
-      firstBox.find(".ganttFixHead").css('top', top);
-      secondBox.find(".ganttFixHead").css('top', top);
 
-      where.stopTime("reset").oneTime(100, "reset", function () {stopScroll = "";})
+	    firstBoxHeader.css('top', top).hide();
+	    secondBoxHeader.css('top', top).hide();
+
+      where.stopTime("reset").oneTime(100, "reset", function () {
+
+	      stopScroll = "";
+	      top = el.scrollTop();
+
+	      firstBoxHeader.css('top', top).fadeIn();
+	      secondBoxHeader.css('top', top).fadeIn();
+
+      });
+
     });
 
 

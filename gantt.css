@@ -3,6 +3,17 @@ body{
   /*overflow: hidden;*/
 }
 
+.TWGanttWorkSpace.ganttFullScreen{
+  position: fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  right: 0;
+  margin: auto;
+  z-index: 1000;
+  background-color: #fff;
+}
+
 /* -------------------------------------- GRIDIFY -----------------------------------*/
 .gdfTable {
   table-layout: fixed;
@@ -34,7 +45,7 @@ body{
 .gdfColHeader {
   min-width: 5px;
   height: 30px;
-  /*background-color: #fff;*/
+  background-color: #eee;
   border-bottom:2px solid #bbb;
   border-right: 1px solid #bbb;
 }
@@ -157,7 +168,7 @@ body{
   position: absolute;
   z-index: 2;
   top:0;
-  background: #EEEEEE;
+  /*background: #EEEEEE;*/
   height: 42px;
 
 }
@@ -397,7 +408,9 @@ body{
 }
 
 .taskEditRow input[type=checkbox]{
+  transform:scale(.7);
   width:15px;
+  height: 15px;
 }
 
 .columnWidthTest{
@@ -528,6 +541,7 @@ select.taskStatus{
   height: 100%;
   background-color: transparent;
   width: 100%;
+  overflow-y: hidden; /*IE11 bug*/
 }
 
 .taskBoxSVG{
@@ -577,29 +591,29 @@ select.taskStatus{
   stroke-dasharray:2,2;
 }
 
-.taskStatusSVG[status=STATUS_ACTIVE]{
+.colorByStatus .taskStatusSVG[status=STATUS_ACTIVE]{
   fill: #3BBF67;
 }
-.taskStatusSVG[status=STATUS_DONE]{
+.colorByStatus .taskStatusSVG[status=STATUS_DONE]{
   fill: #6EBEF4;
 }
-.taskStatusSVG[status=STATUS_FAILED]{
+.colorByStatus .taskStatusSVG[status=STATUS_FAILED]{
   fill: #763A96;
 }
-.taskStatusSVG[status=STATUS_SUSPENDED]{
+.colorByStatus .taskStatusSVG[status=STATUS_SUSPENDED]{
   fill: #f9c154;
 }
-.taskStatusSVG[status=STATUS_UNDEFINED]{
+.colorByStatus .taskStatusSVG[status=STATUS_UNDEFINED]{
   fill: #dededf;
 }
-.taskStatusSVG[status=STATUS_UNDEFINED] .taskLayout{
+.colorByStatus .taskStatusSVG[status=STATUS_UNDEFINED] .taskLayout{
   stroke: #ccc;
   stroke-width:1;
 }
 
-.taskStatusSVG[status=STATUS_DONE] .textPerc,
-.taskStatusSVG[status=STATUS_ACTIVE] .textPerc,
-.taskStatusSVG[status=STATUS_FAILED] .textPerc{
+.colorByStatus .taskStatusSVG[status=STATUS_DONE] .textPerc,
+.colorByStatus .taskStatusSVG[status=STATUS_ACTIVE] .textPerc,
+.colorByStatus .taskStatusSVG[status=STATUS_FAILED] .textPerc{
   fill: #fff;
 }
 
@@ -753,10 +767,13 @@ select.taskStatus{
   .ganttButtonBar .button span.teamworkIcon {
     font-size: 130%;
   }
+  .userLine {
+    display: none;
+  }
 
 }
 
-@media only screen and (max-width : 1155px) {
+@media only screen and (min-width : 1261px) and (max-width : 1320px) {
 
   .ganttButtonBar .button span.teamworkIcon {
     font-size: 130%;
@@ -775,13 +792,34 @@ select.taskStatus{
 
 }
 
+@media only screen and (max-width : 1160px) {
+
+  .userProfile {
+    float: none;
+    position: absolute;
+    top:0;
+    right: 10px;
+  }
+
+  .userProfile .teamworkIcon {
+    color: rgb(255, 255, 255);
+  }
+  .userProfile .ganttButtonSeparator, .userProfile .avatar {
+    border-color: rgb(127, 154, 170);
+  }
+
+}
+
 /* Ipad */
 
-@media only screen and (max-width: 989px) and (min-width: 768px){
+@media only screen and  (min-width: 768px) and (max-width: 1024px){
   .ganttButtonSeparator {
     margin-left: 2px;
     padding-right: 6px;
     font-size: 100%;
+  }
+  .button {
+    padding: 5px 6px 6px;
   }
 }
 

@@ -31,7 +31,8 @@ function GanttMaster() {
 
   this.isMultiRoot=false; // set to true in case of tasklist
 
-  this.element;
+  this.workSpace;  // the original element used for containing everything
+  this.element; // editor and gantt box without buttons
 
 
   this.resources; //list of resources
@@ -49,6 +50,7 @@ function GanttMaster() {
     canWriteOnParent: true,
     canWrite: true,
     canAdd: true,
+    canDelete: true,
     canInOutdent: true,
     canMoveUpDown: true,
     canSeePopEdit: true,
@@ -74,8 +76,16 @@ function GanttMaster() {
 }
 
 
-GanttMaster.prototype.init = function (place) {
+GanttMaster.prototype.init = function (workSpace) {
+  var place=$("<div>").prop("id","TWGanttArea").css( {padding:0, "overflow-y":"auto", "overflow-x":"hidden","border":"1px solid #e5e5e5",position:"relative"});
+  workSpace.append(place).addClass("TWGanttWorkSpace");
+
+  this.workSpace=workSpace;
   this.element = place;
+
+  //by default task are coloured by status
+  this.element.addClass('colorByStatus' )
+
   var self = this;
   //load templates
   $("#gantEditorTemplates").loadTemplates().remove();
@@ -99,12 +109,17 @@ GanttMaster.prototype.init = function (place) {
 
 
   //bindings
-  place.bind("refreshTasks.gantt", function () {
+  workSpace.bind("refreshTasks.gantt", function () {
     self.redrawTasks();
   }).bind("refreshTask.gantt", function (e, task) {
     self.drawTask(task);
 
-  }).bind("deleteCurrentTask.gantt", function (e) {
+  }).bind("deleteFocused.gantt", function (e) {
+    //delete task or link?
+    var focusedSVGElement=self.gantt.element.find(".focused.focused.linkGroup");
+    if (focusedSVGElement.size()>0)
+      self.removeLink(focusedSVGElement.data("from"), focusedSVGElement.data("to"));
+    else
     self.deleteCurrentTask();
   }).bind("addAboveCurrentTask.gantt", function () {
     self.addAboveCurrentTask();
@@ -122,7 +137,8 @@ GanttMaster.prototype.init = function (place) {
     self.collapseAll();
   }).bind("expandAll.gantt", function () {
     self.expandAll();
-
+  }).bind("fullScreen.gantt", function () {
+    self.fullScreen();
 
 
   }).bind("zoomPlus.gantt", function () {
@@ -130,8 +146,14 @@ GanttMaster.prototype.init = function (place) {
   }).bind("zoomMinus.gantt", function () {
     self.gantt.zoomGantt(false);
 
+  }).bind("openFullEditor.gantt", function () {
+    self.editor.openFullEditor(self.currentTask,false);
+  }).bind("openAssignmentEditor.gantt", function () {
+    self.editor.openFullEditor(self.currentTask,true);
   }).bind("addIssue.gantt", function () {
     self.addIssue();
+  }).bind("openExternalEditor.gantt", function () {
+    self.openExternalEditor();
 
   }).bind("undo.gantt", function () {
     if (!self.permissions.canWrite)
@@ -153,7 +175,7 @@ GanttMaster.prototype.init = function (place) {
     var eventManaged = true;
     var isCtrl = e.ctrlKey || e.metaKey;
     var bodyOrSVG = e.target.nodeName.toLowerCase() == "body" || e.target.nodeName.toLowerCase() == "svg";
-    var inWorkSpace=$(e.target).closest("#workSpace").length>0;
+    var inWorkSpace=$(e.target).closest("#TWGanttArea").length>0;
 
     //store focused field
     var focusedField=$(":focus");
@@ -191,7 +213,7 @@ GanttMaster.prototype.init = function (place) {
         self.deleteCurrentTask();
 
     } else if ( focusedSVGElement.is(".linkGroup") &&   (e.keyCode == 8 || e.keyCode == 46)  ) { //DEL BACKSPACE  svg link
-        self.removeLink(focused.data("from"), focused.data("to"));
+        self.removeLink(focusedSVGElement.data("from"), focusedSVGElement.data("to"));
 
     } else {
       eventManaged=false;
@@ -209,7 +231,15 @@ GanttMaster.prototype.init = function (place) {
   $("#saveGanttButton").after($('#LOG_CHANGES_CONTAINER'));
 
   //ask for comment management
-  this.element.on("gantt.saveRequired",this.manageSaveRequired)
+  this.element.on("saveRequired.gantt",this.manageSaveRequired);
+
+
+  //resize
+  $(window).resize(function () {
+    place.css({width: "100%", height: $(window).height() - place.position().top});
+    place.trigger("resize.gantt");
+  }).oneTime(2, "resize", function () {$(this).trigger("resize")});
+
 
 };
 
@@ -392,6 +422,7 @@ GanttMaster.prototype.loadProject = function (project) {
   this.permissions.canWriteOnParent = project.canWriteOnParent;
   this.permissions.cannotCloseTaskIfIssueOpen = project.cannotCloseTaskIfIssueOpen;
   this.permissions.canAddIssue = project.canAddIssue;
+  this.permissions.canDelete = project.canDelete;
   //repaint button bar basing on permissions
   this.checkButtonPermissions();
 
@@ -572,6 +603,9 @@ GanttMaster.prototype.checkButtonPermissions = function () {
 
   if (!this.permissions.canMoveUpDown)
     ganttButtons.find(".requireCanMoveUpDown").hide();
+
+  if (!this.permissions.canDelete)
+    ganttButtons.find(".requireCanDelete").hide();
 
   if (!this.permissions.canSeeCriticalPath)
     ganttButtons.find(".requireCanSeeCriticalPath").hide();
@@ -894,10 +928,10 @@ GanttMaster.prototype.updateLinks = function (task) {
 GanttMaster.prototype.moveUpCurrentTask = function () {
   var self = this;
   //console.debug("moveUpCurrentTask",self.currentTask)
+  if (self.currentTask) {
   if (!self.permissions.canWrite  || !self.currentTask.canWrite || !self.permissions.canMoveUpDown )
     return;
 
-  if (self.currentTask) {
     self.beginTransaction();
     self.currentTask.moveUp();
     self.endTransaction();
@@ -907,10 +941,10 @@ GanttMaster.prototype.moveUpCurrentTask = function () {
 GanttMaster.prototype.moveDownCurrentTask = function () {
   var self = this;
   //console.debug("moveDownCurrentTask",self.currentTask)
+  if (self.currentTask) {
   if (!self.permissions.canWrite  || !self.currentTask.canWrite || !self.permissions.canMoveUpDown )
     return;
 
-  if (self.currentTask) {
     self.beginTransaction();
     self.currentTask.moveDown();
     self.endTransaction();
@@ -919,10 +953,10 @@ GanttMaster.prototype.moveDownCurrentTask = function () {
 
 GanttMaster.prototype.outdentCurrentTask = function () {
   var self = this;
+  if (self.currentTask) {
   if (!self.permissions.canWrite || !self.currentTask.canWrite  || !self.permissions.canInOutdent)
     return;
 
-  if (self.currentTask) {
     var par = self.currentTask.getParent();
 
     self.beginTransaction();
@@ -936,10 +970,10 @@ GanttMaster.prototype.outdentCurrentTask = function () {
 
 GanttMaster.prototype.indentCurrentTask = function () {
   var self = this;
+  if (self.currentTask) {
   if (!self.permissions.canWrite || !self.currentTask.canWrite|| !self.permissions.canInOutdent)
     return;
 
-  if (self.currentTask) {
     self.beginTransaction();
     self.currentTask.indent();
     self.endTransaction();
@@ -955,7 +989,7 @@ GanttMaster.prototype.addBelowCurrentTask = function () {
   var ch;
   var row = 0;
   if (self.currentTask && self.currentTask.name) {
-    ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level + 1, self.currentTask.start, 1);
+    ch = factory.build("tmp_" + new Date().getTime(), "", "", self.currentTask.level+ (self.currentTask.isParent()||self.currentTask.level==0?1:0), self.currentTask.start, 1);
     row = self.currentTask.getRow() + 1;
 
     if (row>0) {
@@ -1001,7 +1035,7 @@ GanttMaster.prototype.addAboveCurrentTask = function () {
 GanttMaster.prototype.deleteCurrentTask = function () {
   //console.debug("deleteCurrentTask",this.currentTask , this.isMultiRoot)
   var self = this;
-  if (!self.currentTask || !self.permissions.canWrite || !self.currentTask.canWrite)
+  if (!self.currentTask || !self.permissions.canDelete && !self.currentTask.canDelete)
     return;
   var row = self.currentTask.getRow();
   if (self.currentTask && (row > 0 || self.isMultiRoot || self.currentTask.isNew()) ) {
@@ -1052,6 +1086,13 @@ GanttMaster.prototype.collapseAll = function () {
   }
 };
 
+GanttMaster.prototype.fullScreen = function () {
+  //console.debug("fullScreen");
+  this.workSpace.toggleClass("ganttFullScreen").resize();
+  $("#fullscrbtn .teamworkIcon").html(this.workSpace.is(".ganttFullScreen")?"€":"@");
+};
+
+
 GanttMaster.prototype.expandAll = function () {
   //console.debug("expandAll");
   if (this.currentTask){
@@ -1073,8 +1114,7 @@ GanttMaster.prototype.expandAll = function () {
 
 
 GanttMaster.prototype.collapse = function (task, all) {
-  console.debug("collapse",task)
-
+  //console.debug("collapse",task)
   task.collapsed=true;
   task.rowElement.addClass("collapsed");
 
@@ -1092,7 +1132,7 @@ GanttMaster.prototype.collapse = function (task, all) {
 
 
 GanttMaster.prototype.expand = function (task,all) {
-  console.debug("expand",task)
+  //console.debug("expand",task)
   task.collapsed=false;
   task.rowElement.removeClass("collapsed");
 
@@ -1128,7 +1168,8 @@ GanttMaster.prototype.getCollapsedDescendant = function () {
 
 GanttMaster.prototype.addIssue = function () {
   var self = this;
-  if (self.currentTask.isNew()){
+
+  if (self.currentTask && self.currentTask.isNew()){
     alert(GanttMaster.messages.PLEASE_SAVE_PROJECT);
     return;
   }
@@ -1136,6 +1177,20 @@ GanttMaster.prototype.addIssue = function () {
     return;
 
   openIssueEditorInBlack('0',"AD","ISSUE_TASK="+self.currentTask.id);
+};
+
+GanttMaster.prototype.openExternalEditor = function () {
+  //console.debug("openExternalEditor ")
+  var self = this;
+  if (!self.currentTask)
+    return;
+
+  if (self.currentTask.isNew()){
+    alert(GanttMaster.messages.PLEASE_SAVE_PROJECT);
+    return;
+  }
+
+  //window.location.href=contextPath+"/applications/teamwork/task/taskEditor.jsp?CM=ED&OBJID="+self.currentTask.id;
 };
 
 //<%----------------------------- TRANSACTION MANAGEMENT ---------------------------------%>
@@ -1282,17 +1337,18 @@ GanttMaster.prototype.redo = function () {
 
 
 GanttMaster.prototype.saveRequired = function () {
+  //console.debug("saveRequired")
   //show/hide save button
   if(this.__undoStack.length>0 && this.permissions.canWrite) {
     $("#saveGanttButton").removeClass("disabled");
     $("form[alertOnChange] #Gantt").val(new Date().getTime()); // set a fake variable as dirty
-    this.element.trigger("gantt.saveRequired",[true]);
+    this.element.trigger("saveRequired.gantt",[true]);
 
 
   } else {
     $("#saveGanttButton").addClass("disabled");
     $("form[alertOnChange] #Gantt").updateOldValue(); // set a fake variable as clean
-    this.element.trigger("gantt.saveRequired",[false]);
+    this.element.trigger("saveRequired.gantt",[false]);
 
   }
 };
@@ -1469,7 +1525,7 @@ GanttMaster.prototype.manageSaveRequired=function(ev, showSave) {
       for (var i = 0; !changes && i < ge.tasks.length; i++) {
         var newTask = ge.tasks[i];
         //se è un task che c'erà già
-        if (typeof (newTask.id)=="String" && !newTask.id.startsWith("tmp_")) {
+        if (!(""+newTask.id).startsWith("tmp_")) {
           //si recupera il vecchio task
           var oldTask;
           for (var j = 0; j < oldProject.tasks.length; j++) {
