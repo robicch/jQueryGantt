@@ -397,7 +397,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       } else if (field == "name" && el.val() == "") { // remove unfilled task
         var par = task.getParent();
         task.deleteTask();
-        self.fillEmptyLines();
+
+        self.redraw();//update index
 
         if (par) self.refreshExpandStatus(par);
         self.master.gantt.synchHighlight();
