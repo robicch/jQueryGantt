@@ -263,7 +263,7 @@ GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
   });
 };
 
-GridEditor.prototype.refreshAfterDeleteEmptyrow = function(task){
+GridEditor.prototype.deleteEmptyRowAndRefresh = function(task){
   var self = this;
   var par = task.getParent();
   task.deleteTask();
@@ -408,7 +408,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
         self.master.changeTaskDates(task, dates.start, dates.end);
 
       } else if (field == "name" && el.val() == "") { // remove unfilled task
-        self.refreshAfterDeleteEmptyrow(task);
+        self.deleteEmptyRowAndRefresh(task);
       } else if (field == "progress" ) {
         task[field]=parseFloat(el.val())||0;
         el.val(task[field]);
@@ -418,7 +418,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       self.master.endTransaction();
     } else if (field == "name" && el.val() == "") { // remove unfilled task even if not changed
       if (task.getRow()!=0) {
-        self.refreshAfterDeleteEmptyrow(task);
+        self.deleteEmptyRowAndRefresh(task);
       }else {
         el.oneTime(1,"foc",function(){$(this).focus()}); //
         event.preventDefault();
