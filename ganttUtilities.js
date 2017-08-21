@@ -316,6 +316,9 @@ $.splittify = {
       event.preventDefault();
 
       var deltaY = event.originalEvent.wheelDeltaY;
+      if(!deltaY)
+          deltaY=event.originalEvent.wheelDelta; 
+      
       var deltaX = event.originalEvent.wheelDeltaX;
 
       if (event.originalEvent.axis) {
