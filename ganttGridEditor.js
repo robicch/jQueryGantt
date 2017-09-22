@@ -263,6 +263,19 @@ GridEditor.prototype.bindRowExpandEvents = function (task, taskRow) {
   });
 };
 
+GridEditor.prototype.deleteEmptyRowAndRefresh = function(task){
+  var self = this;
+  var par = task.getParent();
+  task.deleteTask();
+  //update index and depends
+  self.master.updateDependsStrings();
+  self.master.redraw();
+
+  if (par) self.refreshExpandStatus(par);
+  self.master.gantt.synchHighlight();
+}
+
+
 GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
   var self = this;
 
@@ -395,30 +408,17 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
         self.master.changeTaskDates(task, dates.start, dates.end);
 
       } else if (field == "name" && el.val() == "") { // remove unfilled task
-        var par = task.getParent();
-        task.deleteTask();
-        self.fillEmptyLines();
-
-        if (par) self.refreshExpandStatus(par);
-        self.master.gantt.synchHighlight();
-
-
+        self.deleteEmptyRowAndRefresh(task);
       } else if (field == "progress" ) {
         task[field]=parseFloat(el.val())||0;
         el.val(task[field]);
-
       } else {
         task[field] = el.val();
       }
       self.master.endTransaction();
-
     } else if (field == "name" && el.val() == "") { // remove unfilled task even if not changed
       if (task.getRow()!=0) {
-        var par = task.getParent();
-        task.deleteTask();
-        self.fillEmptyLines();
-        if (par) self.refreshExpandStatus(par);
-        self.master.gantt.synchHighlight();
+        self.deleteEmptyRowAndRefresh(task);
       }else {
         el.oneTime(1,"foc",function(){$(this).focus()}); //
         event.preventDefault();

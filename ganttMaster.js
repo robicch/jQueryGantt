@@ -299,7 +299,7 @@ GanttMaster.prototype.updateDependsStrings = function () {
     link.to.depends = link.to.depends + (link.to.depends == "" ? "" : ",") + (link.from.getRow() + 1) + (link.lag ? ":" + link.lag : "");
   }
 
-};
+  };
 
 GanttMaster.prototype.removeLink = function (fromTask, toTask) {
   //console.debug("removeLink");
