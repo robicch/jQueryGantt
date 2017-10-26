@@ -117,10 +117,11 @@ GanttMaster.prototype.init = function (workSpace) {
   }).bind("deleteFocused.gantt", function (e) {
     //delete task or link?
     var focusedSVGElement=self.gantt.element.find(".focused.focused.linkGroup");
-    if (focusedSVGElement.size()>0)
+    if (focusedSVGElement.size()>0) {
       self.removeLink(focusedSVGElement.data("from"), focusedSVGElement.data("to"));
-    else
+    } else {
     self.deleteCurrentTask();
+    }
   }).bind("addAboveCurrentTask.gantt", function () {
     self.addAboveCurrentTask();
   }).bind("addBelowCurrentTask.gantt", function () {
