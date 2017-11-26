@@ -329,7 +329,7 @@ Task.prototype.moveTo = function (start, ignoreMilestones) {
     //loops children to shift them
     var children = this.getChildren();
     for (var i = 0; i < children.length; i++) {
-      ch = children[i];
+      var ch = children[i];
       var chStart=new Date(ch.start).incrementDateByWorkingDays(panDeltaInWD);
       if (!ch.moveTo(chStart, false)) {
         //console.debug("esco")
