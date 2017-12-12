@@ -261,7 +261,8 @@ GanttMaster.messages = {
   "GANTT_QUARTER_SHORT":                   "GANTT_QUARTER_SHORT",
   "GANTT_SEMESTER_SHORT":                  "GANTT_SEMESTER_SHORT",
   "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE":       "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE",
-  "PLEASE_SAVE_PROJECT":                   "PLEASE_SAVE_PROJECT"
+  "PLEASE_SAVE_PROJECT":                   "PLEASE_SAVE_PROJECT",
+  "CANNOT_CREATE_SAME_LINK":               "CANNOT_CREATE_SAME_LINK"
 };
 
 
@@ -885,6 +886,7 @@ GanttMaster.prototype.updateLinks = function (task) {
     var newDepsString = "";
 
     var visited = [];
+    var depsEqualCheck = [];
     for (var j = 0; j < deps.length; j++) {
       var dep = deps[j]; // in the form of row(lag) e.g. 2:3,3:4,5
       var par = dep.split(":");
@@ -895,6 +897,7 @@ GanttMaster.prototype.updateLinks = function (task) {
       }
 
       var sup = this.tasks[parseInt(par[0] - 1)];
+      depsEqualCheck.push(sup);
 
       if (sup) {
         if (parents && parents.indexOf(sup) >= 0) {
@@ -906,8 +909,13 @@ GanttMaster.prototype.updateLinks = function (task) {
           todoOk = false;
 
         } else if (isLoop(sup, task, visited)) {
-          todoOk = false;
           this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE + "\n\"" + task.name + "\" -> \"" + sup.name+"\"");
+          todoOk = false;
+
+        } else if((depsEqualCheck.filter((v, i, a) => a.indexOf(v) === i)).length != depsEqualCheck.length) {
+          this.setErrorOnTransaction("\""+task.name + "\"\n" + GanttMaster.messages.CANNOT_CREATE_SAME_LINK + "\n\"" + sup.name+"\"");
+          todoOk = false;
+
         } else {
           this.links.push(new Link(sup, task, lag));
           newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
