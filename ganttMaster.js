@@ -426,7 +426,9 @@ GanttMaster.prototype.loadProject = function (project) {
   //repaint button bar basing on permissions
   this.checkButtonPermissions();
 
-
+  Date.weekendIsWorking = project.weekendIsWorking;
+  Date.holidays = project.holidays;
+  Date.fridayIsWorking = project.fridayIsWorking;
 
   if (project.minEditableDate)
     this.minEditableDate = computeStart(project.minEditableDate);
