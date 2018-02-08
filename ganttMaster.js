@@ -897,7 +897,6 @@ GanttMaster.prototype.updateLinks = function (task) {
       }
 
       var sup = this.tasks[parseInt(par[0] - 1)];
-      depsEqualCheck.push(sup);
 
       if (sup) {
         if (parents && parents.indexOf(sup) >= 0) {
@@ -909,17 +908,20 @@ GanttMaster.prototype.updateLinks = function (task) {
           todoOk = false;
 
         } else if (isLoop(sup, task, visited)) {
-          this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE + "\n\"" + task.name + "\" -> \"" + sup.name+"\"");
           todoOk = false;
+          this.setErrorOnTransaction(GanttMaster.messages.CIRCULAR_REFERENCE + "\n\"" + task.id +" - "+ task.name + "\" -> \"" + sup.id +" - "+sup.name+"\"");
 
-        } else if((depsEqualCheck.filter((v, i, a) => a.indexOf(v) === i)).length != depsEqualCheck.length) {
-          this.setErrorOnTransaction("\""+task.name + "\"\n" + GanttMaster.messages.CANNOT_CREATE_SAME_LINK + "\n\"" + sup.name+"\"");
+        } else if(depsEqualCheck.indexOf(sup)>=0) {
+          this.setErrorOnTransaction(GanttMaster.messages.CANNOT_CREATE_SAME_LINK + "\n\"" + sup.name+"\" -> \""+task.name+"\"");
           todoOk = false;
 
         } else {
           this.links.push(new Link(sup, task, lag));
-          newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + dep;
+          newDepsString = newDepsString + (newDepsString.length > 0 ? "," : "") + supStr+(lag==0?"":":"+durationToString(lag));
         }
+
+        if (todoOk)
+          depsEqualCheck.push(sup);
       }
     }
 
