@@ -109,6 +109,9 @@ Date.dayAbbreviations = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 Date.preferAmericanFormat = false;
 
 Date.firstDayOfWeek =0;
+Date.weekendIsWorking = true;
+Date.fridayIsWorking = false;
+Date.holidays = "##";
 Date.defaultFormat = "M/d/yyyy";
 Date.masks = {
   fullDate:       "EEEE, MMMM d, yyyy",
@@ -127,22 +130,17 @@ var millisInWorkingDay =28800000;
 var workingDaysPerWeek =5;
 
 function isHoliday(date) {
-  var friIsHoly =false;
-  var satIsHoly =true;
-  var sunIsHoly =true;
-
   var pad = function (val) {
     val = "0" + val;
     return val.substr(val.length - 2);
   };
 
-  var holidays = "##";
-
   var ymd = "#" + date.getFullYear() + "_" + pad(date.getMonth() + 1) + "_" + pad(date.getDate()) + "#";
   var md = "#" + pad(date.getMonth() + 1) + "_" + pad(date.getDate()) + "#";
   var day = date.getDay();
 
-  return  (day == 5 && friIsHoly) || (day == 6 && satIsHoly) || (day == 0 && sunIsHoly) || holidays.indexOf(ymd) > -1 || holidays.indexOf(md) > -1;
+  return  (day == 5 && !Date.fridayIsWorking) || (day == 6 && !Date.weekendIsWorking) || (day == 0 && !Date.weekendIsWorking) 
+    || Date.holidays.indexOf(ymd) > -1 || Date.holidays.indexOf(md) > -1;
 }
 
 
