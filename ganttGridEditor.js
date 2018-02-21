@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2017 Open Lab
+ Copyright (c) 2012-2018 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -28,8 +28,10 @@ function GridEditor(master) {
     editorTabel.find(".requireCanSeeDep").hide();
 
   this.gridified = $.gridify(editorTabel);
-
   this.element = this.gridified.find(".gdfTable").eq(1);
+
+  this.minAllowedDate=new Date(new Date().getTime()-3600000*24*365*20).format();
+  this.maxAllowedDate=new Date(new Date().getTime()+3600000*24*365*30).format();
 }
 
 
@@ -54,7 +56,7 @@ GridEditor.prototype.fillEmptyLines = function () {
       //console.debug("emptyRow.click")
       var emptyRow = $(this);
       //add on the first empty row only
-      if (!master.permissions.canWrite || !master.permissions.canAdd || emptyRow.prevAll(".emptyRow").length > 0)
+      if (!master.permissions.canAdd || emptyRow.prevAll(".emptyRow").length > 0)
         return;
 
       master.beginTransaction();
@@ -70,13 +72,12 @@ GridEditor.prototype.fillEmptyLines = function () {
       var cnt=0;
       emptyRow.prevAll(".emptyRow").addBack().each(function () {
         cnt++;
-        var ch = factory.build("tmp_fk" + new Date().getTime()+"_"+cnt, "", "", level, start, 1);
+        var ch = factory.build("tmp_fk" + new Date().getTime()+"_"+cnt, "", "", level, start, Date.workingPeriodResolution);
         var task = master.addTask(ch);
         lastTask = ch;
       });
       master.endTransaction();
       if (lastTask.rowElement) {
-        //lastTask.rowElement.click();  removed R&S 22/03/2016 il click è bindato comunque
         lastTask.rowElement.find("[name=name]").focus();//focus to "name" input
       }
     });
@@ -87,10 +88,10 @@ GridEditor.prototype.fillEmptyLines = function () {
 
 GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
   //console.debug("GridEditor.addTask",task,row);
-  //var prof = new Profiler("editorAddTaskHtml");
+  //var prof = new Profiler("ganttGridEditor.addTask");
 
   //remove extisting row
-  this.element.find("[taskId=" + task.id + "]").remove();
+  this.element.find("#tid_" + task.id).remove();
 
   var taskRow = $.JST.createFromTemplate(task, "TASKROW");
 
@@ -127,7 +128,7 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
     var collapsedDescendant = this.master.getCollapsedDescendant();
     if (collapsedDescendant.indexOf(task) >= 0) taskRow.hide();
   }
-
+  //prof.stop();
   return taskRow;
 };
 
@@ -140,6 +141,7 @@ GridEditor.prototype.refreshExpandStatus = function (task) {
     task.rowElement.removeClass("isParent");
   }
 
+
   var par = task.getParent();
   if (par && !par.rowElement.is("isParent")) {
     par.rowElement.addClass("isParent");
@@ -151,7 +153,7 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   //console.debug("refreshTaskRow")
   //var profiler = new Profiler("editorRefreshTaskRow");
 
-  var canWrite=this.master.permissions.canWrite && task.canWrite;
+  var canWrite=this.master.permissions.canWrite || task.canWrite;
 
   var row = task.rowElement;
 
@@ -161,12 +163,12 @@ GridEditor.prototype.refreshTaskRow = function (task) {
   row.find("[name=code]").val(task.code);
   row.find("[status]").attr("status", task.status);
 
-  row.find("[name=duration]").val(task.duration);
+  row.find("[name=duration]").val(durationToString(task.duration)).prop("readonly",!canWrite || task.isParent() && task.master.shrinkParent);
   row.find("[name=progress]").val(task.progress).prop("readonly",!canWrite || task.progressByWorklog==true);
   row.find("[name=startIsMilestone]").prop("checked", task.startIsMilestone);
-  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue().prop("readonly",!canWrite || task.depends || !task.canWrite  && !this.master.permissions.canWrite ); // called on dates only because for other field is called on focus event
+  row.find("[name=start]").val(new Date(task.start).format()).updateOldValue().prop("readonly",!canWrite || task.depends || !(task.canWrite  || this.master.permissions.canWrite) ); // called on dates only because for other field is called on focus event
   row.find("[name=endIsMilestone]").prop("checked", task.endIsMilestone);
-  row.find("[name=end]").val(new Date(task.end).format()).updateOldValue();
+  row.find("[name=end]").val(new Date(task.end).format()).prop("readonly",!canWrite || task.isParent() && task.master.shrinkParent).updateOldValue();
   row.find("[name=depends]").val(task.depends);
   row.find(".taskAssigs").html(task.getAssigsString());
 
@@ -184,7 +186,7 @@ GridEditor.prototype.refreshTaskRow = function (task) {
 
 GridEditor.prototype.redraw = function () {
   //console.debug("GridEditor.prototype.redraw")
-  //var prof = new Profiler("ganttGridEditorRedraw");
+  //var prof = new Profiler("gantt.GridEditor.redraw");
   for (var i = 0; i < this.master.tasks.length; i++) {
     this.refreshTaskRow(this.master.tasks[i]);
   }
@@ -229,7 +231,7 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
   });
 
 
-  if (this.master.permissions.canWrite && task.canWrite) {
+  if (this.master.permissions.canWrite || task.canWrite) {
     self.bindRowInputEvents(task, taskRow);
 
   } else { //cannot write: disable input
@@ -241,10 +243,16 @@ GridEditor.prototype.bindRowEvents = function (task, taskRow) {
     taskRow.find("[name=depends]").attr("readonly", true);
 
   self.bindRowExpandEvents(task, taskRow);
+
   if (this.master.permissions.canSeePopEdit) {
     taskRow.find(".edit").click(function () {self.openFullEditor(task, false)});
-    taskRow.find(".taskAssigs").dblclick(function () {self.openFullEditor(task, true)});
+
+    taskRow.dblclick(function (ev) { //open editor only if no text has been selected
+      if (window.getSelection().toString().trim()=="")
+        self.openFullEditor(task, $(ev.target).closest(".taskAssigs").size()>0)
+      });
   }
+  //prof.stop();
 };
 
 
@@ -273,6 +281,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
       var inp = $(this);
       inp.dateField({
         inputField: el,
+        minDate:self.minAllowedDate,
+        maxDate:self.maxAllowedDate,
         callback:   function (d) {
           $(this).blur();
         }
@@ -338,16 +348,13 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     var task = self.master.getTask(taskId);
     //update task from editor
     var field = el.prop("name");
-    //console.debug("blur",field)
 
     if (el.isValueChanged()) {
       self.master.beginTransaction();
 
       if (field == "depends") {
-
         var oldDeps = task.depends;
         task.depends = el.val();
-
 
         // update links
         var linkOK = self.master.updateLinks(task);
@@ -355,23 +362,17 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
           //synchronize status from superiors states
           var sups = task.getSuperiors();
 
-
-/*
-          for (var i = 0; i < sups.length; i++) {
-            if (!sups[i].from.synchronizeStatus())
-              break;
-          }
-*/
-
           var oneFailed=false;
           var oneUndefined=false;
           var oneActive=false;
           var oneSuspended=false;
+          var oneWaiting=false;
           for (var i = 0; i < sups.length; i++) {
             oneFailed=oneFailed|| sups[i].from.status=="STATUS_FAILED";
             oneUndefined=oneUndefined|| sups[i].from.status=="STATUS_UNDEFINED";
             oneActive=oneActive|| sups[i].from.status=="STATUS_ACTIVE";
             oneSuspended=oneSuspended|| sups[i].from.status=="STATUS_SUSPENDED";
+            oneWaiting=oneWaiting|| sups[i].from.status=="STATUS_WAITING";
           }
 
           if (oneFailed){
@@ -379,13 +380,15 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
           } else if (oneUndefined){
             task.changeStatus("STATUS_UNDEFINED")
           } else if (oneActive){
-            task.changeStatus("STATUS_SUSPENDED")
+            //task.changeStatus("STATUS_SUSPENDED")
+            task.changeStatus("STATUS_WAITING")
           } else  if (oneSuspended){
             task.changeStatus("STATUS_SUSPENDED")
+          } else  if (oneWaiting){
+            task.changeStatus("STATUS_WAITING")
           } else {
             task.changeStatus("STATUS_ACTIVE")
           }
-
 
           self.master.changeTaskDeps(task); //dates recomputation from dependencies
         }
@@ -395,12 +398,7 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
         self.master.changeTaskDates(task, dates.start, dates.end);
 
       } else if (field == "name" && el.val() == "") { // remove unfilled task
-        var par = task.getParent();
-        task.deleteTask();
-        self.fillEmptyLines();
-
-        if (par) self.refreshExpandStatus(par);
-        self.master.gantt.synchHighlight();
+        self.master.deleteCurrentTask(taskId);
 
 
       } else if (field == "progress" ) {
@@ -414,11 +412,8 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
     } else if (field == "name" && el.val() == "") { // remove unfilled task even if not changed
       if (task.getRow()!=0) {
-        var par = task.getParent();
-        task.deleteTask();
-        self.fillEmptyLines();
-        if (par) self.refreshExpandStatus(par);
-        self.master.gantt.synchHighlight();
+        self.master.deleteCurrentTask(taskId);
+
       }else {
         el.oneTime(1,"foc",function(){$(this).focus()}); //
         event.preventDefault();
@@ -438,6 +433,10 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
     var ret = true;
     if (!event.ctrlKey) {
       switch (event.keyCode) {
+      case 13:
+        if (theCell.is(":text"))
+          theCell.blur();
+        break;
 
         case 37: //left arrow
           if (!theCell.is(":text") || (!this.selectionEnd || this.selectionEnd == 0))
@@ -510,7 +509,6 @@ GridEditor.prototype.bindRowInputEvents = function (task, taskRow) {
 
 };
 
-
 GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
   var self = this;
 
@@ -521,7 +519,6 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
 
   //task editor in popup
   var taskId = taskRow.attr("taskId");
-  //console.debug(task);
 
   //make task editor
   var taskEditor = $.JST.createFromTemplate(task, "TASK_EDITOR");
@@ -560,11 +557,11 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
   if (task.endIsMilestone)
     taskEditor.find("#endIsMilestone").prop("checked", true);
 
-  taskEditor.find("#duration").val(task.duration);
+  taskEditor.find("#duration").val(durationToString(task.duration));
   var startDate = taskEditor.find("#start");
   startDate.val(new Date(task.start).format());
   //start is readonly in case of deps
-  if (task.depends || !this.master.permissions.canWrite && !task.canWrite) {
+  if (task.depends || !(this.master.permissions.canWrite ||task.canWrite)) {
     startDate.attr("readonly", "true");
   } else {
     startDate.removeAttr("readonly");
@@ -582,7 +579,9 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
     assigsTable.append(assigRow);
   }
 
-  if (!self.master.permissions.canWrite || !task.canWrite) {
+  taskEditor.find(":input").updateOldValue();
+
+  if (!(self.master.permissions.canWrite || task.canWrite)) {
     taskEditor.find("input,textarea").prop("readOnly", true);
     taskEditor.find("input:checkbox,select").prop("disabled", true);
     taskEditor.find("#saveButton").remove();
@@ -596,6 +595,8 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
       if (input.is("[entrytype=DATE]")) {
         input.dateField({
           inputField: input,
+          minDate:self.minAllowedDate,
+          maxDate:self.maxAllowedDate,
           callback:   function (d) {$(this).blur();}
         });
       }
@@ -684,21 +685,18 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
 
         if (!found && resId && roleId) { //insert
           cnt++;
-          //console.debug("adding assig row:", assId,resId,resName,roleId,effort)
           var ass = task.createAssignment("tmp_" + new Date().getTime()+"_"+cnt, resId, roleId, effort);
           ass.touched = true;
         }
 
       });
 
-      //console.debug("task.assigs",task.assigs,task.assigs.length)
       //remove untouched assigs
       task.assigs = task.assigs.filter(function (ass) {
         var ret = ass.touched;
         delete ass.touched;
         return ret;
       });
-      //console.debug("task.assigs",task.assigs,task.assigs.length)
 
       //change dates
       task.setPeriod(Date.parseString(taskEditor.find("#start").val()).getTime(), Date.parseString(taskEditor.find("#end").val()).getTime() + (3600000 * 22));
@@ -716,7 +714,6 @@ GridEditor.prototype.openFullEditor = function (task, editOnlyAssig) {
 
   taskEditor.attr("alertonchange","true");
   var ndo = createModalPopup(800, 450).append(taskEditor);//.append("<div style='height:800px; background-color:red;'></div>")
-  //var ndo = createModalPopup(800, 650).append("<div style='height:300px; background-color:red;'></div>")
 
   //workload computation
   if (typeof(workloadDatesChanged)=="function")

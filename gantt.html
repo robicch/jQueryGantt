@@ -33,8 +33,13 @@
   <script src="ganttUtilities.js"></script>
   <script src="ganttTask.js"></script>
   <script src="ganttDrawerSVG.js"></script>
+  <script src="ganttZoom.js"></script>
   <script src="ganttGridEditor.js"></script>
   <script src="ganttMaster.js"></script>  
+
+
+  <!--<script src="libs/profiling.js"></script>-->
+  <!--<script type="text/javascript" src="ganttTestSuite.js"></script>-->
 </head>
 <body style="background-color: #fff;">
 
@@ -73,7 +78,6 @@
 
 <script type="text/javascript">
 
-
 var ge;
 $(function() {
   var canWrite=true; //this is the default for test purposes
@@ -82,31 +86,65 @@ $(function() {
   ge = new GanttMaster();
   ge.set100OnClose=true;
 
+  ge.shrinkParent=true;
+
   ge.init($("#workSpace"));
   loadI18n(); //overwrite with localized ones
 
   //in order to force compute the best-fitting zoom level
   delete ge.gantt.zoom;
 
-
   var project=loadFromLocalStorage();
-
 
   if (!project.canWrite)
     $(".ganttButtonBar button.requireWrite").attr("disabled","true");
 
   ge.loadProject(project);
   ge.checkpoint(); //empty the undo stack
-
-  ge.editor.element.oneTime(100, "cl", function () {$(this).find("tr.emptyRow:first").click()});
 });
+
+
+
+function getDemoProject(){
+  //console.debug("getDemoProject")
+ret= {"tasks":    [
+      {"id": -1, "name": "Gantt editor", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 0, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
+      {"id": -2, "name": "coding", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
+      {"id": -3, "name": "gantt part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 2, "end": 1397167199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
+      {"id": -4, "name": "editor part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "3", "canWrite": true, "start": 1397167200000, "duration": 4, "end": 1397685599999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
+      {"id": -5, "name": "testing", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_SUSPENDED", "depends": "2:5", "canWrite": true, "start": 1398981600000, "duration": 5, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
+      {"id": -6, "name": "test on safari", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "", "canWrite": true, "start": 1398981600000, "duration": 2, "end": 1399327199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
+      {"id": -7, "name": "test on ie", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 3, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
+      {"id": -8, "name": "test on chrome", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 2, "end": 1399499999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false}
+    ], "selectedRow": 2, "deletedTaskIds": [],
+      "resources": [
+      {"id": "tmp_1", "name": "Resource 1"},
+      {"id": "tmp_2", "name": "Resource 2"},
+      {"id": "tmp_3", "name": "Resource 3"},
+      {"id": "tmp_4", "name": "Resource 4"}
+    ],
+      "roles":       [
+      {"id": "tmp_1", "name": "Project Manager"},
+      {"id": "tmp_2", "name": "Worker"},
+      {"id": "tmp_3", "name": "Stakeholder"},
+      {"id": "tmp_4", "name": "Customer"}
+    ], "canWrite":    true, "canDelete":true, "canWriteOnParent": true, canAdd:true}
+
+
+    //actualize data
+    var offset=new Date().getTime()-ret.tasks[0].start;
+    for (var i=0;i<ret.tasks.length;i++) {
+      ret.tasks[i].start = ret.tasks[i].start + offset;
+    }
+  return ret;
+}
 
 
 
 function loadGanttFromServer(taskId, callback) {
 
   //this is a simulation: load data from the local storage if you have already played with the demo or a textarea with starting demo data
-  loadFromLocalStorage();
+  var ret=loadFromLocalStorage();
 
   //this is the real implementation
   /*
@@ -130,6 +168,8 @@ function loadGanttFromServer(taskId, callback) {
     }
   });
   */
+
+  return ret;
 }
 
 
@@ -189,70 +229,9 @@ function newProject(){
 }
 
 
-//-------------------------------------------  Create some demo data ------------------------------------------------------
-function setRoles() {
-  ge.roles = [
-    {
-      id:"tmp_1",
-      name:"Project Manager"
-    },
-    {
-      id:"tmp_2",
-      name:"Worker"
-    },
-    {
-      id:"tmp_3",
-      name:"Stakeholder"
-    },
-    {
-      id:"tmp_4",
-      name:"Customer"
-    }
-  ];
-}
-
-function setResource() {
-  var res = [];
-  for (var i = 1; i <= 10; i++) {
-    res.push({id:"tmp_" + i,name:"Resource " + i});
-  }
-  ge.resources = res;
-}
-
-
-function editResources(){
-
-}
-
 function clearGantt() {
   ge.reset();
 }
-
-function loadI18n() {
-  GanttMaster.messages = {
-    "CANNOT_WRITE":                  "CANNOT_WRITE",
-    "CHANGE_OUT_OF_SCOPE":"NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
-    "START_IS_MILESTONE":"START_IS_MILESTONE",
-    "END_IS_MILESTONE":"END_IS_MILESTONE",
-    "TASK_HAS_CONSTRAINTS":"TASK_HAS_CONSTRAINTS",
-    "GANTT_ERROR_DEPENDS_ON_OPEN_TASK":"GANTT_ERROR_DEPENDS_ON_OPEN_TASK",
-    "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK":"GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
-    "TASK_HAS_EXTERNAL_DEPS":"TASK_HAS_EXTERNAL_DEPS",
-    "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
-    "ERROR_SETTING_DATES":"ERROR_SETTING_DATES",
-    "CIRCULAR_REFERENCE":"CIRCULAR_REFERENCE",
-    "CANNOT_DEPENDS_ON_ANCESTORS":"CANNOT_DEPENDS_ON_ANCESTORS",
-    "CANNOT_DEPENDS_ON_DESCENDANTS":"CANNOT_DEPENDS_ON_DESCENDANTS",
-    "INVALID_DATE_FORMAT":"INVALID_DATE_FORMAT",
-    "TASK_MOVE_INCONSISTENT_LEVEL":"TASK_MOVE_INCONSISTENT_LEVEL",
-    "CANNOT_CREATE_SAME_LINK":"CANNOT_CREATE_SAME_LINK",
-
-    "GANTT_QUARTER_SHORT":"trim.",
-    "GANTT_SEMESTER_SHORT":"sem."
-  };
-}
-
-
 
 //-------------------------------------------  Get project file as JSON (used for migrate project from gantt to Teamwork) ------------------------------------------------------
 function getFile() {
@@ -275,35 +254,7 @@ function loadFromLocalStorage() {
 
   //if not found create a new example task
   if (!ret || !ret.tasks || ret.tasks.length == 0){
-    ret= {"tasks":    [
-      {"id": -1, "name": "Gantt editor", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 0, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 20, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-      {"id": -2, "name": "coding", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-      {"id": -3, "name": "gantt part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_ACTIVE", "depends": "", "canWrite": true, "start": 1396994400000, "duration": 2, "end": 1397167199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-      {"id": -4, "name": "editor part", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "3", "canWrite": true, "start": 1397167200000, "duration": 4, "end": 1397685599999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-      {"id": -5, "name": "testing", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_SUSPENDED", "depends": "2:5", "canWrite": true, "start": 1398981600000, "duration": 5, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": true},
-      {"id": -6, "name": "test on safari", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "", "canWrite": true, "start": 1398981600000, "duration": 2, "end": 1399327199999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-      {"id": -7, "name": "test on ie", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 3, "end": 1399586399999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false},
-      {"id": -8, "name": "test on chrome", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_SUSPENDED", "depends": "6", "canWrite": true, "start": 1399327200000, "duration": 2, "end": 1399499999999, "startIsMilestone": false, "endIsMilestone": false, "collapsed": false, "assigs": [], "hasChild": false}
-    ], "selectedRow": 2, "deletedTaskIds": [],
-      "resources": [
-      {"id": "tmp_1", "name": "Resource 1"},
-      {"id": "tmp_2", "name": "Resource 2"},
-      {"id": "tmp_3", "name": "Resource 3"},
-      {"id": "tmp_4", "name": "Resource 4"}
-    ],
-      "roles":       [
-      {"id": "tmp_1", "name": "Project Manager"},
-      {"id": "tmp_2", "name": "Worker"},
-      {"id": "tmp_3", "name": "Stakeholder"},
-      {"id": "tmp_4", "name": "Customer"}
-    ], "canWrite":    true, "canDelete":true, "canWriteOnParent": true, "zoom": "w3"}
-
-
-    //actualize data
-    var offset=new Date().getTime()-ret.tasks[0].start;
-    for (var i=0;i<ret.tasks.length;i++) {
-      ret.tasks[i].start = ret.tasks[i].start + offset;
-    }
+    ret=getDemoProject();
   }
   return ret;
 }
@@ -382,6 +333,116 @@ function editResources(){
 
   var ndo = createModalPopup(400, 500).append(resourceEditor);
 }
+
+function initializeHistoryManagement(){
+
+  //si chiede al server se c'è della hisory per la root
+  $.getJSON(contextPath+"/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTPOINTS", OBJID:10236}, function (response) {
+
+    //se c'è
+    if (response.ok == true && response.historyPoints && response.historyPoints.length>0) {
+
+      //si crea il bottone sulla bottoniera
+      var histBtn = $("<button>").addClass("button textual icon lreq30 lreqLabel").attr("title", "SHOW_HISTORY").append("<span class=\"teamworkIcon\">&#x60;</span>");
+
+      //al click
+      histBtn .click(function () {
+        var el = $(this);
+        var ganttButtons = $(".ganttButtonBar .buttons");
+
+        //è gi�  in modalit�  history?
+        if (!ge.element.is(".historyOn")) {
+          ge.element.addClass("historyOn");
+          ganttButtons.find(".requireCanWrite").hide();
+
+          //si carica la history server side
+          if (false) return;
+          showSavingMessage();
+          $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTPOINTS", OBJID: ge.tasks[0].id}, function (response) {
+            jsonResponseHandling(response);
+            hideSavingMessage();
+            if (response.ok == true) {
+              var dh = response.historyPoints;
+              //ge.historyPoints=response.historyPoints;
+              if (dh && dh.length > 0) {
+                //si crea il div per lo slider
+                var sliderDiv = $("<div>").prop("id", "slider").addClass("lreq30 lreqHide").css({"display":"inline-block","width":"500px"});
+                ganttButtons.append(sliderDiv);
+
+                var minVal = 0;
+                var maxVal = dh.length-1 ;
+
+                $("#slider").show().mbSlider({
+                  rangeColor : '#2f97c6',
+                  minVal     : minVal,
+                  maxVal     : maxVal,
+                  startAt    : maxVal,
+                  showVal    : false,
+                  grid       :1,
+                  formatValue: function (val) {
+                    return new Date(dh[val]).format();
+                  },
+                  onSlideLoad: function (obj) {
+                    this.onStop(obj);
+
+                  },
+                  onStart    : function (obj) {},
+                  onStop     : function (obj) {
+                    var val = $(obj).mbgetVal();
+                    showSavingMessage();
+                    $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTORYAT", OBJID: ge.tasks[0].id, millis:dh[val]}, function (response) {
+                      jsonResponseHandling(response);
+                      hideSavingMessage();
+                      if (response.ok ) {
+                        ge.baselines=response.baselines;
+                        ge.showBaselines=true;
+                        ge.baselineMillis=dh[val];
+                        ge.redraw();
+                      }
+                    })
+
+                  },
+                  onSlide    : function (obj) {
+                    clearTimeout(obj.renderHistory);
+                    var self = this;
+                    obj.renderHistory = setTimeout(function(){
+                      self.onStop(obj);
+                    }, 200)
+
+                  }
+                });
+              }
+            }
+          });
+
+
+          // quando si spenge
+        } else {
+          //si cancella lo slider
+          $("#slider").remove();
+          ge.element.removeClass("historyOn");
+          if (ge.permissions.canWrite)
+            ganttButtons.find(".requireCanWrite").show();
+
+          ge.showBaselines=false;
+          ge.baselineMillis=undefined;
+          ge.redraw();
+        }
+
+      });
+      $("#saveGanttButton").before(histBtn);
+    }
+  })
+}
+
+function showBaselineInfo (event,element){
+  //alert(element.attr("data-label"));
+  $(element).showBalloon(event, $(element).attr("data-label"));
+  ge.splitter.secondBox.one("scroll",function(){
+    $(element).hideBalloon();
+  })
+}
+
 </script>
 
 
@@ -405,8 +466,8 @@ function editResources(){
       <span class="ganttButtonSeparator requireCanWrite requireCanMoveUpDown"></span>
       <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move up"><span class="teamworkIcon">k</span></button>
       <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');return false;" class="button textual icon requireCanWrite requireCanMoveUpDown" title="move down"><span class="teamworkIcon">j</span></button>
-      <span class="ganttButtonSeparator requireCanDelete"></span>
-      <button onclick="$('#workSpace').trigger('deleteFocused.gantt');return false;" class="button textual icon delete requireCanWrite" title="Delete"><span class="teamworkIcon">&cent;</span></button>
+      <span class="ganttButtonSeparator requireCanWrite requireCanDelete"></span>
+      <button onclick="$('#workSpace').trigger('deleteFocused.gantt');return false;" class="button textual icon delete requireCanWrite" title="Elimina"><span class="teamworkIcon">&cent;</span></button>
       <span class="ganttButtonSeparator"></span>
       <button onclick="$('#workSpace').trigger('expandAll.gantt');return false;" class="button textual icon " title="EXPAND_ALL"><span class="teamworkIcon">6</span></button>
       <button onclick="$('#workSpace').trigger('collapseAll.gantt'); return false;" class="button textual icon " title="COLLAPSE_ALL"><span class="teamworkIcon">5</span></button>
@@ -415,7 +476,7 @@ function editResources(){
       <button onclick="$('#workSpace').trigger('zoomMinus.gantt'); return false;" class="button textual icon " title="zoom out"><span class="teamworkIcon">)</span></button>
       <button onclick="$('#workSpace').trigger('zoomPlus.gantt');return false;" class="button textual icon " title="zoom in"><span class="teamworkIcon">(</span></button>
     <span class="ganttButtonSeparator"></span>
-      <button onclick="print();return false;" class="button textual icon " title="Print"><span class="teamworkIcon">p</span></button>
+      <button onclick="$('#workSpace').trigger('print.gantt');return false;" class="button textual icon " title="Print"><span class="teamworkIcon">p</span></button>
     <span class="ganttButtonSeparator"></span>
       <button onclick="ge.gantt.showCriticalPath=!ge.gantt.showCriticalPath; ge.redraw();return false;" class="button textual icon requireCanSeeCriticalPath" title="CRITICAL_PATH"><span class="teamworkIcon">&pound;</span></button>
     <span class="ganttButtonSeparator requireCanSeeCriticalPath"></span>
@@ -457,7 +518,7 @@ function editResources(){
   --></div>
 
 <div class="__template__" type="TASKROW"><!--
-  <tr taskId="(#=obj.id#)" class="taskEditRow (#=obj.isParent()?'isParent':''#) (#=obj.collapsed?'collapsed':''#)" level="(#=level#)">
+  <tr id="tid_(#=obj.id#)" taskId="(#=obj.id#)" class="taskEditRow (#=obj.isParent()?'isParent':''#) (#=obj.collapsed?'collapsed':''#)" level="(#=level#)">
     <th class="gdfCell edit" align="right" style="cursor:pointer;"><span class="taskRowIndex">(#=obj.getRow()+1#)</span> <span class="teamworkIcon" style="font-size:12px;" >e</span></th>
     <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
     <td class="gdfCell"><input type="text" name="code" value="(#=obj.code?obj.code:''#)" placeholder="code/short name"></td>
@@ -509,14 +570,14 @@ function editResources(){
 
 <div class="__template__" type="CHANGE_STATUS"><!--
     <div class="taskStatusBox">
-      <div class="taskStatus cvcColorSquare" status="STATUS_ACTIVE" title="active"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_DONE" title="completed"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_FAILED" title="failed"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_SUSPENDED" title="suspended"></div>
-      <div class="taskStatus cvcColorSquare" status="STATUS_UNDEFINED" title="undefined"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_ACTIVE" title="Active"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_DONE" title="Completed"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_FAILED" title="Failed"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_SUSPENDED" title="Suspended"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_WAITING" title="Waiting" style="display: none;"></div>
+    <div class="taskStatus cvcColorSquare" status="STATUS_UNDEFINED" title="Undefined"></div>
     </div>
   --></div>
-
 
 
 
@@ -559,6 +620,7 @@ function editResources(){
           <label for="status" class=" ">status</label><br>
           <select id="status" name="status" class="taskStatus" status="(#=obj.status#)"  onchange="$(this).attr('STATUS',$(this).val());">
             <option value="STATUS_ACTIVE" class="taskStatus" status="STATUS_ACTIVE" >active</option>
+            <option value="STATUS_WAITING" class="taskStatus" status="STATUS_WAITING" >suspended</option>
             <option value="STATUS_SUSPENDED" class="taskStatus" status="STATUS_SUSPENDED" >suspended</option>
             <option value="STATUS_DONE" class="taskStatus" status="STATUS_DONE" >completed</option>
             <option value="STATUS_FAILED" class="taskStatus" status="STATUS_FAILED" >failed</option>
@@ -690,11 +752,14 @@ function editResources(){
       "GANTT_ERROR_LOADING_DATA_TASK_REMOVED":"An error has occurred while loading the data. A task has been trashed.",
       "CANNOT_CLOSE_TASK_IF_OPEN_ISSUE":"Cannot close a task with open issues",
       "TASK_MOVE_INCONSISTENT_LEVEL":"You cannot exchange tasks of different depth.",
-      "GANTT_QUARTER_SHORT":"Quarter",
-      "GANTT_SEMESTER_SHORT":"Sem",
       "CANNOT_MOVE_TASK":"CANNOT_MOVE_TASK",
       "PLEASE_SAVE_PROJECT":"PLEASE_SAVE_PROJECT",
-      "CANNOT_CREATE_SAME_LINK":"CANNOT_CREATE_SAME_LINK"
+      "GANTT_SEMESTER":"Semester",
+      "GANTT_SEMESTER_SHORT":"s.",
+      "GANTT_QUARTER":"Quarter",
+      "GANTT_QUARTER_SHORT":"q.",
+      "GANTT_WEEK":"Week",
+      "GANTT_WEEK_SHORT":"w."
     };
   }
 

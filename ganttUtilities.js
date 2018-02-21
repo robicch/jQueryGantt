@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2017 Open Lab
+ Copyright (c) 2012-2018 Open Lab
  Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.open-lab.com
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -95,7 +95,6 @@ $.gridify = function (table, opt) {
       $("body").unselectable();
       $.gridify.columInResize = colHeader;
       //on event for start resizing
-      //console.debug("start resizing");
       $(document).on("mousemove.gdf", function (e) {
 
         e.preventDefault();
@@ -111,9 +110,6 @@ $.gridify = function (table, opt) {
         //on mouse up on body to stop resizing
       }).on("mouseup.gdf", function () {
         //console.debug("mouseup.gdf")
-
-        //$("body").css({cursor: "auto"});
-
         $(this).off("mousemove.gdf").off("mouseup.gdf").clearUnselectable();
         $("body").removeClass("gdfHResizing");
         delete $.gridify.columInResize;
@@ -167,7 +163,6 @@ $.gridify = function (table, opt) {
       gridState.colSizes = colSizes;
 
       localStorage.setObject("TWPGanttGridState", gridState);
-      //console.debug("gridState",localStorage.getItem("TWPGanttGridState"));
     }
   }
 
@@ -229,8 +224,6 @@ $.splittify = {
     var totalW = where.innerWidth();
     var splW = splitterBar.width();
     var fbw = totalW * perc / 100 - splW;
-    //var realW = firstBox.get(0).scrollWidth;
-    //fbw = fbw > realW? realW: fbw;
     fbw = fbw > totalW - splW - splitter.secondBoxMinWidth ? totalW - splW - splitter.secondBoxMinWidth : fbw;
     firstBox.width(fbw).css({left: 0});
     splitterBar.css({left: firstBox.width()});
@@ -244,11 +237,8 @@ $.splittify = {
       $.splittify.splitterBar = $(this);
       //on event for start resizing
       //console.debug("start splitting");
-      //var realW = firstBox.get(0).scrollWidth;
       $("body").unselectable().on("mousemove.gdf", function (e) {
         //manage resizing
-        //console.debug(e.pageX - $.gridify.columInResize.offset().left)
-
         e.preventDefault();
 
         var sb = $.splittify.splitterBar;
@@ -280,6 +270,7 @@ $.splittify = {
     // keep both side in synch when scroll
     var stopScroll = false;
     var fs = firstBox.add(secondBox);
+    var lastScrollTop=0;
     fs.scroll(function (e) {
       var el = $(this);
       var top = el.scrollTop();
@@ -295,8 +286,12 @@ $.splittify = {
         firstBox.scrollTop(top);
       }
 
+
+      if (Math.abs(top-lastScrollTop)>10) {
 	    firstBoxHeader.css('top', top).hide();
 	    secondBoxHeader.css('top', top).hide();
+      }
+      lastScrollTop=top;
 
       where.stopTime("reset").oneTime(100, "reset", function () {
 
@@ -316,9 +311,8 @@ $.splittify = {
       event.preventDefault();
 
       var deltaY = event.originalEvent.wheelDeltaY;
-      if(!deltaY)
-          deltaY=event.originalEvent.wheelDelta; 
-      
+      if (!deltaY)
+        deltaY = event.originalEvent.wheelDelta;
       var deltaX = event.originalEvent.wheelDeltaX;
 
       if (event.originalEvent.axis) {
@@ -397,11 +391,33 @@ $.splittify = {
 
 
 //<%------------------------------------------------------------------------  UTILITIES ---------------------------------------------------------------%>
+// same dates returns 1
+function getDurationInUnits(start,end){
+  return start.distanceInWorkingDays(end)+1; // working in days
+}
+
+//con due date uguali ritorna 0: usata per cancolare la distanza effettiva tra due date
+function getDistanceInUnits(date1,date2){
+  return date1.distanceInWorkingDays(date2); // working in days
+}
+
+function incrementDateByUnits(date,duration){
+  date.incrementDateByWorkingDays(duration); // working in days
+  return date;
+}
+
+
 function computeStart(start) {
   return computeStartDate(start).getTime();
 }
+
+/**
+ * @param start
+ * @returns {Date} the closes start date
+ */
 function computeStartDate(start) {
-  var d = new Date(start + 3600000 * 12);
+  var d;
+  d = new Date(start + 3600000 * 12);
   d.setHours(0, 0, 0, 0);
   //move to next working day
   while (isHoliday(d)) {
@@ -414,6 +430,11 @@ function computeStartDate(start) {
 function computeEnd(end) {
   return computeEndDate(end).getTime()
 }
+
+/**
+ * @param end
+ * @returns {Date} the closest end date
+ */
 function computeEndDate(end) {
   var d = new Date(end - 3600000 * 12);
   d.setHours(23, 59, 59, 999);
@@ -426,8 +447,8 @@ function computeEndDate(end) {
 }
 
 function computeEndByDuration(start, duration) {
+//console.debug("computeEndByDuration start ",d,duration)
   var d = new Date(start);
-  //console.debug("computeEndByDuration start ",d,duration)
   var q = duration - 1;
   while (q > 0) {
     d.setDate(d.getDate() + 1);
@@ -448,49 +469,44 @@ function incrementDateByWorkingDays(date, days) {
 
 function recomputeDuration(start, end) {
   //console.debug("recomputeDuration");
-  return new Date(start).distanceInWorkingDays(new Date(end)) + 1;
+  return getDurationInUnits(new Date(start),new Date(end));
 }
 
-
 function resynchDates(leavingField, startField, startMilesField, durationField, endField, endMilesField) {
-  //console.debug("resynchDates",leavingField.prop("name"), startField.prop("name"), startMilesField.prop("name"), durationField.prop("name"), endField.prop("name"), endMilesField.prop("name"));
+  //console.debug("resynchDates",leavingField.prop("name"), "start. "+startField.val(),"durationField: "+ durationField.val(), "endField: "+endField.val());
+
   function resynchDatesSetFields(command) {
     //console.debug("resynchDatesSetFields",command);
-    //var duration = parseInt(durationField.val());
-    var duration = daysFromString(durationField.val(), true);
-    if (!duration || duration < 1)
-      duration = 1;
-
+    var duration = stringToDuration(durationField.val());
     var start = computeStart(Date.parseString(startField.val()).getTime());
 
     var end = endField.val();
     if (end.length > 0) {
       end = Date.parseString(end);
-      end.setHours(23, 59, 59, 999);
+      end.setHours(23, 59, 59, 999); //this is necessary because compute end get the closest end, and parseString returns 00:00
       end = computeEnd(end.getTime());
     }
 
     var date = new Date();
     if ("CHANGE_END" == command) {
       date.setTime(start);
-      var workingDays = duration - 1;
-      date.incrementDateByWorkingDays(workingDays);
-      date.setHours(23, 59, 59, 999);
-      end = computeEnd(date.getTime());
+      var workingUnits = duration-1; // if we do not decremet a task lasting two days starting on 10 will end on 12 (at 00:00) instead of on (at 23:59)
+      incrementDateByUnits(date,workingUnits);
+      date.setHours(23, 59, 59, 999); //this is necessary because compute end get the closest end, and parseString returns 00:00
+      end = computeEnd(date.getTime()); // not strictly necessary
     } else if ("CHANGE_START" == command) {
       date.setTime(end);
-      var workingDays = duration - 1;
-      date.incrementDateByWorkingDays(-workingDays);
-      date.setHours(0, 0, 0, 0);
-      start = computeStart(date.getTime());
+      var workingUnits = duration - 1; // if we do not decremet a task lasting two days starting on 10 will end on 12 (at 00:00) instead of on (at 23:59)
+      incrementDateByUnits(date,-workingUnits);
+      date.setHours(0, 0, 0, 0); //this is necessary because decreasing end we are at 23:50
+      start = computeStart(date.getTime()); //not strictly necessary
     } else if ("CHANGE_DURATION" == command) {
-      //console.debug("CHANGE_DURATION",new Date(start),new Date(end))
-      duration = new Date(start).distanceInWorkingDays(new Date(end)) + 1;
+      duration = getDurationInUnits(new Date(start),new Date(end)) + 1; 
     }
 
     startField.val(new Date(start).format());
     endField.val(new Date(end).format());
-    durationField.val(duration);
+    durationField.val(durationToString(duration));
 
     return {start: start, end: end, duration: duration};
   }
@@ -503,8 +519,7 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
   var endIsMilesAndFilled = endIsFilled && (endMilesField.prop("checked") || endField.is("[readOnly]"));
 
   if (durIsFilled) {
-    if (parseInt(durationField.val()) == NaN || parseInt(durationField.val()) < 1)
-      durationField.val(1);
+    durationField.val(durationToString(stringToDuration(durationField.val())));
   }
 
   if (leavingFieldName.indexOf("Milestone") > 0) {
@@ -566,6 +581,15 @@ if (!Array.prototype.filter) {
   };
 }
 
+function durationToString(d) {
+  return d;
+}
+
+function stringToDuration(durStr) {
+  var duration = NaN;
+  duration = daysFromString(durStr, true) || 1;
+  return duration;
+}
 
 function goToPage(url) {
   if (!canILeave()) return;

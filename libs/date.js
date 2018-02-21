@@ -366,6 +366,28 @@ Date.prototype.isAfter = function(date2) {
 	return (this.getTime()>date2.getTime());
 };
 
+Date.prototype.isOutOfRange = function (minDate, maxDate) {
+
+  minDate = minDate || this;
+  maxDate = maxDate || this;
+
+  if(typeof minDate == "string")
+    minDate = Date.parseString(minDate);
+
+  if(typeof maxDate == "string")
+    maxDate = Date.parseString(maxDate);
+
+
+  /*
+   console.debug("date:: ", this);
+   console.debug("minDate:: ", minDate);
+   console.debug("maxDate:: ", maxDate);
+   console.debug("isDisabled:: ", this.isBefore(minDate) , this.isAfter(maxDate));
+   */
+
+  return (this.isBefore(minDate) || this.isAfter(maxDate));
+};
+
 // Check if two date objects have equal dates and times
 Date.prototype.equals = function(date2) {
 	if (date2==null) { 
@@ -653,29 +675,65 @@ function getMillisInDaysHoursMinutes(millis) {
 	return (sgn >= 0 ? "" : "-") + (days > 0 ? days + "  " : "") + pad(hour, 1, "0") + ":" + pad(min, 2, "0");
 }
 
-function millisFromHourMinute(stringHourMinutes) { //All this format are valid: "12:58" "13.75"  "63635676000" (this is already in milliseconds)
-	var result = 0;
-	stringHourMinutes.replace(",", ".");
-	var semiColSeparator = stringHourMinutes.indexOf(":");
-	var dotSeparator = stringHourMinutes.indexOf(".");
 
-	if (semiColSeparator < 0 && dotSeparator < 0 && stringHourMinutes.length > 5) {
-		return parseInt(stringHourMinutes, 10); //already in millis
+function millisToString(millis,considerWorkingdays) {
+  // console.debug("millisToString",millis)
+  if (!millis)
+    return "";
+  // millisInWorkingDay is set on partHeaderFooter
+  var sgn=millis>=0?1:-1;
+  millis=Math.abs(millis);
+  var wm = (considerWorkingdays?millisInWorkingDay:3600000*24);
+  var days = Math.floor(millis / wm);
+  var hour = Math.floor((millis % wm) / 3600000);
+  var min = Math.floor((millis-days*wm-hour*3600000) / 60000);
+  var sec = Math.floor((millis-days*wm-hour*3600000-min*60000) / 1000);
+  //console.debug("millisToString",wm, millis,days,hour,min)
+  return (sgn>=0?"":"-")+(days > 0 ? days + "d " : "") + (hour>0? (days>0?" ":"")+hour+"h":"") +(min>0?(days>0||hour>0?" ":"")+min+"m":"")+ (sec>0?+sec+"s":"");
+}
+
+
+
+function millisFromHourMinute(stringHourMinutes) { //All this format are valid: "12:58" "13.75"  "63635676000" (this is already in milliseconds)
+	var semiColSeparator = stringHourMinutes.indexOf(":");
+  if (semiColSeparator ==0) // :30 minutes
+    return millisFromHourMinuteSecond("00"+stringHourMinutes+":00");
+  else if (semiColSeparator >0) // 1:15 hours:minutes
+    return millisFromHourMinuteSecond(stringHourMinutes+":00");
+  else
+    return millisFromHourMinuteSecond(stringHourMinutes);
+
+}
+
+function millisFromHourMinuteSecond(stringHourMinutesSeconds) { //All this format are valid: "00:12:58" "12:58:55" "13.75"  "63635676000" (this is already in milliseconds)
+	var result = 0;
+  stringHourMinutesSeconds.replace(",", ".");
+  var semiColSeparator = stringHourMinutesSeconds.indexOf(":");
+  var dotSeparator = stringHourMinutesSeconds.indexOf(".");
+
+  if (semiColSeparator < 0 && dotSeparator < 0 && stringHourMinutesSeconds.length > 5) {
+    return parseInt(stringHourMinutesSeconds, 10); //already in millis
 	} else {
 
 		if (dotSeparator > -1) {
-			var d = parseFloat(stringHourMinutes);
+      var d = parseFloat(stringHourMinutesSeconds);
 			result = d * 3600000;
 		} else {
 			var hour = 0;
 			var minute = 0;
+      var second= 0;
+
 			if (semiColSeparator == -1)
-				hour = parseInt(stringHourMinutes, 10);
+        hour = parseInt(stringHourMinutesSeconds, 10);
 			else {
-				hour = parseInt(stringHourMinutes.substring(0, semiColSeparator), 10);
-				minute = parseInt(stringHourMinutes.substring(semiColSeparator + 1), 10);
+
+        var units=stringHourMinutesSeconds.split(":")
+
+        hour = parseInt(units[0],10);
+        minute = parseInt(units[1], 10);
+        second = parseInt(units[2], 10);
 			}
-			result = hour * 3600000 + minute * 60000;
+      result = hour * 3600000 + minute * 60000+second*1000;
 		}
 		if (typeof(result) != "number")
 			result = NaN;
@@ -695,7 +753,7 @@ function millisFromString(string, considerWorkingdays) {
 		return 0;
 
   //var regex = new RegExp("(\\d+[Yy])|(\\d+[M])|(\\d+[Ww])|(\\d+[Dd])|(\\d+[Hh])|(\\d+[m])|(\\d+[Ss])|(\\d+:\\d+)|(:\\d+)|(\\d*[\\.,]\\d+)|(\\d+)", "g"); // bicch 14/1/16 supporto per 1.5d
-  var regex = new RegExp("([0-9\\.,]+[Yy])|([0-9\\.,]+[M])|([0-9\\.,]+[Ww])|([0-9\\.,]+[Dd])|([0-9\\.,]+[Hh])|([0-9\\.,]+[m])|([0-9\\.,]+[Ss])|(\\d+:\\d+)|(:\\d+)|(\\d*[\\.,]\\d+)|(\\d+)", "g");
+  var regex = new RegExp("([0-9\\.,]+[Yy])|([0-9\\.,]+[Qq])|([0-9\\.,]+[M])|([0-9\\.,]+[Ww])|([0-9\\.,]+[Dd])|([0-9\\.,]+[Hh])|([0-9\\.,]+[m])|([0-9\\.,]+[Ss])|(\\d+:\\d+:\\d+)|(\\d+:\\d+)|(:\\d+)|(\\d*[\\.,]\\d+)|(\\d+)", "g");
 
 	var matcher = regex.exec(string);
 	var totMillis = 0;
@@ -715,25 +773,29 @@ function millisFromString(string, considerWorkingdays) {
 				}
 				if (i == 1) { // years
 					totMillis = totMillis + number * (considerWorkingdays ? millisInWorkingDay * workingDaysPerWeek * 52 : 3600000 * 24 * 365);
-				} else if (i == 2) { // months
+        } else if (i == 2) { // quarter
+          totMillis = totMillis + number * (considerWorkingdays ? millisInWorkingDay * workingDaysPerWeek * 4 : 3600000 * 24 * 91);
+        } else if (i == 3) { // months
 					totMillis = totMillis + number * (considerWorkingdays ? millisInWorkingDay * workingDaysPerWeek * 4 : 3600000 * 24 * 30);
-				} else if (i == 3) { // weeks
+        } else if (i == 4) { // weeks
 					totMillis = totMillis + number * (considerWorkingdays ? millisInWorkingDay * workingDaysPerWeek : 3600000 * 24 * 7);
-				} else if (i == 4) { // days
+        } else if (i == 5) { // days
 					totMillis = totMillis + number * (considerWorkingdays ? millisInWorkingDay : 3600000 * 24);
-				} else if (i == 5) { // hours
+        } else if (i == 6) { // hours
 					totMillis = totMillis + number * 3600000;
-				} else if (i == 6) { // minutes
+        } else if (i == 7) { // minutes
 					totMillis = totMillis + number * 60000;
-				} else if (i == 7) { // seconds
+        } else if (i == 8) { // seconds
 					totMillis = totMillis + number * 1000;
-				} else if (i == 8) { // hour:minutes
+        } else if (i == 9) { // hour:minutes:seconds
+          totMillis = totMillis + millisFromHourMinuteSecond(match);
+        } else if (i == 10) { // hour:minutes
 					totMillis = totMillis + millisFromHourMinute(match);
-				} else if (i == 9) { // :minutes
+        } else if (i == 11) { // :minutes
 					totMillis = totMillis + millisFromHourMinute(match);
-				} else if (i == 10) { // hour.minutes
+        } else if (i == 12) { // hour.minutes
 					totMillis = totMillis + millisFromHourMinute(match);
-				} else if (i == 11) { // hours
+        } else if (i == 13) { // hours
 					totMillis = totMillis + number * 3600000;
 				}
 			}
@@ -755,7 +817,8 @@ function daysFromString(string, considerWorkingdays) {
 		return undefined;
 
 	//var regex = new RegExp("(\\d+[Yy])|(\\d+[Mm])|(\\d+[Ww])|(\\d+[Dd])|(\\d*[\\.,]\\d+)|(\\d+)", "g"); // bicch 14/1/16 supporto per 1.5d
-	var regex = new RegExp("([0-9\\.,]+[Yy])|([0-9\\.,]+[Mm])|([0-9\\.,]+[Ww])|([0-9\\.,]+[Dd])|(\\d*[\\.,]\\d+)|(\\d+)", "g");
+  //var regex = new RegExp("([0-9\\.,]+[Yy])|([0-9\\.,]+[Qq])|([0-9\\.,]+[Mm])|([0-9\\.,]+[Ww])|([0-9\\.,]+[Dd])|(\\d*[\\.,]\\d+)|(\\d+)", "g");
+  var regex = new RegExp("([\\-]?[0-9\\.,]+[Yy])|([\\-]?[0-9\\.,]+[Qq])|([\\-]?[0-9\\.,]+[Mm])|([\\-]?[0-9\\.,]+[Ww])|([\\-]?[0-9\\.,]+[Dd])|([\\-]?\\d*[\\.,]\\d+)|([\\-]?\\d+)", "g");
 
 	var matcher = regex.exec(string);
 	var totDays = 0;
@@ -775,15 +838,17 @@ function daysFromString(string, considerWorkingdays) {
 				}
 				if (i == 1) { // years
 					totDays = totDays + number * (considerWorkingdays ? workingDaysPerWeek * 52 : 365);
-				} else if (i == 2) { // months
+        } else if (i == 2) { // quarter
+          totDays = totDays + number * (considerWorkingdays ? workingDaysPerWeek * 12 : 91);
+        } else if (i == 3) { // months
 					totDays = totDays + number * (considerWorkingdays ? workingDaysPerWeek * 4 : 30);
-				} else if (i == 3) { // weeks
+        } else if (i == 4) { // weeks
 					totDays = totDays + number * (considerWorkingdays ? workingDaysPerWeek : 7);
-				} else if (i == 4) { // days
+        } else if (i == 5) { // days
 					totDays = totDays + number;
-				} else if (i == 5) { // days.minutes
+        } else if (i == 6) { // days.minutes
 					totDays = totDays + number;
-				} else if (i == 6) { // days
+        } else if (i == 7) { // days
 					totDays = totDays + number;
 				}
 			}

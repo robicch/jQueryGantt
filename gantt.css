@@ -168,9 +168,7 @@ body{
   position: absolute;
   z-index: 2;
   top:0;
-  /*background: #EEEEEE;*/
   height: 42px;
-
 }
 
 /* -------------------------------------- GANTT -----------------------------------*/
@@ -218,6 +216,10 @@ body{
 
 .ganttHead1 th.headSmall,.ganttHead2 th.headSmall{
   font-size: 10px;
+}
+
+.ganttHead1 th.headLeft,.ganttHead2 th.headLeft{
+  text-align: left;
 }
 
 .ganttToday{
@@ -309,7 +311,7 @@ body{
   border-right: 2px dotted #ddd;
 }
 
-.ganttHead2 th.holyH{
+.ganttHead2 th.holy{
   background-color: rgba(236, 195, 176, 0.40);
 }
 .ganttBodyCell.holy{
@@ -477,6 +479,10 @@ input[readonly]{
 }
 .taskStatus[status=STATUS_SUSPENDED]{
   background-color: #F9C154;
+  color:#000;
+}
+.taskStatus[status=STATUS_WAITING]{
+  background-color:rgb(247, 145, 54);
   color:#000;
 }
 .taskStatus[status=STATUS_UNDEFINED]{
