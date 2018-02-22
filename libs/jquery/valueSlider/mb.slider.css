@@ -1,0 +1,131 @@
+.mb_slider{
+  position:relative;
+  padding:10px;
+  padding-bottom: 40px;
+  z-index:0;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.mb_sliderBar{
+  background-color:#fafafa;
+  height: 6px;
+  width:100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 0 1px;
+  cursor:default;
+}
+
+.mb_sliderHandler {
+  width: 14px;
+  height: 14px;
+  background-color: #266b8d;
+  position: absolute;
+  top: -4px;
+  left: 0;
+  border-radius: 100%;
+  border: 3px solid white;
+  box-shadow: #2F97C6 0 0 0 2px;
+  cursor: default;
+}
+
+.mb_sliderEnd, .mb_sliderStart, .mb_sliderValue{
+  padding:7px;
+  position:absolute;
+  margin: 3px;
+  min-width: 50px;
+  color:#AAA;
+  white-space: nowrap;
+  cursor:default;
+}
+
+.mb_sliderStart{
+  left:0;
+  bottom: 0;
+  text-align: right;
+  margin-top: 20px;
+}
+
+.mb_sliderEnd{
+  text-align: left;
+  right: 0;
+  bottom: 0;
+  margin-top: 20px;
+}
+
+.mb_sliderRange {
+  position: absolute;
+  height: 2px;
+  margin: auto;
+  bottom: 0;
+  top: 0;
+  background: #ffcc00;
+  cursor: default;
+}
+
+.mb_sliderZero{
+  background-color: #fafafa;
+  position:absolute;
+  height:100%;
+  margin:0;
+  top:0;
+  cursor:default;
+}
+
+.mb_sliderZeroLabel{
+  font: 12px/12px Arial, sans-serif;
+  color: #AAA;
+  padding: 5px;
+  background-color: #fff;
+  margin-left: -4px;
+  z-index: -2;
+  margin-top: -5px;
+}
+
+.mb_sliderValueLabel{
+  font:12px/12px Arial, sans-serif;
+  padding: 3px 5px;
+  background-color: #2F97C6;
+  color: #fff;
+  top: -24px;
+  margin-left:0;
+  z-index:-1;
+  border: none;
+  border-radius: 4px;
+  margin-top: -10px;
+  white-space: nowrap;
+}
+
+.mb_sliderValueLabel:after{
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  width: 0;
+  height: 0;
+  left:0;
+  right: 0;
+  margin: auto;
+  border-style: solid;
+  border-width: 5px 5px 0 5px;
+  border-color: #2F97C6 transparent transparent transparent;
+}
+
+.mb_sliderValueLabel.right{
+  left: auto!important;
+  right: -15px!important;
+}
+
+.mb_sliderValueLabel.left{
+  left: -15px!important;
+  right: auto!important;
+}
+
+.mb_sliderValueLabel.right:after{
+  left:auto;
+  right: 10px;
+  margin: auto;
+}
+
+.mb_sliderValueLabel.left:after{
+  right:auto;
+  left: 10px;
+  margin: auto;
+}

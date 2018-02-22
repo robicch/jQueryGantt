@@ -10,6 +10,7 @@
 
   <link rel=stylesheet href="gantt.css" type="text/css">
   <link rel=stylesheet href="ganttPrint.css" type="text/css" media="print">
+  <link rel=stylesheet href="libs/jquery/valueSlider/mb.slider.css" type="text/css" media="print">
 
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -25,6 +26,7 @@
   <script src="libs/i18nJs.js"></script>
   <script src="libs/jquery/dateField/jquery.dateField.js"></script>
   <script src="libs/jquery/JST/jquery.JST.js"></script>
+  <script src="libs/jquery/valueSlider/jquery.mb.slider.js"></script>
 
   <script type="text/javascript" src="libs/jquery/svg/jquery.svg.min.js"></script>
   <script type="text/javascript" src="libs/jquery/svg/jquery.svgdom.1.8.js"></script>
@@ -101,6 +103,8 @@ $(function() {
 
   ge.loadProject(project);
   ge.checkpoint(); //empty the undo stack
+
+  //initializeHistoryManagement(ge.tasks[0].id);
 });
 
 
@@ -334,36 +338,35 @@ function editResources(){
   var ndo = createModalPopup(400, 500).append(resourceEditor);
 }
 
-function initializeHistoryManagement(){
+function initializeHistoryManagement(taskId){
 
-  //si chiede al server se c'è della hisory per la root
-  $.getJSON(contextPath+"/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTPOINTS", OBJID:10236}, function (response) {
+  //retrieve from server the list of history points in millisecond that represent the instant when the data has been recorded
+  //response: {ok:true, historyPoints: [1498168800000, 1498600800000, 1498687200000, 1501538400000, …]}
+  $.getJSON(contextPath+"/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTPOINTS", OBJID:taskId}, function (response) {
 
-    //se c'è
+    //if there are history points
     if (response.ok == true && response.historyPoints && response.historyPoints.length>0) {
 
-      //si crea il bottone sulla bottoniera
+      //add show slider button on button bar
       var histBtn = $("<button>").addClass("button textual icon lreq30 lreqLabel").attr("title", "SHOW_HISTORY").append("<span class=\"teamworkIcon\">&#x60;</span>");
 
-      //al click
+      //clicking it
       histBtn .click(function () {
         var el = $(this);
         var ganttButtons = $(".ganttButtonBar .buttons");
 
-        //è gi�  in modalit�  history?
+        //is it already on?
         if (!ge.element.is(".historyOn")) {
           ge.element.addClass("historyOn");
           ganttButtons.find(".requireCanWrite").hide();
 
-          //si carica la history server side
-          if (false) return;
+          //load the history points from server again
           showSavingMessage();
           $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTPOINTS", OBJID: ge.tasks[0].id}, function (response) {
             jsonResponseHandling(response);
             hideSavingMessage();
             if (response.ok == true) {
               var dh = response.historyPoints;
-              //ge.historyPoints=response.historyPoints;
               if (dh && dh.length > 0) {
                 //si crea il div per lo slider
                 var sliderDiv = $("<div>").prop("id", "slider").addClass("lreq30 lreqHide").css({"display":"inline-block","width":"500px"});
@@ -390,6 +393,13 @@ function initializeHistoryManagement(){
                   onStop     : function (obj) {
                     var val = $(obj).mbgetVal();
                     showSavingMessage();
+                    /**
+                     * load the data history for that milliseconf from server
+                     * response in this format {ok: true, baselines: {...}}
+                     *
+                     * baselines: {61707: {duration:1,endDate:1550271599998,id:61707,progress:40,startDate:1550185200000,status:"STATUS_WAITING",taskId:"3055"},
+                     *            {taskId:{duration:in days,endDate:in millis,id:history record id,progress:in percent,startDate:in millis,status:task status,taskId:"3055"}....}}                     */
+
                     $.getJSON(contextPath + "/applications/teamwork/task/taskAjaxController.jsp", {CM: "GETGANTTHISTORYAT", OBJID: ge.tasks[0].id, millis:dh[val]}, function (response) {
                       jsonResponseHandling(response);
                       hideSavingMessage();
@@ -416,9 +426,9 @@ function initializeHistoryManagement(){
           });
 
 
-          // quando si spenge
+          // closing the history
         } else {
-          //si cancella lo slider
+          //remove the slider
           $("#slider").remove();
           ge.element.removeClass("historyOn");
           if (ge.permissions.canWrite)

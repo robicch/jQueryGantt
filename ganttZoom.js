@@ -158,6 +158,7 @@
         var start = new Date(date.getTime());
         date.setMonth(Math.floor(date.getMonth() / 3) * 3 + 3);
         var inc=(date.getMonth()-start.getMonth());
+        inc=inc>0?inc:1;
         var q = (Math.floor(start.getMonth() / 3) + 1);
         self.createHeadCell(1,this,tr1,GanttMaster.messages["GANTT_QUARTER"]+" "+q+" "+start.format("yyyy"), inc,"",start,date);
       },
