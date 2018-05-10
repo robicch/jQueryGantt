@@ -836,3 +836,14 @@ select.taskStatus{
     font-size: 50%;
   }
 }
+th.gdfColHeader {
+  padding: 0px !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+.gdfColHeader.max {
+  max-width: 35px !important;
+}
+.gdfColHeader.max2 {
+  max-width: 25px !important;
+}
