@@ -253,7 +253,7 @@ GanttMaster.prototype.init = function (workSpace,templateFunctions = []) {
   $("#saveGanttButton").after($('#LOG_CHANGES_CONTAINER'));
 
   //ask for comment management
-  this.element.on("saveRequired.gantt",this.manageSaveRequired);
+  this.element.on("saveRequired.gantt",self.manageSaveRequired.bind(this));
 
 
   //resize
