@@ -1671,8 +1671,6 @@ GanttMaster.prototype.manageSaveRequired = function (ev, showSave) {
 		$("#LOG_CHANGES_CONTAINER").css("display", changes ? "inline-block" : "none");
 	}.bind(this);
 
-	console.log(this);
-
 	if (showSave) {
 		$("body").stopTime("gantt.manageSaveRequired").oneTime(200, "gantt.manageSaveRequired", checkChanges);
 	} else {
