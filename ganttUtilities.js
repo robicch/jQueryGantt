@@ -64,7 +64,7 @@ $.gridify = function (table, opt) {
     if (!$.gridify.columInResize) {
       var colHeader = $(this);
       var nextCol = colHeader.next();
-      if (nextCol.length > 0 && nextCol.width() < options.resizeZoneWidth)
+      if (nextCol.length > 0 && nextCol.outerWidth() < options.resizeZoneWidth)
         colHeader = nextCol;
 
       if (!colHeader.is(".gdfResizable"))
@@ -72,7 +72,7 @@ $.gridify = function (table, opt) {
 
       var mousePos = e.pageX - colHeader.offset().left;
 
-      if (colHeader.width() - mousePos < options.resizeZoneWidth) {
+      if (colHeader.outerWidth() - mousePos < options.resizeZoneWidth) {
         $("body").addClass("gdfHResizing");
       } else {
         $("body").removeClass("gdfHResizing");
@@ -84,14 +84,14 @@ $.gridify = function (table, opt) {
     var colHeader = $(this);
 
     var nextCol = colHeader.next();
-    if (nextCol.length > 0 && nextCol.width() < options.resizeZoneWidth)
+    if (nextCol.length > 0 && nextCol.outerWidth() < options.resizeZoneWidth)
       colHeader = nextCol;
 
     if (!colHeader.is(".gdfResizable"))
       return;
 
     var mousePos = e.pageX - colHeader.offset().left;
-    if (colHeader.width() - mousePos < options.resizeZoneWidth) {
+    if (colHeader.outerWidth() - mousePos < options.resizeZoneWidth) {
       $("body").unselectable();
       $.gridify.columInResize = colHeader;
       //on event for start resizing
@@ -103,8 +103,8 @@ $.gridify = function (table, opt) {
         //manage resizing
         var w = e.pageX - $.gridify.columInResize.offset().left;
         w = w <= 1 ? 1 : w;
-        $.gridify.columInResize.width(w);
-        $.gridify.columInResize.data("fTh").width(w);
+        $.gridify.columInResize.outerWidth(w);
+        $.gridify.columInResize.data("fTh").outerWidth(w);
 
 
         //on mouse up on body to stop resizing
@@ -140,7 +140,7 @@ $.gridify = function (table, opt) {
     });
 
     w = w + 5;
-    col.width(w);
+    col.outerWidth(w);
     col.data("fTh").width(w);
 
     //save columns dimension
@@ -501,7 +501,7 @@ function resynchDates(leavingField, startField, startMilesField, durationField, 
       date.setHours(0, 0, 0, 0); //this is necessary because decreasing end we are at 23:50
       start = computeStart(date.getTime()); //not strictly necessary
     } else if ("CHANGE_DURATION" == command) {
-      duration = getDurationInUnits(new Date(start),new Date(end)) + 1; 
+      duration = getDurationInUnits(new Date(start),new Date(end)) + 1;
     }
 
     startField.val(new Date(start).format());
