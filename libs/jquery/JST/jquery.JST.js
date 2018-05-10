@@ -104,7 +104,6 @@ $.JST = {
 			stripString = "<div>Template is required</div>";
 
 		} else if (typeof(templates[template]) === "function") { // resig template
-			console.log(jsData);
 			try {
 				stripString = templates[template](jsData);// create a jquery object in memory
 			} catch (e) {
