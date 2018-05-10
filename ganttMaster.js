@@ -90,7 +90,7 @@ function GanttMaster() {
 }
 
 
-GanttMaster.prototype.init = function (workSpace) {
+GanttMaster.prototype.init = function (workSpace,templateFunctions = []) {
   var place=$("<div>").prop("id","TWGanttArea").css( {padding:0, "overflow-y":"auto", "overflow-x":"hidden","border":"1px solid #e5e5e5",position:"relative"});
   workSpace.append(place).addClass("TWGanttWorkSpace");
 
@@ -103,7 +103,7 @@ GanttMaster.prototype.init = function (workSpace) {
 
   var self = this;
   //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();
+  $("#gantEditorTemplates").loadTemplates(templateFunctions).remove();
 
   //create editor
   this.editor = new GridEditor(this);
@@ -423,7 +423,7 @@ GanttMaster.prototype.addTask = function (task, row) {
     this.gantt.addTask(task);
   }
 
-//trigger addedTask event 
+//trigger addedTask event
   $(this.element).trigger("addedTask.gantt", task);
   return ret;
 };
