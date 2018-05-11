@@ -847,3 +847,6 @@ th.gdfColHeader {
 .gdfColHeader.max2 {
   max-width: 25px !important;
 }
+.gdfCell input[disabled]{
+  color:#222;
+}

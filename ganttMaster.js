@@ -20,7 +20,8 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-function GanttMaster() {
+function GanttMaster(templateFunctions = []) {
+	this.templateFunctions = templateFunctions;
 	this.tasks = [];
 	this.deletedTaskIds = [];
 	this.links = [];
@@ -89,7 +90,7 @@ function GanttMaster() {
 }
 
 
-GanttMaster.prototype.init = function (workSpace, templateFunctions = []) {
+GanttMaster.prototype.init = function (workSpace) {
 	var place = $("<div>").prop("id", "TWGanttArea").css({
 		padding: 0,
 		"overflow-y": "auto",
@@ -108,7 +109,7 @@ GanttMaster.prototype.init = function (workSpace, templateFunctions = []) {
 
 	var self = this;
 	//load templates
-	$("#gantEditorTemplates").loadTemplates(templateFunctions).remove();
+	$("#gantEditorTemplates").loadTemplates(this.templateFunctions).remove();
 
 	//create editor
 	this.editor = new GridEditor(this);
