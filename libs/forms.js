@@ -414,7 +414,7 @@ jQuery.fn.validateField = function () {
 			}
 
 			if (!rett) {
-				el.createErrorAlert(i18n.ERROR_ON_FIELD, i18n.INVALID_DATA + (errParam ? " " + errParam : ""));
+				el.createErrorAlert(Gantt_i18n.ERROR_ON_FIELD, Gantt_i18n.INVALID_DATA + (errParam ? " " + errParam : ""));
 				isValid=false;
 			}
 
@@ -460,7 +460,7 @@ jQuery.fn.validateField = function () {
 				}
 
 				if (el.attr("minValue") && val<min){
-					el.createErrorAlert(i18n.ERROR_ON_FIELD, i18n.OUT_OF_BOUDARIES + " ("+el.attr("minValue")+" : "+(el.attr("maxValue")?el.attr("maxValue"):"--")+")");
+					el.createErrorAlert(Gantt_i18n.ERROR_ON_FIELD, Gantt_i18n.OUT_OF_BOUDARIES + " ("+el.attr("minValue")+" : "+(el.attr("maxValue")?el.attr("maxValue"):"--")+")");
 					rett=false;
 					isValid=false;
 
@@ -468,7 +468,7 @@ jQuery.fn.validateField = function () {
 				}
 
 				if (rett && el.attr("maxValue") && val>max){
-					el.createErrorAlert(i18n.ERROR_ON_FIELD, i18n.OUT_OF_BOUDARIES + " ("+(el.attr("minValue")?el.attr("minValue"):"--")+" : "+el.attr("maxValue")+")");
+					el.createErrorAlert(Gantt_i18n.ERROR_ON_FIELD, Gantt_i18n.OUT_OF_BOUDARIES + " ("+(el.attr("minValue")?el.attr("minValue"):"--")+" : "+el.attr("maxValue")+")");
 					rett=false;
 					isValid=false;
 				}
@@ -551,7 +551,7 @@ function limitSize(ob) {
 		var val = ob.value;//.replace(/\r\n/g,"\n");
 		if (val.length > ml) {
 			ob.value = val.substr(0, ml);
-			$(ob).createErrorAlert("Error",i18n.ERR_FIELD_MAX_SIZE_EXCEEDED);
+			$(ob).createErrorAlert("Error",Gantt_i18n.ERR_FIELD_MAX_SIZE_EXCEEDED);
 		} else {
 			$(ob).clearErrorAlert();
 		}
@@ -579,13 +579,13 @@ function alertOnUnload(container) {
       if (!('true' == '' + anInput.attr('excludeFromAlert'))) {
         if (anInput.attr("maleficoTiny")) {
           if (tinymce.EditorManager.get(anInput.prop("id")).isDirty()) {
-            return i18n.FORM_IS_CHANGED + " \"" + anInput.prop("name") + "\"";
+            return Gantt_i18n.FORM_IS_CHANGED + " \"" + anInput.prop("name") + "\"";
           }
 
         } else if (anInput.isValueChanged()) {
           var inputLabel = $("label[for='" + anInput.prop("id") + "']").text(); //use label element
           inputLabel = inputLabel ? inputLabel : anInput.prop("name");
-          return i18n.FORM_IS_CHANGED + " \"" + inputLabel + "\"";
+          return Gantt_i18n.FORM_IS_CHANGED + " \"" + inputLabel + "\"";
         }
       }
     }
@@ -595,7 +595,7 @@ function alertOnUnload(container) {
 
 function canILeave(){
 	var ret = window.onbeforeunload();
-	if (typeof(ret)!="undefined" && !confirm(ret+"  \n"+i18n.PROCEED))
+	if (typeof(ret)!="undefined" && !confirm(ret+"  \n"+Gantt_i18n.PROCEED))
 		return false;
 	else
 		return true;
