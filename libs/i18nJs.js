@@ -146,7 +146,7 @@ function isHoliday(date) {
 }
 
 
-var i18n = {
+var Gantt_i18n = {
 	YES: "Yes",
 	NO: "No",
 	FLD_CONFIRM_DELETE: "confirm the deletion?",
