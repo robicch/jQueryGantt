@@ -612,8 +612,8 @@ select {
 .formElementExclamation {
   width: 15px;
   height: 25px;
-  mmmargin-left: -20px;
-  mmmposition: absolute;
+  margin-left: -20px;
+  position: absolute;
   background: url("../../applications/gantt/distrib/res/alert.gif") no-repeat;
 }
 

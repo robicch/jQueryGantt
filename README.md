@@ -25,11 +25,11 @@ These are some key features:
 
 Try the online working demo here: https://gantt.twproject.com
 
-Read here about latest release: https://roberto.open-lab.com/2017/04/05/new-gantt-editor-release-the-best-ever/
+Read here about latest release: https://roberto.twproject.com/2017/04/05/new-gantt-editor-release-the-best-ever/
 
-Read the genesis of this component here: http://roberto.open-lab.com/2012/06/14/the-javascript-gantt-odyssey/
+Read the genesis of this component here: http://roberto.twproject.com/2012/06/14/the-javascript-gantt-odyssey/
 
-Documentation is here: http://roberto.open-lab.com/2012/08/24/jquery-gantt-editor/
+Documentation is here: http://roberto.twproject.com/2012/08/24/jquery-gantt-editor/
 
 jQuery Gantt editor is part of <a href="https://twproject.com">Twproject 6</a> project
 
