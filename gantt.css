@@ -481,7 +481,7 @@ input[readonly]{
   color:#000;
 }
 .taskStatus[status=STATUS_WAITING]{
-  background-color:rgb(247, 145, 54);
+  background-color:#F79136;
   color:#000;
 }
 .taskStatus[status=STATUS_UNDEFINED]{
