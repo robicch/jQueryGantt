@@ -727,7 +727,7 @@ GanttMaster.prototype.markUnChangedTasksAndAssignments=function(newProject){
   //console.debug("markUnChangedTasksAndAssignments");
   //si controlla che ci sia qualcosa di cambiato, ovvero che ci sia l'undo stack
   if (this.__undoStack.length>0){
-    var oldProject=JSON.parse(ge.__undoStack[0]);
+    var oldProject=JSON.parse(this.__undoStack[0]);
     //si looppano i "nuovi" task
     for (var i=0;i<newProject.tasks.length;i++){
       var newTask=newProject.tasks[i];
@@ -1643,14 +1643,15 @@ GanttMaster.prototype.computeCriticalPath = function () {
 GanttMaster.prototype.manageSaveRequired=function(ev, showSave) {
   //console.debug("manageSaveRequired", showSave);
 
+  var self=this;
   function checkChanges() {
     var changes = false;
     //there is somethin in the redo stack?
-    if (ge.__undoStack.length > 0) {
-      var oldProject = JSON.parse(ge.__undoStack[0]);
+    if (self.__undoStack.length > 0) {
+      var oldProject = JSON.parse(self.__undoStack[0]);
       //si looppano i "nuovi" task
-      for (var i = 0; !changes && i < ge.tasks.length; i++) {
-        var newTask = ge.tasks[i];
+      for (var i = 0; !changes && i < self.tasks.length; i++) {
+        var newTask = self.tasks[i];
         //se è un task che c'erà già
         if (!(""+newTask.id).startsWith("tmp_")) {
           //si recupera il vecchio task
