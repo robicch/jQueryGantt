@@ -104,7 +104,7 @@ $(function() {
   ge.loadProject(project);
   ge.checkpoint(); //empty the undo stack
 
-  //initializeHistoryManagement(ge.tasks[0].id);
+  initializeHistoryManagement(ge.tasks[0].id);
 });
 
 
@@ -176,14 +176,32 @@ function loadGanttFromServer(taskId, callback) {
   return ret;
 }
 
+function upload(uploadedFile) {
+  var fileread = new FileReader();
+  
+  fileread.onload = function(e) {
+    var content = e.target.result;
+    var intern = JSON.parse(content); // Array of Objects.
+    //console.log(intern); // You can index every object
+    
+    ge.loadProject(intern);
+    ge.checkpoint(); //empty the undo stack
+
+  };
+
+  fileread.readAsText(uploadedFile);
+}
 
 function saveGanttOnServer() {
 
   //this is a simulation: save data to the local storage or to the textarea
-  saveInLocalStorage();
+  //saveInLocalStorage();
+
+  var prj = ge.saveProject();
+
+  download(JSON.stringify(prj, null, '\t'), "MyProject.json", "application/json");
 
   /*
-  var prj = ge.saveProject();
 
   delete prj.resources;
   delete prj.roles;
@@ -228,6 +246,25 @@ function saveGanttOnServer() {
   */
 }
 
+// Function to download data to a file
+function download(data, filename, type) {
+  var file = new Blob([data], {type: type});
+  if (window.navigator.msSaveOrOpenBlob) // IE10+
+    window.navigator.msSaveOrOpenBlob(file, filename);
+  else { // Others
+    var a = document.createElement("a"),
+      url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);  
+    }, 0); 
+  }
+}
+
 function newProject(){
   clearGantt();
 }
@@ -266,6 +303,7 @@ function loadFromLocalStorage() {
 
 function saveInLocalStorage() {
   var prj = ge.saveProject();
+
   if (localStorage) {
     localStorage.setObject("teamworkGantDemo", prj);
   }
@@ -460,7 +498,8 @@ function showBaselineInfo (event,element){
 
 
 <div id="gantEditorTemplates" style="display:none;">
-<div class="__template__" type="GANTBUTTONS"><!--
+<div class="__template__" type="GANTBUTTONS">
+  <!--
   <div class="ganttButtonBar noprint">
     <div class="buttons">
       <a href="https://gantt.twproject.com/"><img src="res/twGanttLogo.png" alt="Twproject" align="absmiddle" style="max-width: 136px; padding-right: 15px"></a>
@@ -499,12 +538,19 @@ function showBaselineInfo (event,element){
 
     <button onclick="editResources();" class="button textual requireWrite" title="edit resources"><span class="teamworkIcon">M</span></button>
       &nbsp; &nbsp; &nbsp; &nbsp;
-    <button onclick="saveGanttOnServer();" class="button first big requireWrite" title="Save">Save</button>
-    <button onclick='newProject();' class='button requireWrite newproject'><em>clear project</em></button>
-    <button class="button login" title="login/enroll" onclick="loginEnroll($(this));" style="display:none;">login/enroll</button>
-    <button class="button opt collab" title="Start with Twproject" onclick="collaborate($(this));" style="display:none;"><em>collaborate</em></button>
-    </div></div>
-  --></div>
+    </div>
+
+    <div>
+      <button onclick="saveGanttOnServer();" class="button first big requireWrite" title="Save">Save</button>
+      <input type="file" name="load-file" id="load-file">
+      <label for="load-file">Load</label>
+      <button onclick='newProject();' class='button requireWrite newproject'><em>clear project</em></button>
+      <button class="button login" title="login/enroll" onclick="loginEnroll($(this));" style="display:none;">login/enroll</button>
+      <button class="button opt collab" title="Start with Twproject" onclick="collaborate($(this));" style="display:none;"><em>collaborate</em></button>
+    </div>
+  </div>
+  -->
+</div>
 
 <div class="__template__" type="TASKSEDITHEAD"><!--
   <table class="gdfTable" cellspacing="0" cellpadding="0">
@@ -790,6 +836,12 @@ function showBaselineInfo (event,element){
 
     });
   }
+
+$(document).on("change", "#load-file", function() {
+  var uploadedFile = $("#load-file").prop("files")[0];
+  upload(uploadedFile);
+});
+
 </script>
 
 
