@@ -1,5 +1,5 @@
-Copyright (c) 2012-2018 Open Lab http://open-lab.com
 Copyright (c) 2019-2020 Twproject https://twproject.com
+Copyright (c) 2012-2018 Open Lab http://open-lab.com
 Written by Roberto Bicchierai and Silvia Chelazzi http://roberto.twproject.com
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
