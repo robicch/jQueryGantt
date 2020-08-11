@@ -753,17 +753,12 @@ Ganttalendar.prototype.reset = function () {
 Ganttalendar.prototype.timeSimulation = function (time) {
     var self = this;
     //var prof = new Profiler("ganttRedrawTasks");
-
     self.element.find("table.ganttTable").height(self.master.editor.element.height());
-
     var collapsedDescendant = this.master.getCollapsedDescendant();
-
     var startRowAdd = self.master.firstScreenLine - self.master.rowBufferSize;
     var endRowAdd = self.master.firstScreenLine + self.master.numOfVisibleRows + self.master.rowBufferSize;
-
     $("#linksGroup").empty();
     var gridGroup = $("#gridGroup").empty().get(0);
-
     //add missing ones
     var row = 0;
     self.master.firstVisibleTaskIndex = -1;
@@ -779,17 +774,14 @@ Ganttalendar.prototype.timeSimulation = function (time) {
         }
         row++
     }
-
     //creates rows grid
     for (var i = 40; i <= self.master.editor.element.height(); i += self.master.rowHeight)
         self.svg.rect(gridGroup, 0, i, "100%", self.master.rowHeight, {class: "ganttLinesSVG"});
-
     // drawTodayLine
     if (time > self.startMillis && time < self.endMillis) {
         var x = Math.round((time - self.startMillis) * self.fx);
         self.svg.line(gridGroup, x, 0, x, "100%", {class: "ganttTodaySVG"});
     }
-
 }
 
 Ganttalendar.prototype.redrawTasks = function (drawAll) {

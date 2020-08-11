@@ -1409,7 +1409,6 @@ GanttMaster.prototype.print = function () {
     this.gantt.redrawTasks(true);
     print();
 };
-
 GanttMaster.prototype.timeSimulation = function ({startTime, endTime, rate, callback}) {
     let self = this;
     let currentTime = startTime;
@@ -1422,11 +1421,8 @@ GanttMaster.prototype.timeSimulation = function ({startTime, endTime, rate, call
             currentTime += 24 * 60 * 60 * 1000 * (rate ? rate : 1);
             self.gantt.timeSimulation(currentTime);
             callback && callback(currentTime);
-
         }
     }, 1000)
-
-
 }
 
 GanttMaster.prototype.resize = function () {
