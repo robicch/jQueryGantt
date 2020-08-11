@@ -37,7 +37,7 @@
   <script src="ganttDrawerSVG.js"></script>
   <script src="ganttZoom.js"></script>
   <script src="ganttGridEditor.js"></script>
-  <script src="ganttMaster.js"></script>  
+  <script src="ganttMaster.js"></script>
 
 
   <!--<script src="libs/profiling.js"></script>-->
@@ -103,7 +103,15 @@ $(function() {
 
   ge.loadProject(project);
   ge.checkpoint(); //empty the undo stack
-
+  // ge.timeSimulation({
+  //   startTime: new Date().getTime(),
+  //   endTime: new Date('2020-08-20').getTime(),
+  //   rate: 1,
+  //   callback: function (time) {
+  //     console.log(time);
+  //   }
+  //
+  // })
   initializeHistoryManagement(ge.tasks[0].id);
 });
 
@@ -178,12 +186,12 @@ function loadGanttFromServer(taskId, callback) {
 
 function upload(uploadedFile) {
   var fileread = new FileReader();
-  
+
   fileread.onload = function(e) {
     var content = e.target.result;
     var intern = JSON.parse(content); // Array of Objects.
     //console.log(intern); // You can index every object
-    
+
     ge.loadProject(intern);
     ge.checkpoint(); //empty the undo stack
 
@@ -260,8 +268,8 @@ function download(data, filename, type) {
     a.click();
     setTimeout(function() {
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);  
-    }, 0); 
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 }
 
