@@ -1404,7 +1404,9 @@ GanttMaster.prototype.saveRequired = function () {
 
 GanttMaster.prototype.print = function () {
   this.gantt.redrawTasks(true);
-  print();
+ // Wait until the redrawing task is over before printing, or the SVG links may not be printed.
+  setTimeout(function(){print()}, 1000);
+
 };
 
 
