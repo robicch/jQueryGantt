@@ -564,6 +564,14 @@ Date.fromInt=function (dateInt){
 Date.prototype.isHoliday=function(){
   return isHoliday(this);
 };
+// Just define isHoliday in i18nJs.js
+// Date.prototype.setHoliday = function(){
+//   this._isHoliday=true;
+// };
+
+// Date.prototype.setWorkday = function(){
+//   this._isHoliday=false;
+// };
 
 Date.prototype.isToday=function(){
   return this.toInt()==new Date().toInt();  

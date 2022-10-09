@@ -1,13 +1,3 @@
-@font-face {
-  font-family: 'TeamworkRegular';
-  src: url('res/icons.eot?5qjga5');
-  src: url('res/icons.eot?#iefix5qjga5') format('embedded-opentype'),
-  url('res/icons.woff?5qjga5') format('woff'),
-  url('res/icons.ttf?5qjga5') format('truetype'),
-  url('res/icons.svg?5qjga5#icons') format('svg');
-  font-weight: normal !important;
-  font-style: normal;
-}
 
 * {
   -webkit-box-sizing: border-box;
@@ -33,8 +23,7 @@ BODY, TBODY {
 a {
   text-decoration: none;
   font-weight: bold;
-  /*color: #16ABDD;*/
-  color: #2b9af3;
+  color: #3bbf67;
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-font-smoothing: antialiased;
@@ -42,9 +31,8 @@ a {
 }
 
 a:hover, a.aHover {
-  color: #0C85AD;
-  color: #2575be;
-  text-decoration: underline;
+  color: #2196f3;
+  text-decoration: none;
 }
 
 h1 {
@@ -99,37 +87,25 @@ h4 {
   cursor: progress;
 }
 
+.logo{
+  text-decoration-line: none;
+  margin-right: 6px;
+  vertical-align: middle;
+  font-weight: normal;
+}
 /*
 -------------------------------------------------------
 teamwork icon
 -------------------------------------------------------
 */
 
-.teamworkIcon {
-  font-family: 'TeamworkRegular' !important;
-  color: #34495e;
-  font-weight: normal;
-  font-size: 120%;
-  font-style: normal !important;
-  text-rendering: optimizelegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-font-smoothing: antialiased;
 
-}
 
-.teamworkIcon:hover {
-  opacity: .8
-}
-
-.teamworkIcon.withLabel {
-  padding-right: 5px;
-}
-
-.button:hover .teamworkIcon {
+.button:hover .iconfont {
   opacity: 0.8
 }
 
-.teamworkIcon.alert {
+.iconfont.alert {
   color: #B61E2D;
 }
 
@@ -395,7 +371,7 @@ width: 120px;
   background-color: rgba(255, 255, 0, 0.16);
 }
 
-.lastMod .teamworkIcon {
+.lastMod .iconfont {
   color: #34495e;
   font-size: 160%;
   vertical-align: middle;
@@ -405,10 +381,42 @@ width: 120px;
 .button.buttonImg,
 .ganttButtonSeparator {
   vertical-align: middle;
+  position: relative;
 }
 
-.button span.teamworkIcon {
+.button span.iconfont {
   font-size: .95em;
+}
+
+.tooltip{
+  position: absolute;
+  background-color: #000;
+  border-radius: 4px;
+  color: #fff;
+  text-align: center;
+  padding: 4px;
+  top:3.5em;
+  width:max-content;
+  margin:auto;
+  font-size: 12px;
+/*  left: calc(-1 * var(--width) / 2);
+  --width: 100%;*/
+  visibility: hidden;
+}
+
+.tooltip::before{
+  content: '';
+  width: 0;
+  height: 0;
+  border: 4px solid;
+  position: absolute;
+  top: -8px;
+  left: calc(50% - 4px);
+  border-color: transparent transparent #000;
+}
+
+.button.textual:hover .tooltip {
+  visibility: visible;
 }
 
 .clearfix:after {
@@ -529,7 +537,7 @@ Buttons
 .button.textual, .button.buttonImg {
   border: none;
   background-color: transparent;
-  color: #68979B;
+  color: #34495e;
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
   -o-border-radius: 0;
@@ -556,17 +564,12 @@ Buttons
   margin: 0
 }
 
-.button:hover {
-  background-color: #506b84;
-  color: rgba(255, 255, 255, 0.75);
-}
-
 a.button:hover {
   text-decoration: none
 }
 
 .button.textual:hover, .button.buttonImg:hover {
-  background-color: transparent;
+  color: #68979B;
 }
 
 span.separator {
@@ -577,7 +580,7 @@ span.separator {
   color: #009E94;
 }
 
-.button.add .teamworkIcon {
+.button.add .iconfont {
   color: #009E94;
 }
 
@@ -812,8 +815,9 @@ iframe#bwinPopup {
   height: 20px;
   text-align: center;
   line-height: 20px;
-  right: 15px;
-  top:15px;
+  right: 12px;
+  top: 12px;
+  font-size: 18px !important;
 }
 
 .modalPopup.black .bwinPopupd .popUpClose{

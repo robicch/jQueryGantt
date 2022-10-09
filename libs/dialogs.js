@@ -242,11 +242,11 @@ function createModalPopup(width, height, onCloseCallBack, cssClass, element, pop
 
 	showBG(bg, 300, function(){})
 	bg.on("click",function(event){
-		if ($(event.target).closest(".bwinPopupd").length <= 0)
+		if ($(event.target).closest(".bwinPopupd").length <= 0 && !$(event.target).hasClass("del"))
 			bg.trigger("close");
 	});
 
-	var close = $("<span class=\"teamworkIcon close popUpClose\" style='cursor:pointer;position:absolute;'>x</span>");
+	var close = $("<span class=\"iconfont icon-gantt-close popUpClose\" style='cursor:pointer;position:absolute;'></span>");
 	internalDiv.append(close);
 
 	close.click(function () {
@@ -256,7 +256,7 @@ function createModalPopup(width, height, onCloseCallBack, cssClass, element, pop
 	$("body").css({overflowY:"hidden"});
 
 	if(!element){
-		$("body").append(bg);
+		$("#workSpace").append(bg);  //$("body").append(bg);  fix popup display in fullscreen
 	}else{
 		element.after(bg);
 	}

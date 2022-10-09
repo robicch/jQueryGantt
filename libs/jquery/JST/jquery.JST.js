@@ -3,6 +3,17 @@ $.fn.loadTemplates = function() {
   return this;
 };
 
+$.fn.ajaxLoadTemplates = function(templateUrl) {
+  $.JST.ajaxLoadTemplates(templateUrl);
+  return this;
+};
+
+$.fn.jsLoadTemplates = function(jsVar) {
+  console.log("Using JS template");
+  $.JST.jsLoadTemplates(jsVar);
+  return this;
+};
+
 $.JST = {
   _templates: new Object(),
   _decorators:new Object(),
@@ -168,6 +179,12 @@ $.JST = {
       }
     });
 
+  },
+  jsLoadTemplates: function(ganttEditorTemplates) {
+    var div = $("<div>");
+    var data = atob(ganttEditorTemplates);
+    div.html(data);
+    $.JST.loadTemplates(div);
   }
 
 

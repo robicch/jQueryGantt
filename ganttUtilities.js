@@ -171,6 +171,12 @@ $.gridify = function (table, opt) {
     if (localStorage) {
       if (localStorage.getObject("TWPGanttGridState")) {
         var gridState = localStorage.getObject("TWPGanttGridState");
+        //fix the last column width
+        let tableWidth = gridState.colSizes.reduce((x,y)=>x+y)/2;
+        console.log("tableWidth:",tableWidth,"innerWidth",window.innerWidth);
+        //20px = padding 10px+10px
+        let initial_width = window.innerWidth-tableWidth-20;
+        gridState.colSizes[gridState.colSizes.length-1]=initial_width>672?initial_width:672;
         if (gridState.colSizes) {
           box.find(".gdfTable .gdfColHeader").each(function (i) {
             $(this).width(gridState.colSizes[i]);
@@ -204,13 +210,13 @@ $.splittify = {
     //override with saved one
     loadPosition();
 
-    var toLeft = $("<div>").addClass("toLeft").html("{").click(function () {splitter.resize(0.001, 300);});
+    var toLeft = $("<div>").addClass("toLeft iconfont icon-gantt-arrow-left").click(function () {splitter.resize(0.001, 300);});
     splitterBar.append(toLeft);
 
-    var toCenter = $("<div>").addClass("toCenter").html("&#xa9;").click(function () {splitter.resize(50, 300);});
+    var toCenter = $("<div>").addClass("toCenter iconfont icon-gantt-circle").click(function () {splitter.resize(50, 300);});
     splitterBar.append(toCenter);
 
-    var toRight = $("<div>").addClass("toRight").html("}").click(function () {splitter.resize(99.9999, 300);});
+    var toRight = $("<div>").addClass("toRight iconfont icon-gantt-arrow-right").click(function () {splitter.resize(99.9999, 300);});
     splitterBar.append(toRight);
 
 

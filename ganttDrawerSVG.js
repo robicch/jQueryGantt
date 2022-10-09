@@ -826,6 +826,40 @@ Ganttalendar.prototype.redraw = function () {
     var domEl = this.createGanttGrid();
   this.element = domEl;
   par.append(domEl);
+  // 单击甘特图日期切换工作日和假期
+  var th1 = this.element.children('table.ganttFixHead').children('tr.ganttHead1').children('th');
+  // var th2 = ge.element.children('div.splitterContainer').children('div.splitBox2').children('div.gantt').children('table.ganttFixHead').children('tr.ganttHead2').children('th.headSmall');
+  var th2 = this.element.children('table.ganttFixHead').children('tr.ganttHead2').children('th.headSmall');
+  var ganttBodyCells = this.element.children('table.ganttTable').children('tr.ganttBody').children('td.ganttBodyCell');
+  th2.off("click").on("click",function(){
+        let idx = parseInt($(this).parent().children().index(this));
+        let day = parseInt(this.innerText);
+        let mons = Array.from(th1.map(function(){ return {'days': parseInt(this.colSpan),'mons': this.innerText}}));
+        let yearmons = "";
+        let seq = idx;
+        for (itm of mons){
+            if(seq <= itm.days){
+                yearmons = itm.mons;
+                break;
+            }
+            seq -= itm.days;
+        }
+        let selected_day = Date.parseString(day+","+yearmons,"d,MMMM yyyy");
+        let selected_day_str = selected_day.format("yyyy-MM-dd")
+        //console.log(selected_day.format("yyyy-MM-dd")+" isHoliday:"+selected_day.isHoliday());
+        if(selected_day.isHoliday()){
+            ge.holidays.delete(selected_day_str);
+            ge.workdays.add(selected_day_str);
+            $(this).removeClass("holy");
+            $(ganttBodyCells[idx]).removeClass("holy");
+        }else{
+            ge.holidays.add(selected_day_str);
+            ge.workdays.delete(selected_day_str);
+            $(this).addClass("holy");
+            $(ganttBodyCells[idx]).addClass("holy");
+        }
+    });
+
   this.redrawTasks();
 
   //set old scroll  

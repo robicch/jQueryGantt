@@ -1,0 +1,42 @@
+body{
+  background-color: #fff;
+  overflow: hidden;
+}
+#workSpace{
+  padding:0px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  border:1px solid #e5e5e5;
+  position:relative;
+  margin:0 5px
+}
+.resEdit {
+  padding: 15px;
+}
+
+.resLine {
+  width: 95%;
+  padding: 3px;
+  margin: 5px;
+  border: 1px solid #d0d0d0;
+}
+
+.dateRow input[name=start], input[name=end]{
+  width: 120px;
+}
+.ganttButtonBar h1{
+  color: #000000;
+  font-weight: bold;
+  font-size: 28px;
+  margin-left: 10px;
+}
+.splitBox2 .ganttFixHead .ganttHead2 .headSmall{
+  cursor: pointer;
+}
+
+#projectName{
+  float: right;
+  margin: 8px;
+  width: 280px;
+  display: inline-block;
+}

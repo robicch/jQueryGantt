@@ -129,7 +129,7 @@ body{
 }
 
 .vSplitBar .toLeft,.vSplitBar .toRight,.vSplitBar .toCenter{
-  font-family: icons,TeamworkRegular;
+  font-size: 12px !important;
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -235,7 +235,7 @@ body{
 
 .ganttButtonBar{
   position:relative;
-  z-index: 2;
+  z-index: 6;
   /*background-color: #fff;*/
   border-bottom: 1px solid #959595;
   padding: 5px 0 5px 10px;
@@ -251,6 +251,7 @@ body{
   width: 100%;
   margin-top: 0;
   height: 45px;
+  cursor: default;
 }
 
 .dataTable .ganttButtonBar .buttons {
@@ -264,17 +265,17 @@ body{
   outline: none;
 }
 
-.ganttButtonBar .buttons .button.textual.icon {
+.ganttButtonBar .buttons .button.textual.iconfont {
   height: 45px;
 }
 
 
-.button span.teamworkIcon {
+.button span.iconfont {
   text-indent: -10px;
 }
 
 
-.button.textual span.teamworkIcon {
+.button.textual span.iconfont {
   font-size: 140%
 }
 
@@ -445,57 +446,68 @@ input[readonly]{
 .taskStatusBox{
   position:absolute;
   /*width:100px;*/
-  height:26px;
+  height:30px;
   border:1px solid #a0a0a0;
   background-color:#fff;
-  margin-top:-21px;
+  margin-top:-26px;
   margin-left:-2px;
   padding: 4px;
   z-index: 100;
 }
+.taskStatusBox div{
+  opacity: 0.3;
+}
 .taskStatus{
-  width:15px;
-  height:15px;
+  width:22px;
+  height:22px;
   display:inline-block;
   text-indent: 0;
+  font-family: "iconfont" !important;
+  font-size: 20px !important;
   position:relative;
   box-shadow: none;
   border-radius: 50%;
   border:0;
   cursor: pointer;
 }
-.taskStatus[status=STATUS_ACTIVE]{
-  background-color: #3BBF67;
-  color: #fff;
+
+
+.taskStatus[status=STATUS_ACTIVE]:before {
+  color: #3BBF67;
+  content: "\e606";
 }
-.taskStatus[status=STATUS_DONE]{
-  background-color: #6EBEF4;
-  color:#000;
+.taskStatus[status=STATUS_DONE]:before {
+  color:#2196f3;
+  content: "\e60c";
 }
-.taskStatus[status=STATUS_FAILED]{
-  background-color: #763A96;
-  color: #fff;
+.taskStatus[status=STATUS_FAILED]:before{
+  color: #f00;
+  content: "\e619";
 }
-.taskStatus[status=STATUS_SUSPENDED]{
-  background-color: #F9C154;
-  color:#000;
+.taskStatus[status=STATUS_SUSPENDED]:before{
+  color:#ff9800;
+  content: "\e617";
 }
-.taskStatus[status=STATUS_WAITING]{
-  background-color:#F79136;
-  color:#000;
+.taskStatus[status=STATUS_WAITING]:before{
+  color:#e8989a;
+  content: "\e688";
 }
-.taskStatus[status=STATUS_UNDEFINED]{
-  background-color: #dededf;
-  color:#000;
+.taskStatus[status=STATUS_UNDEFINED]:before{
+  color:#707070;
+  content: "\e604";
 }
 .taskStatus.selected{
-  border:#666 2px solid;
+  opacity: 1;
 }
 
 select.taskStatus{
   width: auto;
   height: auto;
   border-radius: 2px;
+}
+
+.selectTaskStatus{
+    display: inline;
 }
 
 .assigsTableWrapper{
@@ -600,21 +612,26 @@ select.taskStatus{
   fill: #3BBF67;
 }
 .colorByStatus .taskStatusSVG[status=STATUS_DONE]{
-  fill: #6EBEF4;
+  fill: #2196f3;
 }
 .colorByStatus .taskStatusSVG[status=STATUS_FAILED]{
-  fill: #763A96;
+  fill: #f00;
 }
 .colorByStatus .taskStatusSVG[status=STATUS_SUSPENDED]{
-  fill: #f9c154;
+  fill: #ff9800;
+}
+.colorByStatus .taskStatusSVG[status=STATUS_WAITING]{
+  fill: #e8989a;
 }
 .colorByStatus .taskStatusSVG[status=STATUS_UNDEFINED]{
-  fill: #dededf;
+  fill: #707070;
 }
 .colorByStatus .taskStatusSVG[status=STATUS_UNDEFINED] .taskLayout{
   stroke: #ccc;
   stroke-width:1;
 }
+
+
 
 .colorByStatus .taskStatusSVG[status=STATUS_DONE] .textPerc,
 .colorByStatus .taskStatusSVG[status=STATUS_ACTIVE] .textPerc,
@@ -769,7 +786,7 @@ select.taskStatus{
 
 @media only screen and (max-width : 1260px) {
 
-  .ganttButtonBar .button span.teamworkIcon {
+  .ganttButtonBar .button span.iconfont {
     font-size: 130%;
   }
   .userLine {
@@ -780,7 +797,7 @@ select.taskStatus{
 
 @media only screen and (min-width : 1261px) and (max-width : 1320px) {
 
-  .ganttButtonBar .button span.teamworkIcon {
+  .ganttButtonBar .button span.iconfont {
     font-size: 130%;
   }
 
@@ -806,7 +823,7 @@ select.taskStatus{
     right: 10px;
   }
 
-  .userProfile .teamworkIcon {
+  .userProfile .iconfont {
     color: rgb(255, 255, 255);
   }
   .userProfile .ganttButtonSeparator, .userProfile .avatar {

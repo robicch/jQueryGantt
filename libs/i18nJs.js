@@ -126,7 +126,19 @@ Number.currencyFormat = "###,##0.00";
 var millisInWorkingDay =28800000;
 var workingDaysPerWeek =5;
 
+// var holidaysCollection = new Set();
+// var workdaysCollection = new Set();
 function isHoliday(date) {
+
+  let date_str = date.format("yyyy-MM-dd");
+  //手动设置的工作日节假日
+  if(ge.holidays.has(date_str)){
+    return true;
+  }
+  if(ge.workdays.has(date_str)){
+    return false;
+  }
+
   var friIsHoly =false;
   var satIsHoly =true;
   var sunIsHoly =true;

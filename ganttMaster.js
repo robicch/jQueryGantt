@@ -99,11 +99,13 @@ GanttMaster.prototype.init = function (workSpace) {
   this.numOfVisibleRows=Math.ceil(this.element.height()/this.rowHeight);
 
   //by default task are coloured by status
-  this.element.addClass('colorByStatus' )
+  this.element.addClass('colorByStatus' );
 
   var self = this;
   //load templates
-  $("#gantEditorTemplates").loadTemplates().remove();
+  //$("#gantEditorTemplates").loadTemplates().remove();
+  //$(this).ajaxLoadTemplates("gantEditorTemplates.html").remove();
+  $(this).jsLoadTemplates(ganttEditorTemplates);
 
   //create editor
   this.editor = new GridEditor(this);
@@ -120,7 +122,10 @@ GanttMaster.prototype.init = function (workSpace) {
   //prepend buttons
   var ganttButtons = $.JST.createFromTemplate({}, "GANTBUTTONS");
   place.before(ganttButtons);
+  //keep tooltip center
+  ganttButtons.find(".button.textual").each(function(){let width = $(this).children(".tooltip").width();$(this).children(".tooltip").css({"left":-width/2+8})});
   this.checkButtonPermissions();
+
 
 
   //bindings
@@ -439,6 +444,28 @@ GanttMaster.prototype.loadProject = function (project) {
   this.serverClientTimeOffset = typeof project.serverTimeOffset !="undefined"? (parseInt(project.serverTimeOffset) + new Date().getTimezoneOffset() * 60000) : 0;
   this.resources = project.resources;
   this.roles = project.roles;
+  this.name = project.name;
+
+  //Customizing date
+  this.workdays = new Set(project.workdays);
+  this.holidays = new Set(project.holidays);
+  function setToString(){
+    return Array.from(this).toString();
+  }
+  this.workdays.toString = setToString;
+  this.holidays.toString = setToString;
+
+  //Check the conflictDays
+  let conflictDays = project.workdays.map(x=>project.holidays.includes(x)?x:NaN).filter(x=>x);
+  if(conflictDays.length>0){
+    console.error("Conflict on customizing date setting. The date cannot be a holiday or a working day at the same time, but only one of them. These date settings will discard and using the default value:",conflictDays);
+    for(d of conflictDays){
+      this.workdays.delete(d);
+      this.holidays.delete(d);
+    }
+  }
+  console.log("workdays:",ge.workdays);
+  console.log("holidays:",ge.holidays);
 
   //permissions from loaded project
   this.permissions.canWrite = project.canWrite;
@@ -492,6 +519,9 @@ GanttMaster.prototype.loadProject = function (project) {
   this.endTransaction();
   var self = this;
   this.gantt.element.oneTime(200, function () {self.gantt.centerOnToday()});
+
+//initializeCustomizeFunc();
+  $("#projectName").val(this.name);
 };
 
 
@@ -691,8 +721,9 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
 
     saved.push(cloned);
   }
-
-  var ret = {tasks: saved};
+  let projectName = $("#projectName").val();
+  var ret = {name:projectName?projectName:this.name||"Aglie Project"};
+  ret.tasks = saved;
   if (this.currentTask) {
     ret.selectedRow = this.currentTask.getRow();
   }
@@ -717,7 +748,8 @@ GanttMaster.prototype.saveGantt = function (forTransaction) {
     ret.changesReasonWhy=$("#LOG_CHANGES").val();
 
   }
-
+  ret.workdays=Array.from(this.workdays||[]);
+  ret.holidays=Array.from(this.holidays||[]);
   //prof.stop();
   return ret;
 };
@@ -1151,7 +1183,29 @@ GanttMaster.prototype.collapseAll = function () {
 GanttMaster.prototype.fullScreen = function () {
   //console.debug("fullScreen");
   this.workSpace.toggleClass("ganttFullScreen").resize();
-  $("#fullscrbtn .teamworkIcon").html(this.workSpace.is(".ganttFullScreen")?"€":"@");
+  var ganttView = document.getElementById("workSpace");
+  if(this.workSpace.is(".ganttFullScreen")){
+    if (ganttView.requestFullscreen) {
+      ganttView.requestFullscreen();
+    } else if (ganttView.webkitRequestFullScreen) {
+        ganttView.webkitRequestFullScreen();
+    } else if (ganttView.mozRequestFullScreen) {
+        ganttView.mozRequestFullScreen();
+    } else if (ganttView.msRequestFullscreen) {
+        ganttView.msRequestFullscreen();  // IE11
+    }
+  }else{
+    if (document.exitFullscreen) {
+          document.exitFullscreen();
+      } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+      } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+      }
+  }
+  $("#fullscrbtn .iconfont").html(this.workSpace.is(".ganttFullScreen")?"€":"@");
 };
 
 
@@ -1647,25 +1701,27 @@ GanttMaster.prototype.manageSaveRequired=function(ev, showSave) {
   function checkChanges() {
     var changes = false;
     //there is somethin in the redo stack?
-    if (self.__undoStack.length > 0) {
-      var oldProject = JSON.parse(self.__undoStack[0]);
-      //si looppano i "nuovi" task
-      for (var i = 0; !changes && i < self.tasks.length; i++) {
-        var newTask = self.tasks[i];
-        //se è un task che c'erà già
-        if (!(""+newTask.id).startsWith("tmp_")) {
-          //si recupera il vecchio task
-          var oldTask;
-          for (var j = 0; j < oldProject.tasks.length; j++) {
-            if (oldProject.tasks[j].id == newTask.id) {
-              oldTask = oldProject.tasks[j];
+    if(self.__undoStack){
+      if (self.__undoStack.length > 0) {
+        var oldProject = JSON.parse(self.__undoStack[0]);
+        //si looppano i "nuovi" task
+        for (var i = 0; !changes && i < self.tasks.length; i++) {
+          var newTask = self.tasks[i];
+          //se è un task che c'erà già
+          if (!(""+newTask.id).startsWith("tmp_")) {
+            //si recupera il vecchio task
+            var oldTask;
+            for (var j = 0; j < oldProject.tasks.length; j++) {
+              if (oldProject.tasks[j].id == newTask.id) {
+                oldTask = oldProject.tasks[j];
+                break;
+              }
+            }
+            // chack only status or dateChanges
+            if (oldTask && (oldTask.status != newTask.status || oldTask.start != newTask.start || oldTask.end != newTask.end)) {
+              changes = true;
               break;
             }
-          }
-          // chack only status or dateChanges
-          if (oldTask && (oldTask.status != newTask.status || oldTask.start != newTask.start || oldTask.end != newTask.end)) {
-            changes = true;
-            break;
           }
         }
       }

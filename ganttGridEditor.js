@@ -99,7 +99,7 @@ GridEditor.prototype.addTask = function (task, row, hideIfParentCollapsed) {
     taskRow.find(".requireCanSeeDep").hide();
 
   if (!this.master.permissions.canSeePopEdit)
-    taskRow.find(".edit .teamworkIcon").hide();
+    taskRow.find(".edit .iconfont").hide();
 
   //save row element on task
   task.rowElement = taskRow;
